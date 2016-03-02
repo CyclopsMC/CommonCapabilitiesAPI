@@ -7,6 +7,18 @@ API for the [CommonCapabilities](https://github.com/CyclopsMC/CommonCapabilities
 * All Capabilities must have a default implementation that acts as an example for other modders.
 * All code must comply to our coding conventions, be clean and must be well documented.
 
+### Using the API
+
+Repackage the API:
+```
+git submodule add https://github.com/CyclopsMC/CommonCapabilitiesAPI.git src/main/java/org/cyclops/commoncapabilities/api/
+```
+
+Don't package the API:
+```
+git submodule add https://github.com/CyclopsMC/CommonCapabilitiesAPI.git src/api/java/org/cyclops/commoncapabilities/api/
+```
+
 ### Branching Strategy
 
 For every major Minecraft version, two branches exist:
