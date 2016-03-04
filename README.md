@@ -1,6 +1,7 @@
 ## CommonCapabilitiesAPI
 
 API for the [CommonCapabilities](https://github.com/CyclopsMC/CommonCapabilities) mod.
+This API simply contains various capabilities that can be used by any mod.
 
 ### Contributing
 * New Capabilities should first be discussed through an RFC issue.
@@ -9,14 +10,14 @@ API for the [CommonCapabilities](https://github.com/CyclopsMC/CommonCapabilities
 
 ### Using the API
 
-Repackage the API:
-```
-git submodule add https://github.com/CyclopsMC/CommonCapabilitiesAPI.git src/main/java/org/cyclops/commoncapabilities/api/
-```
-
-Don't package the API:
+Don't package the API (*recommended*):
 ```
 git submodule add https://github.com/CyclopsMC/CommonCapabilitiesAPI.git src/api/java/org/cyclops/commoncapabilities/api/
+```
+
+Repackage the API (Only if you know what you're doing):
+```
+git submodule add https://github.com/CyclopsMC/CommonCapabilitiesAPI.git src/main/java/org/cyclops/commoncapabilities/api/
 ```
 
 ### Branching Strategy
