@@ -1,7 +1,7 @@
 package org.cyclops.commoncapabilities.api.capability.worldnameable;
 
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.IWorldNameable;
 
 /**
@@ -10,7 +10,7 @@ import net.minecraft.world.IWorldNameable;
  */
 public class DefaultWorldNameable implements IWorldNameable {
 
-    private ChatComponentText name;
+    private ITextComponent name;
 
     public DefaultWorldNameable() {
         this.name = null;
@@ -25,7 +25,7 @@ public class DefaultWorldNameable implements IWorldNameable {
      * @param name The new name.
      */
     public void setName(String name) {
-        this.name = new ChatComponentText(name);
+        this.name = new TextComponentString(name);
     }
 
     @Override
@@ -33,7 +33,7 @@ public class DefaultWorldNameable implements IWorldNameable {
         if(this.name == null) {
             return "";
         }
-        return this.name.getUnformattedTextForChat();
+        return this.name.getUnformattedComponentText();
     }
 
     @Override
@@ -42,7 +42,7 @@ public class DefaultWorldNameable implements IWorldNameable {
     }
 
     @Override
-    public IChatComponent getDisplayName() {
+    public ITextComponent getDisplayName() {
         return this.name;
     }
 }
