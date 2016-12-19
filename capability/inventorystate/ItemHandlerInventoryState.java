@@ -59,4 +59,9 @@ public class ItemHandlerInventoryState implements IInventoryState, IItemHandler 
         }
         return itemHandler.extractItem(slot, amount, simulate);
     }
+
+    @Override
+    public int getSlotLimit(int slot) {
+        return itemHandler.getSlotLimit(slot);
+    }
 }
