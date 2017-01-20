@@ -19,9 +19,10 @@ public interface ISlotlessItemHandler {
      *
      * @param stack    ItemStack to insert.
      * @param simulate If true, the insertion is only simulated
-     * @return The remaining ItemStack that was not inserted (if the entire stack is accepted, then return null).
+     * @return The remaining ItemStack that was not inserted (if the entire stack is accepted, then return {@link ItemStack#EMPTY}).
      *         May be the same as the input ItemStack if unchanged, otherwise a new ItemStack.
      **/
+    @Nonnull
     ItemStack insertItem(@Nonnull ItemStack stack, boolean simulate);
 
     /**
@@ -31,8 +32,9 @@ public interface ISlotlessItemHandler {
      *
      * @param amount   Amount to extract (may be greater than the current stacks max limit)
      * @param simulate If true, the extraction is only simulated
-     * @return ItemStack extracted from the slot, must be null, if nothing can be extracted
+     * @return ItemStack extracted from the slot, must be {@link ItemStack#EMPTY}, if nothing can be extracted
      **/
+    @Nonnull
     ItemStack extractItem(int amount, boolean simulate);
 
     /**
@@ -47,8 +49,9 @@ public interface ISlotlessItemHandler {
      *                   ItemMatch.DAMAGE | ItemMatch.NBT will for instance make sure to only extract
      *                   items that have exactly the same damage value and nbt tag, while ignoring the stacksize.
      * @param simulate   If true, the insertion is only simulated
-     * @return ItemStack extracted from the slot, must be null, if nothing can be extracted
+     * @return ItemStack extracted from the slot, must be {@link ItemStack#EMPTY}, if nothing can be extracted
      */
+    @Nonnull
     ItemStack extractItem(@Nonnull ItemStack matchStack, int matchFlags, boolean simulate);
 
 }

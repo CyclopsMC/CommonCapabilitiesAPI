@@ -49,6 +49,7 @@ public abstract class SlotlessItemHandlerWrapper implements ISlotlessItemHandler
     protected abstract int getNonEmptySlot();
 
     @Override
+    @Nonnull
     public ItemStack insertItem(@Nonnull ItemStack stack, boolean simulate) {
         int slot = getNonFullSlotWithItemStack(stack, ItemMatch.DAMAGE | ItemMatch.NBT);
         if (slot < 0) slot = getEmptySlot();
@@ -57,16 +58,18 @@ public abstract class SlotlessItemHandlerWrapper implements ISlotlessItemHandler
     }
 
     @Override
+    @Nonnull
     public ItemStack extractItem(int amount, boolean simulate) {
         int slot = getNonEmptySlot();
-        if (slot < 0) return null;
+        if (slot < 0) return ItemStack.EMPTY;
         return itemHandler.extractItem(slot, amount, simulate);
     }
 
     @Override
+    @Nonnull
     public ItemStack extractItem(@Nonnull ItemStack matchStack, int matchFlags, boolean simulate) {
         int slot = getNonEmptySlotWithItemStack(matchStack, ItemMatch.DAMAGE | ItemMatch.NBT);
-        if (slot < 0) return null;
-        return itemHandler.extractItem(slot, matchStack.stackSize, simulate);
+        if (slot < 0) return ItemStack.EMPTY;
+        return itemHandler.extractItem(slot, matchStack.getCount(), simulate);
     }
 }

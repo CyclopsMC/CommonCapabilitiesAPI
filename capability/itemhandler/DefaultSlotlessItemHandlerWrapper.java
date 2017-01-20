@@ -19,36 +19,39 @@ public class DefaultSlotlessItemHandlerWrapper implements ISlotlessItemHandler {
     }
 
     @Override
+    @Nonnull
     public ItemStack insertItem(@Nonnull ItemStack stack, boolean simulate) {
         for (int i = 0; i < itemHandler.getSlots(); i++) {
             stack = itemHandler.insertItem(i, stack, simulate);
-            if (stack == null) {
-                return null;
+            if (stack.isEmpty()) {
+                return ItemStack.EMPTY;
             }
         }
         return stack;
     }
 
     @Override
+    @Nonnull
     public ItemStack extractItem(int amount, boolean simulate) {
         for (int i = 0; i < itemHandler.getSlots(); i++) {
             ItemStack itemStack = itemHandler.extractItem(i, amount, simulate);
-            if (itemStack != null) {
+            if (!itemStack.isEmpty()) {
                 return itemStack;
             }
         }
-        return null;
+        return ItemStack.EMPTY;
     }
 
     @Override
+    @Nonnull
     public ItemStack extractItem(@Nonnull ItemStack matchStack, int matchFlags, boolean simulate) {
         boolean compareStackSize = (matchFlags & ItemMatch.STACKSIZE) > 0;
         for (int i = 0; i < itemHandler.getSlots(); i++) {
-            ItemStack itemStack = itemHandler.extractItem(i, compareStackSize ? matchStack.stackSize : matchStack.getMaxStackSize(), simulate);
-            if (itemStack != null && ItemMatch.areItemStacksEqual(matchStack, itemStack, matchFlags)) {
+            ItemStack itemStack = itemHandler.extractItem(i, compareStackSize ? matchStack.getCount() : matchStack.getMaxStackSize(), simulate);
+            if (!itemStack.isEmpty() && ItemMatch.areItemStacksEqual(matchStack, itemStack, matchFlags)) {
                 return itemStack;
             }
         }
-        return null;
+        return ItemStack.EMPTY;
     }
 }

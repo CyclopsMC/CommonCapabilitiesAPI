@@ -34,10 +34,10 @@ public final class ItemMatch {
         boolean nbt       = (matchFlags & NBT      ) > 0;
         boolean stackSize = (matchFlags & STACKSIZE) > 0;
         return a == b ||
-                (a != null && b != null
+                (!a.isEmpty() && !b.isEmpty()
                         && a.getItem() == b.getItem()
                         && (!damage || a.getItemDamage() == b.getItemDamage())
-                        && (!stackSize || a.stackSize == b.stackSize)
+                        && (!stackSize || a.getCount() == b.getCount())
                         && (!nbt || ItemStack.areItemStackTagsEqual(a, b)));
     }
 
