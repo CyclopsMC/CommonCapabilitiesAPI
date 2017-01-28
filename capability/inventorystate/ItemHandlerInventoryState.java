@@ -13,8 +13,6 @@ import java.util.Random;
  */
 public class ItemHandlerInventoryState implements IInventoryState, IItemHandler {
 
-    private static final Random RAND = new Random();
-
     private final IItemHandler itemHandler;
     private int hash;
 
@@ -23,10 +21,7 @@ public class ItemHandlerInventoryState implements IInventoryState, IItemHandler 
     }
 
     protected void setNewHash() {
-        int lastHash = hash;
-        while (lastHash == hash) {
-            this.hash = RAND.nextInt();
-        }
+        this.hash++;
     }
 
     @Override

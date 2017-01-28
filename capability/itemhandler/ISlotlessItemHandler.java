@@ -8,6 +8,17 @@ import javax.annotation.Nonnull;
  * A simplified form of the {@link net.minecraftforge.items.IItemHandler} that is slot-agnostic.
  * By not taking into account slots, the item handler provider instead of the consumer
  * is responsible for providing an efficient item insertion and extraction algorithm.
+ *
+ * Note: The capability provider MUST ensure deterministic behaviour for extraction and insertion.
+ *       For example, the three first returned stacks hereafter must equal each other.
+ *       <pre>
+ *          ItemStack stack1 = insertItem(myStack, true);
+ *          ItemStack stack2 = insertItem(myStack, true);
+ *          ItemStack stack3 = insertItem(myStack, false);
+ *          ItemStack stack4 = insertItem(myStack, true); // Can be different again
+ *       </pre>
+ *       The same applies to extraction.
+ *
  * @author rubensworks
  */
 public interface ISlotlessItemHandler {
