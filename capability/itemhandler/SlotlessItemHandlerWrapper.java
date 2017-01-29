@@ -68,8 +68,8 @@ public abstract class SlotlessItemHandlerWrapper implements ISlotlessItemHandler
     @Override
     @Nonnull
     public ItemStack extractItem(@Nonnull ItemStack matchStack, int matchFlags, boolean simulate) {
-        int slot = getNonEmptySlotWithItemStack(matchStack, ItemMatch.DAMAGE | ItemMatch.NBT);
+        int slot = getNonEmptySlotWithItemStack(matchStack, matchFlags);
         if (slot < 0) return ItemStack.EMPTY;
-        return itemHandler.extractItem(slot, matchStack.getCount(), simulate);
+        return itemHandler.extractItem(slot, matchStack.stackSize, simulate);
     }
 }

@@ -1,6 +1,7 @@
 package org.cyclops.commoncapabilities.api.capability.itemhandler;
 
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.oredict.OreDictionary;
 
 /**
  * Item matching flags to be used in {@link ISlotlessItemHandler}.
@@ -30,7 +31,9 @@ public final class ItemMatch {
     public static final int EXACT = DAMAGE | NBT | STACKSIZE;
 
     public static boolean areItemStacksEqual(ItemStack a, ItemStack b, int matchFlags) {
-        boolean damage    = (matchFlags & DAMAGE   ) > 0;
+        boolean damage    = (matchFlags & DAMAGE   ) > 0
+                && !(a.getItemDamage() == OreDictionary.WILDCARD_VALUE
+                  || b.getItemDamage() == OreDictionary.WILDCARD_VALUE);
         boolean nbt       = (matchFlags & NBT      ) > 0;
         boolean stackSize = (matchFlags & STACKSIZE) > 0;
         return a == b ||
