@@ -20,6 +20,23 @@ Repackage the API (Only if you know what you're doing):
 git submodule add https://github.com/CyclopsMC/CommonCapabilitiesAPI.git src/main/java/org/cyclops/commoncapabilities/api/
 ```
 
+Alternatively, you can add [CommonCapabilities to your build file](https://github.com/CyclopsMC/CommonCapabilities#dependency).
+
+### Using the capabilities
+
+Unless you place a hard dependency on CommonCapabilities, it should always be assumed that capabilities may not be registered.
+This can easily be checked by doing the following when you for example want to use the `IWorker` capability:
+
+```java
+public class Capabilities {
+    @CapabilityInject(IWorker.class)
+    public static Capability<IWorker> WORKER = null;
+}
+```
+
+This makes it possible to refer to the `Capabilities.WORKER` capability.
+When CommonCapabilities is not loaded, this field will be null and should not be used.
+
 ### Branching Strategy
 
 For every major Minecraft version, two branches exist:
