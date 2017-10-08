@@ -42,4 +42,31 @@ public class RecipeIngredientItemStack implements IRecipeIngredient<ItemStack, I
     public String toString() {
         return "[RecipeIngredientItemStack ingredient: " + Arrays.toString(ingredient.getMatchingStacks()) + "]";
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof RecipeIngredientItemStack)) {
+            return false;
+        }
+
+        ItemStack[] a = this.ingredient.getMatchingStacks();
+        ItemStack[] b = ((RecipeIngredientItemStack) obj).ingredient.getMatchingStacks();
+
+        int length = a.length;
+        if (b.length != length) {
+            return false;
+        }
+
+        for (int i = 0; i < length; i++) {
+            if (!ItemStack.areItemStacksEqual(a[i], b[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

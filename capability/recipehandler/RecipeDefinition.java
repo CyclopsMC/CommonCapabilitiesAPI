@@ -39,8 +39,8 @@ public class RecipeDefinition {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof RecipeDefinition
+        return this == obj || (obj instanceof RecipeDefinition
                 && getInput().equals(((RecipeDefinition) obj).getInput())
-                && getOutput().equals(((RecipeDefinition) obj).getOutput());
+                && getOutput().equals(((RecipeDefinition) obj).getOutput()));
     }
 }

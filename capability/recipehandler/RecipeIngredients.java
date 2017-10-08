@@ -68,4 +68,12 @@ public class RecipeIngredients {
     public String toString() {
         return "[RecipeIngredients ingredients: " + ingredientsMap.toString() + "]";
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this == obj ||
+                (obj instanceof RecipeIngredients
+                        && this.ingredientsMap.equals(((RecipeIngredients) obj).ingredientsMap));
+
+    }
 }
