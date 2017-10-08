@@ -1,6 +1,6 @@
 package org.cyclops.commoncapabilities.api.capability.recipehandler;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -26,6 +26,6 @@ public interface IRecipeIngredient<T, R> extends Predicate<T> {
      * @return Possible instances that match with the predicate.
      *         This collection is not necessarily exhaustive.
      */
-    public Collection<T> getMatchingInstances();
+    public List<T> getMatchingInstances();
 
 }

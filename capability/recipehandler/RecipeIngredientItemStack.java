@@ -5,7 +5,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
 
 /**
  * An ItemStack recipe ingredient wrapper around {@link Ingredient}.
@@ -29,7 +29,7 @@ public class RecipeIngredientItemStack implements IRecipeIngredient<ItemStack, I
     }
 
     @Override
-    public Collection<ItemStack> getMatchingInstances() {
+    public List<ItemStack> getMatchingInstances() {
         return Lists.newArrayList(ingredient.getMatchingStacks());
     }
 
