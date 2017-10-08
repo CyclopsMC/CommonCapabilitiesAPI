@@ -6,7 +6,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.event.RegistryEvent;
@@ -84,7 +84,7 @@ public class BlockCapabilities implements IBlockCapabilityProvider {
 
     @Override
     public boolean hasCapability(@Nonnull IBlockState blockState, @Nonnull Capability<?> capability,
-                                 @Nonnull World world, @Nonnull BlockPos pos, @Nullable EnumFacing facing) {
+                                 @Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nullable EnumFacing facing) {
         IBlockCapabilityProvider[] providers = this.providers.get(blockState.getBlock());
         if (providers != null) {
             for (IBlockCapabilityProvider provider : providers) {
@@ -110,7 +110,7 @@ public class BlockCapabilities implements IBlockCapabilityProvider {
     @Nullable
     @Override
     public <T> T getCapability(@Nonnull IBlockState blockState, @Nonnull Capability<T> capability,
-                               @Nonnull World world, @Nonnull BlockPos pos, @Nullable EnumFacing facing) {
+                               @Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nullable EnumFacing facing) {
         IBlockCapabilityProvider[] providers = this.providers.get(blockState.getBlock());
         if (providers != null) {
             for (IBlockCapabilityProvider provider : providers) {

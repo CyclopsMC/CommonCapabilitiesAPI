@@ -36,4 +36,11 @@ public class RecipeDefinition {
     public String toString() {
         return "[RecipeDefinition input: " + getInput().toString() + "; output: " + getOutput().toString() + "]";
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof RecipeDefinition
+                && getInput().equals(((RecipeDefinition) obj).getInput())
+                && getOutput().equals(((RecipeDefinition) obj).getOutput());
+    }
 }

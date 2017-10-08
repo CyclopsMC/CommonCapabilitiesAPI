@@ -3,7 +3,7 @@ package org.cyclops.commoncapabilities.api.capability.block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
@@ -37,7 +37,7 @@ public interface IBlockCapabilityProvider {
      * @return True if this object supports the capability.
      */
     boolean hasCapability(@Nonnull IBlockState blockState, @Nonnull Capability<?> capability,
-                          @Nonnull World world, @Nonnull BlockPos pos, @Nullable EnumFacing facing);
+                          @Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nullable EnumFacing facing);
 
     /**
      * Retrieves the handler for the capability of the given block requested at the given position.
@@ -52,10 +52,10 @@ public interface IBlockCapabilityProvider {
      * @param facing The Side to check from:
      *   CAN BE NULL. Null is defined to represent 'internal' or 'self'
      * @return The requested capability. Returns null when
-     *         {@link #hasCapability(IBlockState, Capability, World, BlockPos, EnumFacing)}} would return false.
+     *         {@link #hasCapability(IBlockState, Capability, IBlockAccess, BlockPos, EnumFacing)}} would return false.
      */
     @Nullable
     <T> T getCapability(@Nonnull IBlockState blockState, @Nonnull Capability<T> capability,
-                        @Nonnull World world, @Nonnull BlockPos pos, @Nullable EnumFacing facing);
+                        @Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nullable EnumFacing facing);
 
 }
