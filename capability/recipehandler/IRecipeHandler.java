@@ -2,6 +2,7 @@ package org.cyclops.commoncapabilities.api.capability.recipehandler;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -38,7 +39,7 @@ public interface IRecipeHandler {
     /**
      * @return Recipes that are available through this handler, this list is not necessarily exhaustive, but SHOULD be.
      */
-    public Collection<RecipeDefinition> getRecipes();
+    public List<RecipeDefinition> getRecipes();
 
     /**
      * Test if the given recipe input can be handled by this handler.

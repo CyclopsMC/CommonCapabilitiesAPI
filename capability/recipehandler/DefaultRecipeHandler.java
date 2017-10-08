@@ -8,7 +8,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -33,7 +32,7 @@ public class DefaultRecipeHandler implements IRecipeHandler {
     }
 
     @Override
-    public Collection<RecipeDefinition> getRecipes() {
+    public List<RecipeDefinition> getRecipes() {
         return Lists.newArrayList(
                 new RecipeDefinition(
                         new RecipeIngredients(new RecipeIngredientItemStack(new ItemStack(Blocks.DIRT))),
