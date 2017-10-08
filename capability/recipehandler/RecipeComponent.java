@@ -16,7 +16,7 @@ import net.minecraftforge.fluids.FluidStack;
 public final class RecipeComponent<T, R> {
 
     public static final RecipeComponent<ItemStack, ItemHandlerRecipeTarget> ITEMSTACK  = new RecipeComponent<>("minecraft:itemstack");
-    public static final RecipeComponent<FluidStack, FluidHandlerTarget>     FLUIDSTACK = new RecipeComponent<>("minecraft:fluidstack");
+    public static final RecipeComponent<FluidStack, FluidHandlerRecipeTarget>     FLUIDSTACK = new RecipeComponent<>("minecraft:fluidstack");
     public static final RecipeComponent<Integer, IEnergyStorage>            ENERGY     = new RecipeComponent<>("minecraft:energy");
 
     private final ResourceLocation name;

@@ -6,12 +6,12 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
  * A tank id inside a fluid handler.
  * @author rubensworks
  */
-public class FluidHandlerTarget {
+public class FluidHandlerRecipeTarget {
 
     private final IFluidHandler fluidHandler;
     private final int slot;
 
-    public FluidHandlerTarget(IFluidHandler fluidHandler, int slot) {
+    public FluidHandlerRecipeTarget(IFluidHandler fluidHandler, int slot) {
         this.fluidHandler = fluidHandler;
         this.slot = slot;
     }
@@ -26,6 +26,6 @@ public class FluidHandlerTarget {
 
     @Override
     public String toString() {
-        return "[FluidHandlerTarget slot " + slot + "]";
+        return "[FluidHandlerRecipeTarget slot " + slot + "]";
     }
 }
