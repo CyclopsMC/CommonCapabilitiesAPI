@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,7 +21,11 @@ public class RecipeIngredientItemStack implements IRecipeIngredient<ItemStack, I
     }
 
     public RecipeIngredientItemStack(ItemStack itemStack) {
-        this.ingredient = Ingredient.fromStacks(itemStack);
+        this(itemStack, false);
+    }
+
+    public RecipeIngredientItemStack(ItemStack itemStack, boolean matchNbt) {
+        this.ingredient = matchNbt ? new IngredientNBT(itemStack) : Ingredient.fromStacks(itemStack);
     }
 
     @Override
@@ -68,5 +73,20 @@ public class RecipeIngredientItemStack implements IRecipeIngredient<ItemStack, I
         }
 
         return true;
+    }
+
+    public static class IngredientNBT extends Ingredient {
+
+        private final ItemStack stack;
+
+        public IngredientNBT(ItemStack stack) {
+            super(stack);
+            this.stack = stack;
+        }
+
+        @Override
+        public boolean apply(@Nullable ItemStack stack) {
+            return super.apply(stack) && (stack == null || ItemStack.areItemStackTagsEqual(this.stack, stack));
+        }
     }
 }
