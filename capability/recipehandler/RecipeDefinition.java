@@ -38,6 +38,11 @@ public class RecipeDefinition {
     }
 
     @Override
+    public int hashCode() {
+        return 578 | (this.getInput().hashCode() << 2) | this.getOutput().hashCode();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         return this == obj || (obj instanceof RecipeDefinition
                 && getInput().equals(((RecipeDefinition) obj).getInput())

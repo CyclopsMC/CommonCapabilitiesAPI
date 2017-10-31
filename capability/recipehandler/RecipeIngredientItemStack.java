@@ -49,25 +49,29 @@ public class RecipeIngredientItemStack implements IRecipeIngredient<ItemStack, I
     }
 
     @Override
+    public int hashCode() {
+        return this.ingredient.getValidItemStacksPacked().stream().mapToInt(Integer::intValue).sum();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
 
-        if (!(obj instanceof RecipeIngredientItemStack)) {
+        if (!(obj instanceof IRecipeIngredient) || ((IRecipeIngredient) obj).getComponent() != this.getComponent()) {
             return false;
         }
 
-        ItemStack[] a = this.ingredient.getMatchingStacks();
-        ItemStack[] b = ((RecipeIngredientItemStack) obj).ingredient.getMatchingStacks();
+        List<ItemStack> a = this.getMatchingInstances();
+        List<ItemStack> b = ((IRecipeIngredient<ItemStack, ItemHandlerRecipeTarget>) obj).getMatchingInstances();
 
-        int length = a.length;
-        if (b.length != length) {
+        if (b.size() != a.size()) {
             return false;
         }
 
-        for (int i = 0; i < length; i++) {
-            if (!ItemStack.areItemStacksEqual(a[i], b[i])) {
+        for (int i = 0; i < a.size(); i++) {
+            if (!ItemStack.areItemStacksEqual(a.get(i), b.get(i))) {
                 return false;
             }
         }

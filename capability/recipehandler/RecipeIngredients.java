@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -70,10 +71,35 @@ public class RecipeIngredients {
     }
 
     @Override
+    public int hashCode() {
+        return 927 | this.ingredientsMap.hashCode();
+    }
+
+    @Override
     public boolean equals(Object obj) {
-        return this == obj ||
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj instanceof RecipeIngredients) {
+            Set<RecipeComponent> a = this.ingredientsMap.keySet();
+            Set<RecipeComponent> b = ((RecipeIngredients) obj).ingredientsMap.keySet();
+            if (!Arrays.equals(a.toArray(new RecipeComponent[a.size()]), b.toArray(new RecipeComponent[b.size()]))) {
+                return false;
+            }
+            for (RecipeComponent recipeComponent : a) {
+                if (!this.ingredientsMap.get(recipeComponent).equals(((RecipeIngredients) obj).ingredientsMap.get(recipeComponent))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+
+        // The IdentityMap is acting funky with equals (probably due to its change of equals contract)
+        /*return this == obj ||
                 (obj instanceof RecipeIngredients
-                        && this.ingredientsMap.equals(((RecipeIngredients) obj).ingredientsMap));
+                        && this.ingredientsMap.equals(((RecipeIngredients) obj).ingredientsMap));*/
 
     }
 }
