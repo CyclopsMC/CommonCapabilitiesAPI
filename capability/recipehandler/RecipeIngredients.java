@@ -18,7 +18,7 @@ import java.util.Set;
 public class RecipeIngredients {
 
     private final int size;
-    private final Map<RecipeComponent, List<IRecipeIngredient<?, ?>>> ingredientsMap;
+    private final Map<RecipeComponent<?, ?>, List<IRecipeIngredient<?, ?>>> ingredientsMap;
 
     public RecipeIngredients(IRecipeIngredient... recipeIngredients) {
         this.size = recipeIngredients.length;
@@ -51,7 +51,7 @@ public class RecipeIngredients {
     /**
      * @return The recipe component types that are available in this collection.
      */
-    public Set<RecipeComponent> getComponents() {
+    public Set<RecipeComponent<?, ?>> getComponents() {
         return this.ingredientsMap.keySet();
     }
 
@@ -82,8 +82,8 @@ public class RecipeIngredients {
         }
 
         if (obj instanceof RecipeIngredients) {
-            Set<RecipeComponent> a = this.ingredientsMap.keySet();
-            Set<RecipeComponent> b = ((RecipeIngredients) obj).ingredientsMap.keySet();
+            Set<RecipeComponent<?, ?>> a = this.ingredientsMap.keySet();
+            Set<RecipeComponent<?, ?>> b = ((RecipeIngredients) obj).ingredientsMap.keySet();
             if (!Arrays.equals(a.toArray(new RecipeComponent[a.size()]), b.toArray(new RecipeComponent[b.size()]))) {
                 return false;
             }

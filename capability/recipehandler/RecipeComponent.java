@@ -4,25 +4,35 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistryEntry;
+
+import javax.annotation.Nullable;
 
 /**
  * A RecipeComponent is a type of component that can be used inside recipes.
- * A certain component type MUST only be created once.
  *
  * @param <T> The instance type.
  * @param <R> The recipe target type, may be Void.
  * @author rubensworks
  */
-public final class RecipeComponent<T, R> {
+public final class RecipeComponent<T, R> implements IForgeRegistryEntry<RecipeComponent<?, ?>> {
 
-    public static final RecipeComponent<ItemStack, ItemHandlerRecipeTarget>   ITEMSTACK  = new RecipeComponent<>("minecraft:itemstack");
-    public static final RecipeComponent<FluidStack, FluidHandlerRecipeTarget> FLUIDSTACK = new RecipeComponent<>("minecraft:fluidstack");
-    public static final RecipeComponent<Integer, IEnergyStorage>              ENERGY     = new RecipeComponent<>("minecraft:energy");
+    public static final IForgeRegistry<RecipeComponent<?, ?>> REGISTRY = (IForgeRegistry) GameRegistry
+            .findRegistry(RecipeComponent.class);
 
-    private final ResourceLocation name;
+    @GameRegistry.ObjectHolder("minecraft:itemstack")
+    public static final RecipeComponent<ItemStack, ItemHandlerRecipeTarget>   ITEMSTACK  = null;
+    @GameRegistry.ObjectHolder("minecraft:fluidstack")
+    public static final RecipeComponent<FluidStack, FluidHandlerRecipeTarget> FLUIDSTACK = null;
+    @GameRegistry.ObjectHolder("minecraft:energy")
+    public static final RecipeComponent<Integer, IEnergyStorage>              ENERGY     = null;
+
+    private ResourceLocation name;
 
     public RecipeComponent(ResourceLocation name) {
-        this.name = name;
+        this.setRegistryName(name);
     }
 
     public RecipeComponent(String name) {
@@ -46,5 +56,22 @@ public final class RecipeComponent<T, R> {
     @Override
     public boolean equals(Object obj) {
         return this == obj || (obj instanceof RecipeComponent && this.getName().equals(((RecipeComponent) obj).getName()));
+    }
+
+    @Override
+    public RecipeComponent<T, R> setRegistryName(ResourceLocation name) {
+        this.name = name;
+        return this;
+    }
+
+    @Nullable
+    @Override
+    public ResourceLocation getRegistryName() {
+        return this.name;
+    }
+
+    @Override
+    public Class<RecipeComponent<?, ?>> getRegistryType() {
+        return (Class) RecipeComponent.class;
     }
 }
