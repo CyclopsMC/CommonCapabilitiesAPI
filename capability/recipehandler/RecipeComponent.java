@@ -30,6 +30,7 @@ public final class RecipeComponent<T, R> implements IForgeRegistryEntry<RecipeCo
     public static final RecipeComponent<Integer, IEnergyStorage>              ENERGY     = null;
 
     private ResourceLocation name;
+    private String unlocalizedName;
 
     public RecipeComponent(ResourceLocation name) {
         this.setRegistryName(name);
@@ -73,5 +74,14 @@ public final class RecipeComponent<T, R> implements IForgeRegistryEntry<RecipeCo
     @Override
     public Class<RecipeComponent<?, ?>> getRegistryType() {
         return (Class) RecipeComponent.class;
+    }
+
+    public RecipeComponent<T, R> setUnlocalizedName(String unlocalizedName) {
+        this.unlocalizedName = unlocalizedName;
+        return this;
+    }
+
+    public String getUnlocalizedName() {
+        return unlocalizedName;
     }
 }
