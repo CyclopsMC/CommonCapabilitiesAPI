@@ -39,7 +39,7 @@ public interface IRecipeHandler {
     /**
      * @return Recipes that are available through this handler, this list is not necessarily exhaustive, but SHOULD be.
      */
-    public List<RecipeDefinition> getRecipes();
+    public Collection<RecipeDefinition> getRecipes();
 
     /**
      * Test if the given recipe input can be handled by this handler.
