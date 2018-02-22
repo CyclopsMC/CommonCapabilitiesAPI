@@ -6,6 +6,12 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
+import org.cyclops.commoncapabilities.api.capability.itemhandler.ItemMatch;
+import org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients;
+import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
+import org.cyclops.commoncapabilities.api.ingredient.ItemHandlerRecipeTarget;
+import org.cyclops.commoncapabilities.api.ingredient.MixedIngredients;
+import org.cyclops.commoncapabilities.api.ingredient.PrototypedIngredient;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -17,38 +23,37 @@ import java.util.Set;
  */
 public class DefaultRecipeHandler implements IRecipeHandler {
     @Override
-    public Set<RecipeComponent<?, ?>> getRecipeInputComponents() {
-        return Sets.newHashSet(RecipeComponent.ITEMSTACK);
+    public Set<IngredientComponent<?, ?, ?>> getRecipeInputComponents() {
+        return Sets.newHashSet(IngredientComponent.ITEMSTACK);
     }
 
     @Override
-    public Set<RecipeComponent<?, ?>> getRecipeOutputComponents() {
-        return Sets.newHashSet(RecipeComponent.ITEMSTACK);
+    public Set<IngredientComponent<?, ?, ?>> getRecipeOutputComponents() {
+        return Sets.newHashSet(IngredientComponent.ITEMSTACK);
     }
 
     @Override
-    public boolean isValidSizeInput(RecipeComponent component, int size) {
-        return component == RecipeComponent.ITEMSTACK && size == 1;
+    public boolean isValidSizeInput(IngredientComponent component, int size) {
+        return component == IngredientComponent.ITEMSTACK && size == 1;
     }
 
     @Override
-    public List<RecipeDefinition> getRecipes() {
+    public List<IRecipeDefinition> getRecipes() {
         return Lists.newArrayList(
-                new RecipeDefinition(
-                        new RecipeIngredients(new RecipeIngredientItemStack(new ItemStack(Blocks.DIRT))),
-                        new RecipeIngredients(new RecipeIngredientItemStack(new ItemStack(Items.DIAMOND)))
+                RecipeDefinition.ofIngredient(IngredientComponent.ITEMSTACK,
+                        Lists.newArrayList(new PrototypedIngredient<>(IngredientComponent.ITEMSTACK, new ItemStack(Blocks.DIRT), ItemMatch.EXACT)),
+                        MixedIngredients.ofInstance(IngredientComponent.ITEMSTACK, new ItemStack(Items.DIAMOND))
                 )
         );
     }
 
     @Nullable
     @Override
-    public RecipeIngredients simulate(RecipeIngredients input) {
-        List<IRecipeIngredient<ItemStack, ItemHandlerRecipeTarget>> ingredients =
-                input.getIngredients(RecipeComponent.ITEMSTACK);
-        if (input.getIngredientsSize() == 1 && ingredients.size() == 1) {
-            if (ingredients.get(0).test(new ItemStack(Blocks.DIRT))) {
-                return new RecipeIngredients(new RecipeIngredientItemStack(new ItemStack(Items.DIAMOND)));
+    public IMixedIngredients simulate(IMixedIngredients input) {
+        List<ItemStack> ingredients = input.getInstances(IngredientComponent.ITEMSTACK);
+        if (input.getComponents().size() == 1 && ingredients.size() == 1) {
+            if (IngredientComponent.ITEMSTACK.getMatcher().matchesExactly(ingredients.get(0), new ItemStack(Blocks.DIRT))) {
+                return MixedIngredients.ofInstance(IngredientComponent.ITEMSTACK, new ItemStack(Items.DIAMOND));
             }
         }
         return null;
@@ -56,8 +61,8 @@ public class DefaultRecipeHandler implements IRecipeHandler {
 
     @Nullable
     @Override
-    public <R> R[] getInputComponentTargets(RecipeComponent<?, R> component) {
-        if (component == RecipeComponent.ITEMSTACK) {
+    public <R> R[] getInputComponentTargets(IngredientComponent<?, R, ?> component) {
+        if (component == IngredientComponent.ITEMSTACK) {
             return (R[]) new ItemHandlerRecipeTarget[]{
                     // Just a dummy IItemHandler
                     new ItemHandlerRecipeTarget(new ItemStackHandler(), 0)
@@ -68,8 +73,8 @@ public class DefaultRecipeHandler implements IRecipeHandler {
 
     @Nullable
     @Override
-    public <R> R[] getOutputComponentTargets(RecipeComponent<?, R> component) {
-        if (component == RecipeComponent.ITEMSTACK) {
+    public <R> R[] getOutputComponentTargets(IngredientComponent<?, R, ?> component) {
+        if (component == IngredientComponent.ITEMSTACK) {
             return (R[]) new ItemHandlerRecipeTarget[]{
                     // Just a dummy IItemHandler
                     new ItemHandlerRecipeTarget(new ItemStackHandler(), 1)

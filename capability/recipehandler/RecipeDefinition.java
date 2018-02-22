@@ -1,51 +1,107 @@
 package org.cyclops.commoncapabilities.api.capability.recipehandler;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients;
+import org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient;
+import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
- * A RecipeDefinition defines the input and output of a recipe.
+ * A recipe definition based on maps.
  * @author rubensworks
  */
-public class RecipeDefinition {
+public class RecipeDefinition implements IRecipeDefinition {
 
-    private final RecipeIngredients input;
-    private final RecipeIngredients output;
+    private final Map<IngredientComponent<?, ?, ?>, List<List<IPrototypedIngredient<?, ?, ?>>>> inputs;
+    private final IMixedIngredients output;
 
-    public RecipeDefinition(RecipeIngredients input, RecipeIngredients output) {
-        this.input = input;
+    public RecipeDefinition(Map<IngredientComponent<?, ?, ?>, List<List<IPrototypedIngredient<?, ?, ?>>>> inputs,
+                            IMixedIngredients output) {
+        this.inputs = inputs;
         this.output = output;
     }
 
-    public RecipeDefinition(IRecipeIngredient[] input, IRecipeIngredient[] output) {
-        this(new RecipeIngredients(input), new RecipeIngredients(output));
+    @Override
+    public Set<IngredientComponent<?, ?, ?>> getInputComponents() {
+        return inputs.keySet();
     }
 
-    /**
-     * @return The recipe input.
-     */
-    public RecipeIngredients getInput() {
-        return input;
+    @Override
+    public <T, R, M> List<List<IPrototypedIngredient<T, R, M>>> getInputs(IngredientComponent<T, R, M> ingredientComponent) {
+        return (List<List<IPrototypedIngredient<T, R, M>>>) (List) inputs.getOrDefault(ingredientComponent, Collections.emptyList());
     }
 
-    /**
-     * @return The recipe output.
-     */
-    public RecipeIngredients getOutput() {
+    @Override
+    public IMixedIngredients getOutput() {
         return output;
     }
 
     @Override
-    public String toString() {
-        return "[RecipeDefinition input: " + getInput().toString() + "; output: " + getOutput().toString() + "]";
+    public boolean equals(Object obj) {
+        if (obj instanceof IRecipeDefinition) {
+            IRecipeDefinition that = (IRecipeDefinition) obj;
+            if (Sets.newHashSet(this.getInputComponents()).equals(Sets.newHashSet(that.getInputComponents()))
+                    && this.getOutput().equals(that.getOutput())) {
+                for (IngredientComponent<?, ?, ?> component : getInputComponents()) {
+                    if (!this.getInputs(component).equals(that.getInputs(component))) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public int hashCode() {
-        return 578 | (this.getInput().hashCode() << 2) | this.getOutput().hashCode();
+        return 578 | inputs.hashCode() << 2 | output.hashCode();
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return this == obj || (obj instanceof RecipeDefinition
-                && getInput().equals(((RecipeDefinition) obj).getInput())
-                && getOutput().equals(((RecipeDefinition) obj).getOutput()));
+    public String toString() {
+        return "[RecipeDefinition input: " + inputs.toString() + "; output: " + output.toString() + "]";
+    }
+
+    /**
+     * Create a new recipe definition for a single component type input and a list of instances.
+     * @param component A component type.
+     * @param ingredients The ingredients for the given component type.
+     * @param output The recipe output.
+     * @param <T> The instance type.
+     * @param <R> The recipe target type, may be Void.
+     * @param <M> The matching condition parameter, may be Void.
+     * @return A new recipe definition.
+     */
+    public static <T, R, M> RecipeDefinition ofIngredients(IngredientComponent<T, R, M> component,
+                                                           List<List<IPrototypedIngredient<T, R, M>>> ingredients,
+                                                           IMixedIngredients output) {
+        Map<IngredientComponent<?, ?, ?>, List<List<IPrototypedIngredient<?, ?, ?>>>> inputs = Maps.newIdentityHashMap();
+        inputs.put(component, (List) ingredients);
+        return new RecipeDefinition(inputs, output);
+    }
+
+    /**
+     * Create a new recipe definittion for a single component type input and a single instance.
+     * @param component A component type.
+     * @param ingredient An ingredient for the given component type.
+     * @param output The recipe output.
+     * @param <T> The instance type.
+     * @param <R> The recipe target type, may be Void.
+     * @param <M> The matching condition parameter, may be Void.
+     * @return A new recipe definition.
+     */
+    public static <T, R, M> RecipeDefinition ofIngredient(IngredientComponent<T, R, M> component,
+                                                          List<IPrototypedIngredient<T, R, M>> ingredient,
+                                                          IMixedIngredients output) {
+        List<List<IPrototypedIngredient<T, R, M>>> ingredients = Lists.newArrayList();
+        ingredients.add(ingredient);
+        return ofIngredients(component, ingredients, output);
     }
 }

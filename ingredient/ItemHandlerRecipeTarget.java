@@ -1,4 +1,4 @@
-package org.cyclops.commoncapabilities.api.capability.recipehandler;
+package org.cyclops.commoncapabilities.api.ingredient;
 
 import net.minecraftforge.items.IItemHandler;
 

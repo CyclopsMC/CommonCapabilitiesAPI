@@ -36,7 +36,7 @@ public final class ItemMatch {
                   || b.getItemDamage() == OreDictionary.WILDCARD_VALUE);
         boolean nbt       = (matchFlags & NBT      ) > 0;
         boolean stackSize = (matchFlags & STACKSIZE) > 0;
-        return a == b ||
+        return a == b || a.isEmpty() && b.isEmpty() ||
                 (!a.isEmpty() && !b.isEmpty()
                         && a.getItem() == b.getItem()
                         && (!damage || a.getItemDamage() == b.getItemDamage())
