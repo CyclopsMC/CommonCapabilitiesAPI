@@ -5,11 +5,9 @@ import com.google.common.collect.Sets;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.items.ItemStackHandler;
 import org.cyclops.commoncapabilities.api.capability.itemhandler.ItemMatch;
 import org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
-import org.cyclops.commoncapabilities.api.ingredient.ItemHandlerRecipeTarget;
 import org.cyclops.commoncapabilities.api.ingredient.MixedIngredients;
 import org.cyclops.commoncapabilities.api.ingredient.PrototypedIngredient;
 
@@ -23,12 +21,12 @@ import java.util.Set;
  */
 public class DefaultRecipeHandler implements IRecipeHandler {
     @Override
-    public Set<IngredientComponent<?, ?, ?>> getRecipeInputComponents() {
+    public Set<IngredientComponent<?, ?>> getRecipeInputComponents() {
         return Sets.newHashSet(IngredientComponent.ITEMSTACK);
     }
 
     @Override
-    public Set<IngredientComponent<?, ?, ?>> getRecipeOutputComponents() {
+    public Set<IngredientComponent<?, ?>> getRecipeOutputComponents() {
         return Sets.newHashSet(IngredientComponent.ITEMSTACK);
     }
 
@@ -55,30 +53,6 @@ public class DefaultRecipeHandler implements IRecipeHandler {
             if (IngredientComponent.ITEMSTACK.getMatcher().matchesExactly(ingredients.get(0), new ItemStack(Blocks.DIRT))) {
                 return MixedIngredients.ofInstance(IngredientComponent.ITEMSTACK, new ItemStack(Items.DIAMOND));
             }
-        }
-        return null;
-    }
-
-    @Nullable
-    @Override
-    public <R> R[] getInputComponentTargets(IngredientComponent<?, R, ?> component) {
-        if (component == IngredientComponent.ITEMSTACK) {
-            return (R[]) new ItemHandlerRecipeTarget[]{
-                    // Just a dummy IItemHandler
-                    new ItemHandlerRecipeTarget(new ItemStackHandler(), 0)
-            };
-        }
-        return null;
-    }
-
-    @Nullable
-    @Override
-    public <R> R[] getOutputComponentTargets(IngredientComponent<?, R, ?> component) {
-        if (component == IngredientComponent.ITEMSTACK) {
-            return (R[]) new ItemHandlerRecipeTarget[]{
-                    // Just a dummy IItemHandler
-                    new ItemHandlerRecipeTarget(new ItemStackHandler(), 1)
-            };
         }
         return null;
     }

@@ -20,7 +20,7 @@ public interface IMixedIngredients {
     /**
      * @return The ingredient component types.
      */
-    public Set<IngredientComponent<?, ?, ?>> getComponents();
+    public Set<IngredientComponent<?, ?>> getComponents();
 
     /**
      * Get the instances of a certain type.
@@ -28,7 +28,7 @@ public interface IMixedIngredients {
      * @param <T> The instance type.
      * @return Instances.
      */
-    public <T> List<T> getInstances(IngredientComponent<T, ?, ?> ingredientComponent);
+    public <T> List<T> getInstances(IngredientComponent<T, ?> ingredientComponent);
 
     /**
      * Deserialize ingredients to NBT.
@@ -37,7 +37,7 @@ public interface IMixedIngredients {
      */
     public static NBTTagCompound serialize(IMixedIngredients ingredients) {
         NBTTagCompound tag = new NBTTagCompound();
-        for (IngredientComponent<?, ?, ?> component : ingredients.getComponents()) {
+        for (IngredientComponent<?, ?> component : ingredients.getComponents()) {
             NBTTagList instances = new NBTTagList();
             IIngredientSerializer serializer = component.getSerializer();
             for (Object instance : ingredients.getInstances(component)) {
@@ -55,9 +55,9 @@ public interface IMixedIngredients {
      * @throws IllegalArgumentException If the given tag is invalid or does not contain data on the given ingredients.
      */
     public static MixedIngredients deserialize(NBTTagCompound tag) throws IllegalArgumentException {
-        Map<IngredientComponent<?, ?, ?>, List<?>> ingredients = Maps.newIdentityHashMap();
+        Map<IngredientComponent<?, ?>, List<?>> ingredients = Maps.newIdentityHashMap();
         for (String componentName : tag.getKeySet()) {
-            IngredientComponent<?, ?, ?> component = IngredientComponent.REGISTRY.getValue(new ResourceLocation(componentName));
+            IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.getValue(new ResourceLocation(componentName));
             if (component == null) {
                 throw new IllegalArgumentException("Could not find the ingredient component type " + componentName);
             }

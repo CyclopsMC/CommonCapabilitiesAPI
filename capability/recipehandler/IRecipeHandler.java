@@ -23,12 +23,12 @@ public interface IRecipeHandler {
     /**
      * @return The input recipe component types that are possible for recipes in this handler.
      */
-    public Set<IngredientComponent<?, ?, ?>> getRecipeInputComponents();
+    public Set<IngredientComponent<?, ?>> getRecipeInputComponents();
 
     /**
      * @return The output recipe component types that are possible for recipes in this handler.
      */
-    public Set<IngredientComponent<?, ?, ?>> getRecipeOutputComponents();
+    public Set<IngredientComponent<?, ?>> getRecipeOutputComponents();
 
     /**
      * Check if the given size of recipe component instances are valid for the given recipe component type.
@@ -56,27 +56,5 @@ public interface IRecipeHandler {
      */
     @Nullable
     public IMixedIngredients simulate(IMixedIngredients input);
-
-    /**
-     * Get the input recipe targets for the given recipe component type.
-     * Can be null if the component type is not applicable for this recipe handler,
-     * or if no specified targets exist, in this case, the caller should assume default logic for handling.
-     * @param component The component type.
-     * @param <R> The recipe target type.
-     * @return Recipe component targets for each recipe ingredient, or null if not available.
-     */
-    @Nullable
-    public <R> R[] getInputComponentTargets(IngredientComponent<?, R, ?> component);
-
-    /**
-     * Get the output recipe targets for the given recipe component type.
-     * Can be null if the component type is not applicable for this recipe handler,
-     * or if no specified targets exist, in this case, the caller should assume default logic for handling.
-     * @param component The component type.
-     * @param <R> The recipe target type.
-     * @return Recipe component targets for each recipe ingredient, or null if not available.
-     */
-    @Nullable
-    public <R> R[] getOutputComponentTargets(IngredientComponent<?, R, ?> component);
 
 }

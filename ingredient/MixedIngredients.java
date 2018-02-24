@@ -20,19 +20,19 @@ import java.util.stream.Collectors;
  */
 public class MixedIngredients implements IMixedIngredients {
 
-    private final Map<IngredientComponent<?, ?, ?>, List<?>> ingredients;
+    private final Map<IngredientComponent<?, ?>, List<?>> ingredients;
 
-    public MixedIngredients(Map<IngredientComponent<?, ?, ?>, List<?>> ingredients) {
+    public MixedIngredients(Map<IngredientComponent<?, ?>, List<?>> ingredients) {
         this.ingredients = ingredients;
     }
 
     @Override
-    public Set<IngredientComponent<?, ?, ?>> getComponents() {
+    public Set<IngredientComponent<?, ?>> getComponents() {
         return ingredients.keySet();
     }
 
     @Override
-    public <T> List<T> getInstances(IngredientComponent<T, ?, ?> ingredientComponent) {
+    public <T> List<T> getInstances(IngredientComponent<T, ?> ingredientComponent) {
         return (List<T>) ingredients.getOrDefault(ingredientComponent, Collections.emptyList());
     }
 
@@ -41,7 +41,7 @@ public class MixedIngredients implements IMixedIngredients {
         if (obj instanceof IMixedIngredients) {
             IMixedIngredients that = (IMixedIngredients) obj;
             if (Sets.newHashSet(this.getComponents()).equals(Sets.newHashSet(that.getComponents()))) {
-                for (IngredientComponent<?, ?, ?> component : getComponents()) {
+                for (IngredientComponent<?, ?> component : getComponents()) {
                     List<?> thisInstances = this.getInstances(component);
                     List<?> thatInstances = that.getInstances(component);
                     IIngredientMatcher matcher = component.getMatcher();
@@ -62,7 +62,7 @@ public class MixedIngredients implements IMixedIngredients {
     @Override
     public int hashCode() {
         int hash = 902;
-        for (IngredientComponent<?, ?, ?> component : getComponents()) {
+        for (IngredientComponent<?, ?> component : getComponents()) {
             hash |= component.hashCode() << 2;
             IIngredientMatcher matcher = component.getMatcher();
             for (Object instance : getInstances(component)) {
@@ -77,8 +77,8 @@ public class MixedIngredients implements IMixedIngredients {
         return "[MixedIngredients ingredients: " + ingredients.toString() + "]";
     }
 
-    public static <T> MixedIngredients ofInstances(IngredientComponent<T, ?, ?> component, Collection<T> instances) {
-        Map<IngredientComponent<?, ?, ?>, List<?>> ingredients = Maps.newIdentityHashMap();
+    public static <T> MixedIngredients ofInstances(IngredientComponent<T, ?> component, Collection<T> instances) {
+        Map<IngredientComponent<?, ?>, List<?>> ingredients = Maps.newIdentityHashMap();
         ingredients.put(component, instances instanceof ArrayList ? (List<?>) instances : Lists.newArrayList(instances));
         return new MixedIngredients(ingredients);
     }
@@ -90,7 +90,7 @@ public class MixedIngredients implements IMixedIngredients {
      * @param <T> The instance type.
      * @return New ingredients.
      */
-    public static <T> MixedIngredients ofInstance(IngredientComponent<T, ?, ?> component, T instance) {
+    public static <T> MixedIngredients ofInstance(IngredientComponent<T, ?> component, T instance) {
         return ofInstances(component, Lists.newArrayList(instance));
     }
 
@@ -101,11 +101,11 @@ public class MixedIngredients implements IMixedIngredients {
      * @return New ingredients.
      */
     public static MixedIngredients fromRecipeInput(IRecipeDefinition recipe) {
-        Map<IngredientComponent<?, ?, ?>, List<?>> ingredients = Maps.newIdentityHashMap();
-        for (IngredientComponent<?, ?, ?> component : recipe.getInputComponents()) {
+        Map<IngredientComponent<?, ?>, List<?>> ingredients = Maps.newIdentityHashMap();
+        for (IngredientComponent<?, ?> component : recipe.getInputComponents()) {
             List<?> instances = recipe.getInputs(component).stream()
                     .map(ingredient -> {
-                        IPrototypedIngredient<?, ?, ?> firstIngredient = Iterables.getFirst(ingredient, null);
+                        IPrototypedIngredient<?, ?> firstIngredient = Iterables.getFirst(ingredient, null);
                         if (firstIngredient == null) {
                             return component.getEmptyInstance();
                         }

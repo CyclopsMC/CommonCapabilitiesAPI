@@ -6,16 +6,15 @@ package org.cyclops.commoncapabilities.api.ingredient;
  * Implementing classes should properly implement the equals and hashCode methods.
  *
  * @param <T> The instance type.
- * @param <R> The recipe target type, may be Void.
  * @param <M> The matching condition parameter, may be Void.
  * @author rubensworks
  */
-public interface IPrototypedIngredient<T, R, M> {
+public interface IPrototypedIngredient<T, M> {
 
     /**
      * @return The type of ingredient component this prototype exists for.
      */
-    public IngredientComponent<T, R, M> getComponent();
+    public IngredientComponent<T, M> getComponent();
 
     /**
      * @return The prototype of this ingredient.

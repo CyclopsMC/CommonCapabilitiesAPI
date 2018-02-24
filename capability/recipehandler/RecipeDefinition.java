@@ -18,23 +18,23 @@ import java.util.Set;
  */
 public class RecipeDefinition implements IRecipeDefinition {
 
-    private final Map<IngredientComponent<?, ?, ?>, List<List<IPrototypedIngredient<?, ?, ?>>>> inputs;
+    private final Map<IngredientComponent<?, ?>, List<List<IPrototypedIngredient<?, ?>>>> inputs;
     private final IMixedIngredients output;
 
-    public RecipeDefinition(Map<IngredientComponent<?, ?, ?>, List<List<IPrototypedIngredient<?, ?, ?>>>> inputs,
+    public RecipeDefinition(Map<IngredientComponent<?, ?>, List<List<IPrototypedIngredient<?, ?>>>> inputs,
                             IMixedIngredients output) {
         this.inputs = inputs;
         this.output = output;
     }
 
     @Override
-    public Set<IngredientComponent<?, ?, ?>> getInputComponents() {
+    public Set<IngredientComponent<?, ?>> getInputComponents() {
         return inputs.keySet();
     }
 
     @Override
-    public <T, R, M> List<List<IPrototypedIngredient<T, R, M>>> getInputs(IngredientComponent<T, R, M> ingredientComponent) {
-        return (List<List<IPrototypedIngredient<T, R, M>>>) (List) inputs.getOrDefault(ingredientComponent, Collections.emptyList());
+    public <T, R, M> List<List<IPrototypedIngredient<T, M>>> getInputs(IngredientComponent<T, M> ingredientComponent) {
+        return (List<List<IPrototypedIngredient<T, M>>>) (List) inputs.getOrDefault(ingredientComponent, Collections.emptyList());
     }
 
     @Override
@@ -48,7 +48,7 @@ public class RecipeDefinition implements IRecipeDefinition {
             IRecipeDefinition that = (IRecipeDefinition) obj;
             if (Sets.newHashSet(this.getInputComponents()).equals(Sets.newHashSet(that.getInputComponents()))
                     && this.getOutput().equals(that.getOutput())) {
-                for (IngredientComponent<?, ?, ?> component : getInputComponents()) {
+                for (IngredientComponent<?, ?> component : getInputComponents()) {
                     if (!this.getInputs(component).equals(that.getInputs(component))) {
                         return false;
                     }
@@ -79,10 +79,10 @@ public class RecipeDefinition implements IRecipeDefinition {
      * @param <M> The matching condition parameter, may be Void.
      * @return A new recipe definition.
      */
-    public static <T, R, M> RecipeDefinition ofIngredients(IngredientComponent<T, R, M> component,
-                                                           List<List<IPrototypedIngredient<T, R, M>>> ingredients,
+    public static <T, R, M> RecipeDefinition ofIngredients(IngredientComponent<T, M> component,
+                                                           List<List<IPrototypedIngredient<T, M>>> ingredients,
                                                            IMixedIngredients output) {
-        Map<IngredientComponent<?, ?, ?>, List<List<IPrototypedIngredient<?, ?, ?>>>> inputs = Maps.newIdentityHashMap();
+        Map<IngredientComponent<?, ?>, List<List<IPrototypedIngredient<?, ?>>>> inputs = Maps.newIdentityHashMap();
         inputs.put(component, (List) ingredients);
         return new RecipeDefinition(inputs, output);
     }
@@ -97,10 +97,10 @@ public class RecipeDefinition implements IRecipeDefinition {
      * @param <M> The matching condition parameter, may be Void.
      * @return A new recipe definition.
      */
-    public static <T, R, M> RecipeDefinition ofIngredient(IngredientComponent<T, R, M> component,
-                                                          List<IPrototypedIngredient<T, R, M>> ingredient,
+    public static <T, R, M> RecipeDefinition ofIngredient(IngredientComponent<T, M> component,
+                                                          List<IPrototypedIngredient<T, M>> ingredient,
                                                           IMixedIngredients output) {
-        List<List<IPrototypedIngredient<T, R, M>>> ingredients = Lists.newArrayList();
+        List<List<IPrototypedIngredient<T, M>>> ingredients = Lists.newArrayList();
         ingredients.add(ingredient);
         return ofIngredients(component, ingredients, output);
     }

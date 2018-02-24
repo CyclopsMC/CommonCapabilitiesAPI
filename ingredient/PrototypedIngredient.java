@@ -6,24 +6,23 @@ import java.util.Objects;
  * A raw prototyped ingredient.
  *
  * @param <T> The instance type.
- * @param <R> The recipe target type, may be Void.
  * @param <M> The matching condition parameter, may be Void.
  * @author rubensworks
  */
-public class PrototypedIngredient<T, R, M> implements IPrototypedIngredient<T, R, M> {
+public class PrototypedIngredient<T, M> implements IPrototypedIngredient<T, M> {
 
-    private final IngredientComponent<T, R, M> ingredientComponent;
+    private final IngredientComponent<T, M> ingredientComponent;
     private final T prototype;
     private final M condition;
 
-    public PrototypedIngredient(IngredientComponent<T, R, M> ingredientComponent, T prototype, M condition) {
+    public PrototypedIngredient(IngredientComponent<T, M> ingredientComponent, T prototype, M condition) {
         this.ingredientComponent = ingredientComponent;
         this.prototype = prototype;
         this.condition = condition;
     }
 
     @Override
-    public IngredientComponent<T, R, M> getComponent() {
+    public IngredientComponent<T, M> getComponent() {
         return ingredientComponent;
     }
 
@@ -40,7 +39,7 @@ public class PrototypedIngredient<T, R, M> implements IPrototypedIngredient<T, R
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof IPrototypedIngredient) {
-            IPrototypedIngredient<?, ?, ?> that = (IPrototypedIngredient<?, ?, ?>) obj;
+            IPrototypedIngredient<?, ?> that = (IPrototypedIngredient<?, ?>) obj;
             return this.getComponent().equals(that.getComponent())
                     && this.getComponent().getMatcher().matchesExactly(this.getPrototype(), (T) that.getPrototype())
                     && Objects.equals(this.getCondition(), that.getCondition());

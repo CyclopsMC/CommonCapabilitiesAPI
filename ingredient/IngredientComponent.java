@@ -2,7 +2,6 @@ package org.cyclops.commoncapabilities.api.ingredient;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -14,21 +13,20 @@ import javax.annotation.Nullable;
  * A IngredientComponent is a type of component that can be used as ingredients inside recipes.
  *
  * @param <T> The instance type.
- * @param <R> The ingredient recipe target type, may be Void.
  * @param <M> The matching condition parameter, may be Void. Instances MUST properly implement the equals method.
  * @author rubensworks
  */
-public final class IngredientComponent<T, R, M> implements IForgeRegistryEntry<IngredientComponent<?, ?, ?>> {
+public final class IngredientComponent<T, M> implements IForgeRegistryEntry<IngredientComponent<?, ?>> {
 
-    public static final IForgeRegistry<IngredientComponent<?, ?, ?>> REGISTRY = (IForgeRegistry) GameRegistry
+    public static final IForgeRegistry<IngredientComponent<?, ?>> REGISTRY = (IForgeRegistry) GameRegistry
             .findRegistry(IngredientComponent.class);
 
     @GameRegistry.ObjectHolder("minecraft:itemstack")
-    public static final IngredientComponent<ItemStack, ItemHandlerRecipeTarget, Integer> ITEMSTACK = null;
+    public static final IngredientComponent<ItemStack, Integer> ITEMSTACK = null;
     @GameRegistry.ObjectHolder("minecraft:fluidstack")
-    public static final IngredientComponent<FluidStack, FluidHandlerRecipeTarget, Integer> FLUIDSTACK = null;
+    public static final IngredientComponent<FluidStack, Integer> FLUIDSTACK = null;
     @GameRegistry.ObjectHolder("minecraft:energy")
-    public static final IngredientComponent<Integer, IEnergyStorage, Void> ENERGY = null;
+    public static final IngredientComponent<Integer, Void> ENERGY = null;
 
     private final IIngredientMatcher<T, M> matcher;
     private final IIngredientSerializer<T, M> serializer;
@@ -67,7 +65,7 @@ public final class IngredientComponent<T, R, M> implements IForgeRegistryEntry<I
     }
 
     @Override
-    public IngredientComponent<T, R, M> setRegistryName(ResourceLocation name) {
+    public IngredientComponent<T, M> setRegistryName(ResourceLocation name) {
         this.name = name;
         return this;
     }
@@ -79,11 +77,11 @@ public final class IngredientComponent<T, R, M> implements IForgeRegistryEntry<I
     }
 
     @Override
-    public Class<IngredientComponent<?, ?, ?>> getRegistryType() {
+    public Class<IngredientComponent<?, ?>> getRegistryType() {
         return (Class) IngredientComponent.class;
     }
 
-    public IngredientComponent<T, R, M> setUnlocalizedName(String unlocalizedName) {
+    public IngredientComponent<T, M> setUnlocalizedName(String unlocalizedName) {
         this.unlocalizedName = unlocalizedName;
         return this;
     }

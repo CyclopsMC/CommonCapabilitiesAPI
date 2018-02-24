@@ -30,7 +30,7 @@ public interface IRecipeDefinition {
     /**
      * @return The input ingredient component types.
      */
-    public Set<IngredientComponent<?, ?, ?>> getInputComponents();
+    public Set<IngredientComponent<?, ?>> getInputComponents();
 
     /**
      * Get the input prototypes of a certain type.
@@ -44,7 +44,7 @@ public interface IRecipeDefinition {
      * @param <M> The matching condition parameter, may be Void.
      * @return Input prototypes.
      */
-    public <T, R, M> List<List<IPrototypedIngredient<T, R, M>>> getInputs(IngredientComponent<T, R, M> ingredientComponent);
+    public <T, R, M> List<List<IPrototypedIngredient<T, M>>> getInputs(IngredientComponent<T, M> ingredientComponent);
 
     /**
      * @return The output ingredients.
@@ -59,7 +59,7 @@ public interface IRecipeDefinition {
     public static NBTTagCompound serialize(IRecipeDefinition recipe) {
         NBTTagCompound tag = new NBTTagCompound();
         NBTTagCompound inputTag = new NBTTagCompound();
-        for (IngredientComponent<?, ?, ?> component : recipe.getInputComponents()) {
+        for (IngredientComponent<?, ?> component : recipe.getInputComponents()) {
             NBTTagList instances = new NBTTagList();
             IIngredientSerializer serializer = component.getSerializer();
             for (Object ingredient : recipe.getInputs(component)) {
@@ -86,7 +86,7 @@ public interface IRecipeDefinition {
      * @throws IllegalArgumentException If the given tag is invalid or does not contain data on the given recipe.
      */
     public static RecipeDefinition deserialize(NBTTagCompound tag) throws IllegalArgumentException {
-        Map<IngredientComponent<?, ?, ?>, List<List<IPrototypedIngredient<?, ?, ?>>>> inputs = Maps.newIdentityHashMap();
+        Map<IngredientComponent<?, ?>, List<List<IPrototypedIngredient<?, ?>>>> inputs = Maps.newIdentityHashMap();
         if (!tag.hasKey("input")) {
             throw new IllegalArgumentException("A recipe tag did not contain a valid input tag");
         }
@@ -95,7 +95,7 @@ public interface IRecipeDefinition {
         }
         NBTTagCompound inputTag = tag.getCompoundTag("input");
         for (String componentName : inputTag.getKeySet()) {
-            IngredientComponent<?, ?, ?> component = IngredientComponent.REGISTRY.getValue(new ResourceLocation(componentName));
+            IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.getValue(new ResourceLocation(componentName));
             if (component == null) {
                 throw new IllegalArgumentException("Could not find the ingredient component type " + componentName);
             }
@@ -105,7 +105,7 @@ public interface IRecipeDefinition {
             }
             NBTTagList instancesTag = (NBTTagList) subTag;
             IIngredientSerializer serializer = component.getSerializer();
-            List<List<IPrototypedIngredient<?, ?, ?>>> instances = Lists.newArrayList();
+            List<List<IPrototypedIngredient<?, ?>>> instances = Lists.newArrayList();
             for (NBTBase instanceTag : instancesTag) {
                 if (!(instanceTag instanceof NBTTagList)) {
                     throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid sublist of instances");
