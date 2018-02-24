@@ -26,6 +26,16 @@ public interface IIngredientMatcher<T, M> {
     public boolean matchesExactly(T a, T b);
 
     /**
+     * Check if the given entity matches the empty instance,
+     * as provided by {@link IngredientComponent#getEmptyInstance()}.
+     * @param instance An instance.
+     * @return If the instance is empty.
+     */
+    public default boolean isEmpty(T instance) {
+        return instance == null;
+    }
+
+    /**
      * Hash the given instance.
      * This must be calculated quickly.
      * @param instance An instance.
