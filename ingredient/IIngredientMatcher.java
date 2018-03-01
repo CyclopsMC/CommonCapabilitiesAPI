@@ -1,12 +1,21 @@
 package org.cyclops.commoncapabilities.api.ingredient;
 
+import java.util.Comparator;
+
 /**
  * An instance matcher for certain instance and condition types.
  * @param <T> The instance type to match.
  * @param <M> The matching condition parameter.
  * @author rubensworks
  */
-public interface IIngredientMatcher<T, M> {
+public interface IIngredientMatcher<T, M> extends Comparator<T> {
+
+    /**
+     * If the given object is an instance of the ingredient type.
+     * @param object An object.
+     * @return If the object is a valid instance of the ingredient component type.
+     */
+    public boolean isInstance(Object object);
 
     /**
      * Check if the two given instances match based on the given match conditions.
@@ -42,5 +51,12 @@ public interface IIngredientMatcher<T, M> {
      * @return A hashcode for the given instance.
      */
     public int hash(T instance);
+
+    /**
+     * Create a deep copy of the given instance.
+     * @param instance An instance.
+     * @return A copy of the given instance.
+     */
+    public T copy(T instance);
 
 }
