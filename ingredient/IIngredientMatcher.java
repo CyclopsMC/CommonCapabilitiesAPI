@@ -35,13 +35,19 @@ public interface IIngredientMatcher<T, M> extends Comparator<T> {
     public boolean matchesExactly(T a, T b);
 
     /**
+     * @return The instance that acts as an 'empty' instance.
+     *         For ItemStacks, this would be ItemStack.EMPTY.
+     */
+    public T getEmptyInstance();
+
+    /**
      * Check if the given entity matches the empty instance,
-     * as provided by {@link IngredientComponent#getEmptyInstance()}.
+     * as provided by {@link #getEmptyInstance()}.
      * @param instance An instance.
      * @return If the instance is empty.
      */
     public default boolean isEmpty(T instance) {
-        return instance == null;
+        return instance == getEmptyInstance();
     }
 
     /**

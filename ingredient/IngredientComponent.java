@@ -30,19 +30,17 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
 
     private final IIngredientMatcher<T, M> matcher;
     private final IIngredientSerializer<T, M> serializer;
-    private final T emptyInstance;
     private ResourceLocation name;
     private String unlocalizedName;
 
-    public IngredientComponent(ResourceLocation name, IIngredientMatcher<T, M> matcher, IIngredientSerializer<T, M> serializer, T emptyInstance) {
+    public IngredientComponent(ResourceLocation name, IIngredientMatcher<T, M> matcher, IIngredientSerializer<T, M> serializer) {
         this.setRegistryName(name);
         this.matcher = matcher;
         this.serializer = serializer;
-        this.emptyInstance = emptyInstance;
     }
 
-    public IngredientComponent(String name, IIngredientMatcher<T, M> matcher, IIngredientSerializer<T, M> serializer, T emptyInstance) {
-        this(new ResourceLocation(name), matcher, serializer, emptyInstance);
+    public IngredientComponent(String name, IIngredientMatcher<T, M> matcher, IIngredientSerializer<T, M> serializer) {
+        this(new ResourceLocation(name), matcher, serializer);
     }
 
     public ResourceLocation getName() {
@@ -108,10 +106,11 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     }
 
     /**
-     * @return The instance that acts as an 'empty' instance.
-     *         For ItemStacks, this would be ItemStack.EMPTY.
+     * Wrap the given instance inside an equals, hashCode and compareTo-safe holder.
+     * @param instance An instance.
+     * @return The wrapped instance.
      */
-    public T getEmptyInstance() {
-        return emptyInstance;
+    public IngredientInstanceWrapper<T, M> wrap(T instance) {
+        return new IngredientInstanceWrapper<>(this, instance);
     }
 }

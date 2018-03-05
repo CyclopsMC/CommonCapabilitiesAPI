@@ -103,11 +103,12 @@ public class MixedIngredients implements IMixedIngredients {
     public static MixedIngredients fromRecipeInput(IRecipeDefinition recipe) {
         Map<IngredientComponent<?, ?>, List<?>> ingredients = Maps.newIdentityHashMap();
         for (IngredientComponent<?, ?> component : recipe.getInputComponents()) {
+            IIngredientMatcher<?, ?> matcher = component.getMatcher();
             List<?> instances = recipe.getInputs(component).stream()
                     .map(ingredient -> {
                         IPrototypedIngredient<?, ?> firstIngredient = Iterables.getFirst(ingredient, null);
                         if (firstIngredient == null) {
-                            return component.getEmptyInstance();
+                            return matcher.getEmptyInstance();
                         }
                         return firstIngredient.getPrototype();
                     })
