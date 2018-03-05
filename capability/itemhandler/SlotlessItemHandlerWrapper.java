@@ -1,9 +1,13 @@
 package org.cyclops.commoncapabilities.api.capability.itemhandler;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterators;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Iterator;
 
 /**
  * An abstract {@link ISlotlessItemHandler} wrapper around an {@link IItemHandler}.
@@ -39,6 +43,15 @@ public abstract class SlotlessItemHandlerWrapper implements ISlotlessItemHandler
     protected abstract int getNonEmptySlotWithItemStack(@Nonnull ItemStack itemStack, int matchFlags);
 
     /**
+     * Get an iterator over all slots in which the given ItemStack is present according to the given match flags.
+     * Stacksize of the item in the slot must be larger than zero.
+     * @param itemStack The ItemStack to look for.
+     * @param matchFlags The flags to match the given ItemStack by.
+     * @return An iterator over all slots in which the ItemStack is present.
+     */
+    protected abstract Iterator<Integer> getSlotsWithItemStack(@Nonnull ItemStack itemStack, int matchFlags);
+
+    /**
      * @return A slot with no ItemStack, -1 if no such slot is available.
      */
     protected abstract int getEmptySlot();
@@ -47,6 +60,22 @@ public abstract class SlotlessItemHandlerWrapper implements ISlotlessItemHandler
      * @return A slot that is not empty, -1 if no such slot is available.
      */
     protected abstract int getNonEmptySlot();
+
+    @Override
+    public Iterator<ItemStack> getItems() {
+        return new ItemHandlerItemStackIterator(itemHandler);
+    }
+
+    @Override
+    public Iterator<ItemStack> findItems(@Nonnull ItemStack stack, int matchFlags) {
+        return Iterators.transform(getSlotsWithItemStack(stack, matchFlags), new Function<Integer, ItemStack>() {
+            @Nullable
+            @Override
+            public ItemStack apply(@Nullable Integer input) {
+                return itemHandler.getStackInSlot(input);
+            }
+        });
+    }
 
     @Override
     @Nonnull

@@ -3,6 +3,7 @@ package org.cyclops.commoncapabilities.api.capability.itemhandler;
 import net.minecraft.item.ItemStack;
 
 import javax.annotation.Nonnull;
+import java.util.Iterator;
 
 /**
  * A simplified form of the {@link net.minecraftforge.items.IItemHandler} that is slot-agnostic.
@@ -22,6 +23,25 @@ import javax.annotation.Nonnull;
  * @author rubensworks
  */
 public interface ISlotlessItemHandler {
+
+    /**
+     * @return An immutable iterator over all available ingredients in this storage.
+     */
+    public Iterator<ItemStack> getItems();
+
+    /**
+     * Find all ItemStacks matching the given stack from the item handler.
+     *
+     * Calling this method will not modify the storage in any way.
+     * Results from this method MUST NOT be modified.
+     *
+     * @param stack      The ItemStack to search for.
+     * @param matchFlags The flags to compare the given matchStack by according to {@link ItemMatch}.
+     *                   ItemMatch.DAMAGE | ItemMatch.NBT will for instance make sure to only extract
+     *                   items that have exactly the same damage value and nbt tag, while ignoring the stacksize.
+     * @return An immutable iterator over ItemStacks that match the given stack, which may potentially be empty.
+     */
+    Iterator<ItemStack> findItems(@Nonnull ItemStack stack, int matchFlags);
 
     /**
      * Inserts an ItemStack into the item handler and return the remainder.

@@ -4,6 +4,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
+import java.util.Iterator;
 
 /**
  * An naive {@link ISlotlessItemHandler} wrapper around an {@link IItemHandler}.
@@ -16,6 +17,16 @@ public class DefaultSlotlessItemHandlerWrapper implements ISlotlessItemHandler {
 
     public DefaultSlotlessItemHandlerWrapper(IItemHandler itemHandler) {
         this.itemHandler = itemHandler;
+    }
+
+    @Override
+    public Iterator<ItemStack> getItems() {
+        return new ItemHandlerItemStackIterator(itemHandler);
+    }
+
+    @Override
+    public Iterator<ItemStack> findItems(@Nonnull ItemStack stack, int matchFlags) {
+        return new FilteredItemHandlerItemStackIterator(itemHandler, stack, matchFlags);
     }
 
     @Override
