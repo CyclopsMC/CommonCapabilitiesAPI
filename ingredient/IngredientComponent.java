@@ -49,17 +49,7 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
 
     @Override
     public String toString() {
-        return "[Recipe Component " + this.name + "]";
-    }
-
-    @Override
-    public int hashCode() {
-        return 45 | this.getName().hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return this == obj || (obj instanceof IngredientComponent && this.getName().equals(((IngredientComponent) obj).getName()));
+        return "[Recipe Component " + this.name + " " + hashCode() + "]";
     }
 
     @Override
