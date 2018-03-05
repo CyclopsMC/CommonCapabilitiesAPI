@@ -5,7 +5,7 @@ package org.cyclops.commoncapabilities.api.ingredient;
  * {@link #equals(Object)}, {@link #hashCode()} and {@link #compareTo(Object)} methods.
  * @author rubensworks
  */
-public class IngredientInstanceWrapper<T, M> implements Comparable<T> {
+public class IngredientInstanceWrapper<T, M> implements Comparable<IngredientInstanceWrapper<T, M>> {
 
     private final IngredientComponent<T, M> component;
     private final T instance;
@@ -25,8 +25,16 @@ public class IngredientInstanceWrapper<T, M> implements Comparable<T> {
 
     @Override
     public boolean equals(Object obj) {
+        if (!(obj instanceof IngredientInstanceWrapper)) {
+            return false;
+        }
+        IngredientInstanceWrapper wrapper = (IngredientInstanceWrapper) obj;
+        if (wrapper.getComponent() != this.getComponent()) {
+            return false;
+        }
+        Object thatInstance = wrapper.getInstance();
         IIngredientMatcher<T, M> matcher = getComponent().getMatcher();
-        return matcher.isInstance(obj) && matcher.matchesExactly(getInstance(), (T) obj);
+        return matcher.isInstance(thatInstance) && matcher.matchesExactly(getInstance(), (T) thatInstance);
     }
 
     @Override
@@ -35,7 +43,7 @@ public class IngredientInstanceWrapper<T, M> implements Comparable<T> {
     }
 
     @Override
-    public int compareTo(T o) {
-        return getComponent().getMatcher().compare(getInstance(), o);
+    public int compareTo(IngredientInstanceWrapper<T, M> o) {
+        return getComponent().getMatcher().compare(getInstance(), o.getInstance());
     }
 }
