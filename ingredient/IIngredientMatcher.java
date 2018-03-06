@@ -18,6 +18,11 @@ public interface IIngredientMatcher<T, M> extends Comparator<T> {
     public boolean isInstance(Object object);
 
     /**
+     * @return The match condition that is used to match instances exactly.
+     */
+    public M getExactMatchCondition();
+
+    /**
      * Check if the two given instances match based on the given match conditions.
      * @param a A first instance.
      * @param b A second instance.
@@ -32,7 +37,9 @@ public interface IIngredientMatcher<T, M> extends Comparator<T> {
      * @param b A second instance.
      * @return If the two given instances are equal.
      */
-    public boolean matchesExactly(T a, T b);
+    public default boolean matchesExactly(T a, T b) {
+        return matches(a, b, getExactMatchCondition());
+    }
 
     /**
      * @return The instance that acts as an 'empty' instance.
