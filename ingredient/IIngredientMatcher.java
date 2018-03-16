@@ -18,9 +18,38 @@ public interface IIngredientMatcher<T, M> extends Comparator<T> {
     public boolean isInstance(Object object);
 
     /**
-     * @return The match condition that is used to match instances exactly.
+     * @return The match condition that is used to match any instance based on a prototype.
+     */
+    public M getAnyMatchCondition();
+
+    /**
+     * @return The match condition that is used to match instances exactly based on a prototype.
      */
     public M getExactMatchCondition();
+
+    /**
+     * Create a new match condition based on the given condition that includes the second condition.
+     * @param matchCondition The match condition to start from.
+     * @param with The match condition to include.
+     * @return A new match condition that is the combination of both.
+     */
+    public M withCondition(M matchCondition, M with);
+
+    /**
+     * Create a new match condition based on the given condition that excludes the second condition.
+     * @param matchCondition The match condition to start from.
+     * @param without A match condition to exclude.
+     * @return A new match condition that is the first one without the second one.
+     */
+    public M withoutCondition(M matchCondition, M without);
+
+    /**
+     * Check if the given match condition contains at least the given condition.
+     * @param matchCondition The match condition to start from.
+     * @param searchCondition A match condition to search for.
+     * @return If the first condition contains at least the second condition.
+     */
+    public boolean hasCondition(M matchCondition, M searchCondition);
 
     /**
      * Check if the two given instances match based on the given match conditions.
