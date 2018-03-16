@@ -10,27 +10,35 @@ import net.minecraftforge.oredict.OreDictionary;
 public final class ItemMatch {
 
     /**
-     * Convenience value matching ItemStacks only by Item.
+     * Convenience value matching any ItemStack.
      */
     public static final int ANY = 0;
     /**
+     * Match ItemStack items.
+     */
+    public static final int ITEM = 1;
+    /**
      * Match ItemStack damage values.
      */
-    public static final int DAMAGE = 1;
+    public static final int DAMAGE = 2;
     /**
      * Match ItemStack NBT tags.
      */
-    public static final int NBT = 2;
+    public static final int NBT = 4;
     /**
      * Match ItemStack stacksizes.
      */
-    public static final int STACKSIZE = 4;
+    public static final int STACKSIZE = 8;
     /**
-     * Convenience value matching ItemStacks exactly by damage value, NBT tag and stacksize.
+     * Convenience value matching ItemStacks exactly by item, damage value, NBT tag and stacksize.
      */
-    public static final int EXACT = DAMAGE | NBT | STACKSIZE;
+    public static final int EXACT = ITEM | DAMAGE | NBT | STACKSIZE;
 
     public static boolean areItemStacksEqual(ItemStack a, ItemStack b, int matchFlags) {
+        if (matchFlags == ANY) {
+            return true;
+        }
+        boolean item      = (matchFlags & ITEM     ) > 0;
         boolean damage    = (matchFlags & DAMAGE   ) > 0
                 && !(a.getItemDamage() == OreDictionary.WILDCARD_VALUE
                   || b.getItemDamage() == OreDictionary.WILDCARD_VALUE);
@@ -38,7 +46,7 @@ public final class ItemMatch {
         boolean stackSize = (matchFlags & STACKSIZE) > 0;
         return a == b || a.isEmpty() && b.isEmpty() ||
                 (!a.isEmpty() && !b.isEmpty()
-                        && a.getItem() == b.getItem()
+                        && (!item || a.getItem() == b.getItem())
                         && (!damage || a.getItemDamage() == b.getItemDamage())
                         && (!stackSize || a.getCount() == b.getCount())
                         && (!nbt || ItemStack.areItemStackTagsEqual(a, b)));
