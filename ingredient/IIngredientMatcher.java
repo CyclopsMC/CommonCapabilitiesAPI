@@ -101,4 +101,19 @@ public interface IIngredientMatcher<T, M> extends Comparator<T> {
      */
     public T copy(T instance);
 
+    /**
+     * Get the quantity in the given instance.
+     * @param instance An instance.
+     * @return The instance quantity.
+     */
+    public long getQuantity(T instance);
+
+    /**
+     * Create a copy of the given instance with the given quantity.
+     * @param instance An instance.
+     * @param quantity The new instance quantity.
+     * @return The copied instance with the new quantity.
+     */
+    public T withQuantity(T instance, long quantity);
+
 }
