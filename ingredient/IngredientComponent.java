@@ -34,6 +34,7 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     private final IIngredientMatcher<T, M> matcher;
     private final IIngredientSerializer<T, M> serializer;
     private final List<IngredientComponentCategoryType<T, M, ?>> categoryTypes;
+    private final IngredientComponentCategoryType<T, M, ?> primaryQuantifier;
     private ResourceLocation name;
     private String unlocalizedName;
 
@@ -47,9 +48,17 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
 
         // Validate if the combination of all match conditions equals the exact match condition.
         M matchCondition = this.matcher.getAnyMatchCondition();
+        IngredientComponentCategoryType<T, M, ?> primaryQuantifier = null;
         for (IngredientComponentCategoryType<T, M, ?> categoryType : this.categoryTypes) {
             matchCondition = this.matcher.withCondition(matchCondition, categoryType.getMatchCondition());
+            if (categoryType.isPrimaryQuantifier()) {
+                if (primaryQuantifier != null) {
+                    throw new IllegalArgumentException("Found more than one primary quantifier in category types.");
+                }
+                primaryQuantifier = categoryType;
+            }
         }
+        this.primaryQuantifier = primaryQuantifier;
         if (!Objects.equals(matchCondition, this.getMatcher().getExactMatchCondition())) {
             throw new IllegalArgumentException("The given category types when combined do not conform to the " +
                     "exact match conditions of the matcher.");
@@ -127,5 +136,13 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
      */
     public IngredientInstanceWrapper<T, M> wrap(T instance) {
         return new IngredientInstanceWrapper<>(this, instance);
+    }
+
+    /**
+     * @return The primary quantifier category type, can be null.
+     */
+    @Nullable
+    public IngredientComponentCategoryType<T, M, ?> getPrimaryQuantifier() {
+        return primaryQuantifier;
     }
 }

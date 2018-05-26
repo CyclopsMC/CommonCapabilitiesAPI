@@ -18,14 +18,16 @@ public class IngredientComponentCategoryType<T, M, C> {
     private final boolean referenceEqual;
     private final Function<T, C> classifier;
     private final M matchCondition;
+    private final boolean primaryQuantifier;
 
     public IngredientComponentCategoryType(ResourceLocation name, Class<C> categoryType, boolean referenceEqual,
-                                           Function<T, C> classifier, M matchCondition) {
+                                           Function<T, C> classifier, M matchCondition, boolean primaryQuantifier) {
         this.name = name;
         this.categoryType = categoryType;
         this.referenceEqual = referenceEqual;
         this.classifier = classifier;
         this.matchCondition = matchCondition;
+        this.primaryQuantifier = primaryQuantifier;
     }
 
     /**
@@ -62,6 +64,13 @@ public class IngredientComponentCategoryType<T, M, C> {
      */
     public M getMatchCondition() {
         return matchCondition;
+    }
+
+    /**
+     * @return If this categorizer is indicative of instance quantities.
+     */
+    public boolean isPrimaryQuantifier() {
+        return primaryQuantifier;
     }
 
     @Override
