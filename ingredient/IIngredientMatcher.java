@@ -113,7 +113,13 @@ public interface IIngredientMatcher<T, M> extends Comparator<T> {
      * @param instance An instance.
      * @param quantity The new instance quantity.
      * @return The copied instance with the new quantity.
+     * @throws ArithmeticException If the given quantity does not fit into the instance anymore.
      */
-    public T withQuantity(T instance, long quantity);
+    public T withQuantity(T instance, long quantity) throws ArithmeticException;
+
+    /**
+     * @return The maximum allowed quantity for instances.
+     */
+    public long getMaximumQuantity();
 
 }
