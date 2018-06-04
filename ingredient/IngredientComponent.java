@@ -29,7 +29,7 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     @GameRegistry.ObjectHolder("minecraft:fluidstack")
     public static final IngredientComponent<FluidStack, Integer> FLUIDSTACK = null;
     @GameRegistry.ObjectHolder("minecraft:energy")
-    public static final IngredientComponent<Integer, Void> ENERGY = null;
+    public static final IngredientComponent<Integer, Boolean> ENERGY = null;
 
     private final IIngredientMatcher<T, M> matcher;
     private final IIngredientSerializer<T, M> serializer;
