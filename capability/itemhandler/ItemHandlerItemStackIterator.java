@@ -13,10 +13,15 @@ import java.util.NoSuchElementException;
 public class ItemHandlerItemStackIterator implements Iterator<ItemStack> {
 
     private final IItemHandler itemHandler;
-    private int slot = 0;
+    private int slot;
+
+    public ItemHandlerItemStackIterator(IItemHandler itemHandler, int offset) {
+        this.itemHandler = itemHandler;
+        this.slot = offset;
+    }
 
     public ItemHandlerItemStackIterator(IItemHandler itemHandler) {
-        this.itemHandler = itemHandler;
+        this(itemHandler, 0);
     }
 
     @Override

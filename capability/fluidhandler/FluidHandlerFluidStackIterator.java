@@ -14,10 +14,15 @@ import java.util.NoSuchElementException;
 public class FluidHandlerFluidStackIterator implements Iterator<FluidStack> {
 
     private final IFluidTankProperties[] fluidTankProperties;
-    private int slot = 0;
+    private int slot;
+
+    public FluidHandlerFluidStackIterator(IFluidHandler fluidHandler, int offset) {
+        this.fluidTankProperties = fluidHandler.getTankProperties();
+        this.slot = offset;
+    }
 
     public FluidHandlerFluidStackIterator(IFluidHandler fluidHandler) {
-        this.fluidTankProperties = fluidHandler.getTankProperties();
+        this(fluidHandler, 0);
     }
 
     @Override
