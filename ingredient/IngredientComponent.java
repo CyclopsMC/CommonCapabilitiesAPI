@@ -1,15 +1,25 @@
 package org.cyclops.commoncapabilities.api.ingredient;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityInject;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorage;
+import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorageHandler;
+import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorageWrapperHandler;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -31,9 +41,13 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     @GameRegistry.ObjectHolder("minecraft:energy")
     public static final IngredientComponent<Integer, Boolean> ENERGY = null;
 
+    @CapabilityInject(IIngredientComponentStorageHandler.class)
+    private static Capability<IIngredientComponentStorageHandler> CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLER = null;
+
     private final IIngredientMatcher<T, M> matcher;
     private final IIngredientSerializer<T, M> serializer;
     private final List<IngredientComponentCategoryType<T, M, ?>> categoryTypes;
+    private final Map<Capability<?>, IIngredientComponentStorageWrapperHandler<T, M, ?>> storageWrapperHandler;
     private final IngredientComponentCategoryType<T, M, ?> primaryQuantifier;
     private ResourceLocation name;
     private String unlocalizedName;
@@ -45,6 +59,7 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
         this.matcher = matcher;
         this.serializer = serializer;
         this.categoryTypes = Lists.newArrayList(categoryTypes);
+        this.storageWrapperHandler = Maps.newIdentityHashMap();
 
         // Validate if the combination of all match conditions equals the exact match condition.
         M matchCondition = this.matcher.getAnyMatchCondition();
@@ -144,5 +159,74 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     @Nullable
     public IngredientComponentCategoryType<T, M, ?> getPrimaryQuantifier() {
         return primaryQuantifier;
+    }
+
+    /**
+     * Set the storage wrapper handler for this component.
+     * @param capability The capability for the storage wrapper.
+     * @param storageWrapperHandler The storage wrapper handler.
+     * @param capability The capability that should be wrapped with the given handler.
+     */
+    public <S> void setStorageWrapperHandler(Capability<S> capability,
+                                             IIngredientComponentStorageWrapperHandler<T, M, ? super S> storageWrapperHandler) {
+        this.storageWrapperHandler.put(capability, storageWrapperHandler);
+    }
+
+    /**
+     * Get the storage wrapper handler for this component.
+     * @param capability The capability to get the storage wrapper for.
+     * @param <S> The external storage type.
+     * @return The storage wrapper handler, can be null if none has been assigned.
+     */
+    @SuppressWarnings("unchecked")
+    @Nullable
+    public <S> IIngredientComponentStorageWrapperHandler<T, M, S> getStorageWrapperHandler(Capability<S> capability) {
+        return (IIngredientComponentStorageWrapperHandler<T, M, S>) storageWrapperHandler.get(capability);
+    }
+
+    /**
+     * @return All supported capabilities that have registered wrapper handlers
+     */
+    public Collection<Capability<?>> getStorageWrapperHandlerCapabilities() {
+        return storageWrapperHandler.keySet();
+    }
+
+    /**
+     * Get the ingredient storage within the given capability provider.
+     *
+     * This will first check if the capability provider has a {@link IIngredientComponentStorageHandler} capability
+     * and it will try to fetch the storage from there.
+     * If this fails, then the storage wrapper handlers that are registered in this ingredient component
+     * will be iterated and the first successful one will be returned.
+     *
+     * @param capabilityProvider A capability provider.
+     * @param facing The side to get the storage from.
+     * @return An ingredient storage, or null if it does not exist.
+     */
+    @SuppressWarnings("unchecked")
+    @Nullable
+    public IIngredientComponentStorage<T, M> getStorage(ICapabilityProvider capabilityProvider,
+                                                        @Nullable EnumFacing facing) {
+        // Check IIngredientComponentStorageHandler capability
+        if (capabilityProvider.hasCapability(CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLER, facing)) {
+            IIngredientComponentStorageHandler storageHandler = capabilityProvider.getCapability(
+                    CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLER, facing);
+            IIngredientComponentStorage<T, M> storage = storageHandler.getStorage(this);
+            if (storage != null) {
+                return storage;
+            }
+        }
+
+        // Check registered wrapper handlers
+        for (Capability<?> capability : getStorageWrapperHandlerCapabilities()) {
+            IIngredientComponentStorageWrapperHandler<T, M, ?> wrapperHandler = getStorageWrapperHandler(capability);
+            IIngredientComponentStorage<T, M> storage = wrapperHandler.getComponentStorage(capabilityProvider, facing);
+            if (storage != null) {
+                return storage;
+            }
+        }
+
+        // Otherwise, fail
+        return null;
     }
 }
