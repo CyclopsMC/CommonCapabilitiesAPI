@@ -5,13 +5,16 @@ import com.google.common.collect.Maps;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityDispatcher;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import org.cyclops.commoncapabilities.api.ingredient.capability.AttachCapabilitiesEventIngredientComponent;
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorage;
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorageHandler;
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorageWrapperHandler;
@@ -49,6 +52,7 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     private final List<IngredientComponentCategoryType<T, M, ?>> categoryTypes;
     private final Map<Capability<?>, IIngredientComponentStorageWrapperHandler<T, M, ?>> storageWrapperHandler;
     private final IngredientComponentCategoryType<T, M, ?> primaryQuantifier;
+    private final CapabilityDispatcher capabilityDispatcher;
     private ResourceLocation name;
     private String unlocalizedName;
 
@@ -60,6 +64,7 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
         this.serializer = serializer;
         this.categoryTypes = Lists.newArrayList(categoryTypes);
         this.storageWrapperHandler = Maps.newIdentityHashMap();
+        this.capabilityDispatcher = gatherCapabilities();
 
         // Validate if the combination of all match conditions equals the exact match condition.
         M matchCondition = this.matcher.getAnyMatchCondition();
@@ -83,6 +88,7 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     public IngredientComponent(String name, IIngredientMatcher<T, M> matcher, IIngredientSerializer<T, M> serializer,
                                List<IngredientComponentCategoryType<T, M, ?>> categoryTypes) {
         this(new ResourceLocation(name), matcher, serializer, categoryTypes);
+        gatherCapabilities();
     }
 
     public ResourceLocation getName() {
@@ -109,6 +115,31 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     @Override
     public Class<IngredientComponent<?, ?>> getRegistryType() {
         return (Class) IngredientComponent.class;
+    }
+
+    protected CapabilityDispatcher gatherCapabilities() {
+        AttachCapabilitiesEventIngredientComponent<T, M> event = new AttachCapabilitiesEventIngredientComponent<>(this);
+        MinecraftForge.EVENT_BUS.post(event);
+        return event.getCapabilities().size() > 0 ? new CapabilityDispatcher(event.getCapabilities()) : null;
+    }
+
+    /**
+     * If this component has the given capability.
+     * @param capability The capability to check.
+     * @return If this has the given capability/
+     */
+    public boolean hasCapability(Capability<?> capability) {
+        return capabilityDispatcher != null && capabilityDispatcher.hasCapability(capability, null);
+    }
+
+    /**
+     * Get the given capability.
+     * @param capability The capability to get.
+     * @param <TC> The capability type.
+     * @return The capability instance.
+     */
+    public <TC> TC getCapability(Capability<TC> capability) {
+        return capabilityDispatcher == null ? null : capabilityDispatcher.getCapability(capability, null);
     }
 
     public IngredientComponent<T, M> setUnlocalizedName(String unlocalizedName) {
