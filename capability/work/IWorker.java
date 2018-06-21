@@ -15,17 +15,17 @@ package org.cyclops.commoncapabilities.api.capability.work;
  */
 public interface IWorker {
     /**
-     * If the target has a valid input for things to process.
-     * In case of the vanilla furnace, this will return true if there
-     * is a valid smeltable in its input slot.
+     * @return If the target has a valid input for things to process.
+     *         In case of the vanilla furnace, this will return true if there
+     *         is a valid smeltable in its input slot.
      **/
     boolean hasWork();
     
     /**
-     * If the target is able to start working in its current state,
-     * and if it is not being blocked by some external or internal factor.
-     * In case of the vanilla furnace, this will return true if there is enough
-     * fuel in its fuel slot.
+     * @return If the target is able to start working in its current state,
+     *         and if it is not being blocked by some external or internal factor.
+     *         In case of the vanilla furnace, this will return true if there is enough
+     *         fuel in its fuel slot.
      **/
     boolean canWork();
 }
