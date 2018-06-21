@@ -196,7 +196,7 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
      * Set the storage wrapper handler for this component.
      * @param capability The capability for the storage wrapper.
      * @param storageWrapperHandler The storage wrapper handler.
-     * @param capability The capability that should be wrapped with the given handler.
+     * @param <S> The capability type.
      */
     public <S> void setStorageWrapperHandler(Capability<S> capability,
                                              IIngredientComponentStorageWrapperHandler<T, M, ? super S> storageWrapperHandler) {
