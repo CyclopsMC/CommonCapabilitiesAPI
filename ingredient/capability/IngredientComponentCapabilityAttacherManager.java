@@ -1,12 +1,11 @@
 package org.cyclops.commoncapabilities.api.ingredient.capability;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
-
-import java.util.Map;
 
 /**
  * A helper manager that can be used to easily attach capabilities to ingredient components.
@@ -21,10 +20,10 @@ import java.util.Map;
  */
 public class IngredientComponentCapabilityAttacherManager {
 
-    private final Map<ResourceLocation, IIngredientComponentCapabilityAttacher<?, ?>> attachers;
+    private final Multimap<ResourceLocation, IIngredientComponentCapabilityAttacher<?, ?>> attachers;
 
     public IngredientComponentCapabilityAttacherManager() {
-        this.attachers = Maps.newHashMap();
+        this.attachers = MultimapBuilder.hashKeys().arrayListValues().build();
         MinecraftForge.EVENT_BUS.register(this);
     }
 
@@ -44,10 +43,9 @@ public class IngredientComponentCapabilityAttacherManager {
 
     protected <T, M> void onIngredientComponentLoad(AttachCapabilitiesEventIngredientComponent event,
                                                     IngredientComponent<T, M> ingredientComponent) {
-        IIngredientComponentCapabilityAttacher<T, M> attacher = (IIngredientComponentCapabilityAttacher<T, M>) attachers.get(ingredientComponent.getName());
-        if (attacher != null) {
-            event.addCapability(attacher.getCapabilityProviderName(),
-                    attacher.createCapabilityProvider(ingredientComponent));
+        for (IIngredientComponentCapabilityAttacher<?, ?> attacher : attachers.get(ingredientComponent.getName())) {
+            event.addCapability(attacher.getCapabilityProviderName(), ((IIngredientComponentCapabilityAttacher<T, M>) attacher)
+                    .createCapabilityProvider(ingredientComponent));
         }
     }
 
