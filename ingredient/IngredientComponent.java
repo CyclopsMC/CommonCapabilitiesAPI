@@ -50,6 +50,7 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     private final IIngredientMatcher<T, M> matcher;
     private final IIngredientSerializer<T, M> serializer;
     private final List<IngredientComponentCategoryType<T, M, ?>> categoryTypes;
+    private final List<Capability<?>> storageWrapperCapabilities;
     private final Map<Capability<?>, IIngredientComponentStorageWrapperHandler<T, M, ?>> storageWrapperHandler;
     private final IngredientComponentCategoryType<T, M, ?> primaryQuantifier;
     private final CapabilityDispatcher capabilityDispatcher;
@@ -63,6 +64,7 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
         this.matcher = matcher;
         this.serializer = serializer;
         this.categoryTypes = Lists.newArrayList(categoryTypes);
+        this.storageWrapperCapabilities = Lists.newArrayList();
         this.storageWrapperHandler = Maps.newIdentityHashMap();
         this.capabilityDispatcher = gatherCapabilities();
 
@@ -200,7 +202,9 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
      */
     public <S> void setStorageWrapperHandler(Capability<S> capability,
                                              IIngredientComponentStorageWrapperHandler<T, M, ? super S> storageWrapperHandler) {
-        this.storageWrapperHandler.put(capability, storageWrapperHandler);
+        if (this.storageWrapperHandler.put(capability, storageWrapperHandler) == null) {
+            this.storageWrapperCapabilities.add(capability);
+        }
     }
 
     /**
@@ -219,7 +223,7 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
      * @return All supported capabilities that have registered wrapper handlers
      */
     public Collection<Capability<?>> getStorageWrapperHandlerCapabilities() {
-        return storageWrapperHandler.keySet();
+        return this.storageWrapperCapabilities;
     }
 
     /**
