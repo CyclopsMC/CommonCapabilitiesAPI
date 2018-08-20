@@ -70,4 +70,13 @@ public class DefaultSlotlessItemHandlerWrapper implements ISlotlessItemHandler {
         }
         return ItemStack.EMPTY;
     }
+
+    @Override
+    public int getLimit() {
+        int total = 0;
+        for (int i = 0; i < itemHandler.getSlots(); i++) {
+            total += itemHandler.getSlotLimit(i);
+        }
+        return total;
+    }
 }

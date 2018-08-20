@@ -101,4 +101,13 @@ public abstract class SlotlessItemHandlerWrapper implements ISlotlessItemHandler
         if (slot < 0) return ItemStack.EMPTY;
         return itemHandler.extractItem(slot, matchStack.getCount(), simulate);
     }
+
+    @Override
+    public int getLimit() {
+        int total = 0;
+        for (int i = 0; i < itemHandler.getSlots(); i++) {
+            total += itemHandler.getSlotLimit(i);
+        }
+        return total;
+    }
 }

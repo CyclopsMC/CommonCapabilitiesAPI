@@ -85,4 +85,11 @@ public interface ISlotlessItemHandler {
     @Nonnull
     ItemStack extractItem(@Nonnull ItemStack matchStack, int matchFlags, boolean simulate);
 
+    /**
+     * Retrieves the total item stack count allowed to exist in this handler.
+     *
+     * @return The maximum item count allowed in the handler.
+     */
+    int getLimit();
+
 }
