@@ -83,6 +83,10 @@ public interface IIngredientComponentStorage<T, M> extends Iterable<T> {
      * Internally, ingredients can be combined and matched in any way.
      * For example, an exact match could be produced by combining several ingredients.
      *
+     * If the primary quantifier (as identified by {@link IngredientComponent#getPrimaryQuantifier()})
+     * is NOT part of the match condition, then the quantity of the given prototype MUST be interpreted
+     * as the maximum quantity that must be extracted.
+     *
      * @param prototype      The ingredient to search for.
      * @param matchCondition The flags to compare the given prototype
      *                       by according to {@link IngredientComponent#getMatcher()}.

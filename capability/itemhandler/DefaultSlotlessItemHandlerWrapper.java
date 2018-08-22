@@ -56,9 +56,8 @@ public class DefaultSlotlessItemHandlerWrapper implements ISlotlessItemHandler {
     @Override
     @Nonnull
     public ItemStack extractItem(@Nonnull ItemStack matchStack, int matchFlags, boolean simulate) {
-        boolean compareStackSize = (matchFlags & ItemMatch.STACKSIZE) > 0;
         for (int i = 0; i < itemHandler.getSlots(); i++) {
-            int amount = compareStackSize ? matchStack.getCount() : matchStack.getMaxStackSize();
+            int amount = matchStack.getCount();
             ItemStack tempItemStack;
             if (simulate || (!(tempItemStack = itemHandler.extractItem(i, amount, true)).isEmpty()
                     && ItemMatch.areItemStacksEqual(matchStack, tempItemStack, matchFlags))) {

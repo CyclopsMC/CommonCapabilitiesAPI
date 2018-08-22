@@ -71,9 +71,10 @@ public interface ISlotlessItemHandler {
     /**
      * Extract an ItemStack matching the given stack from the item handler.
      * If nothing is extracted, otherwise it's stack size must not be greater than the itemstacks getMaxStackSize()
-     * Note: the returned ItemStack stacksize could be different (and even greater) than the matchStack
-     * if the stacksize is ignored according to the matchFlags, this is different from the semantics
-     * of {@link net.minecraftforge.items.IItemHandler#extractItem(int, int, boolean)}.
+     *
+     * If the stacksize is ignored according to the matchFlags,
+     * then the stacksize of the given matchStack MUST be interpreted
+     * as the maximum quantity that must be extracted.
      *
      * @param matchStack The ItemStack to search for.
      * @param matchFlags The flags to compare the given matchStack by according to {@link ItemMatch}.
