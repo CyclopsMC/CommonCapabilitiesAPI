@@ -28,6 +28,12 @@ public interface IIngredientMatcher<T, M> extends Comparator<T> {
     public M getExactMatchCondition();
 
     /**
+     * @return The match condition that is used to match instances exactly based on a prototype,
+     *         excluding the quantity.
+     */
+    public M getExactMatchNoQuantityCondition();
+
+    /**
      * Create a new match condition based on the given condition that includes the second condition.
      * @param matchCondition The match condition to start from.
      * @param with The match condition to include.
