@@ -15,7 +15,7 @@ import java.util.Iterator;
  */
 public abstract class SlotlessItemHandlerWrapper implements ISlotlessItemHandler {
 
-    private final IItemHandler itemHandler;
+    protected final IItemHandler itemHandler;
 
     public SlotlessItemHandlerWrapper(IItemHandler itemHandler) {
         this.itemHandler = itemHandler;
