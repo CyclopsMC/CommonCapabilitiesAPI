@@ -80,7 +80,7 @@ public abstract class SlotlessItemHandlerWrapper implements ISlotlessItemHandler
     @Override
     @Nonnull
     public ItemStack insertItem(@Nonnull ItemStack stack, boolean simulate) {
-        int slot = getNonFullSlotWithItemStack(stack, ItemMatch.DAMAGE | ItemMatch.NBT);
+        int slot = getNonFullSlotWithItemStack(stack, ItemMatch.ITEM | ItemMatch.DAMAGE | ItemMatch.NBT);
         if (slot < 0) slot = getEmptySlot();
         if (slot < 0) return stack;
         return itemHandler.insertItem(slot, stack, simulate);
