@@ -32,7 +32,8 @@ import java.util.Objects;
  * @param <M> The matching condition parameter, may be Void. Instances MUST properly implement the equals method.
  * @author rubensworks
  */
-public final class IngredientComponent<T, M> implements IForgeRegistryEntry<IngredientComponent<?, ?>> {
+public final class IngredientComponent<T, M> implements IForgeRegistryEntry<IngredientComponent<?, ?>>,
+        Comparable<IngredientComponent<?, ?>> {
 
     public static final IForgeRegistry<IngredientComponent<?, ?>> REGISTRY = (IForgeRegistry) GameRegistry
             .findRegistry(IngredientComponent.class);
@@ -263,5 +264,10 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
 
         // Otherwise, fail
         return null;
+    }
+
+    @Override
+    public int compareTo(IngredientComponent<?, ?> that) {
+        return this.getName().compareTo(that.getName());
     }
 }

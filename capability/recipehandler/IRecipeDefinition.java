@@ -25,7 +25,7 @@ import java.util.Set;
  *
  * @author rubensworks
  */
-public interface IRecipeDefinition {
+public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
 
     /**
      * @return The input ingredient component types.

@@ -128,4 +128,12 @@ public interface IIngredientMatcher<T, M> extends Comparator<T> {
      */
     public long getMaximumQuantity();
 
+    /**
+     * Compare two conditions with each other.
+     * @param a A first condition.
+     * @param b A second condition.
+     * @return The comparison result.
+     */
+    public int conditionCompare(M a, M b);
+
 }

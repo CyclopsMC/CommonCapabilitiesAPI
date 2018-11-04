@@ -61,4 +61,20 @@ public class PrototypedIngredient<T, M> implements IPrototypedIngredient<T, M> {
                 + "; condition: " + condition.toString()
                 + "]";
     }
+
+    @Override
+    public int compareTo(IPrototypedIngredient<?, ?> that) {
+        int compComp = this.getComponent().compareTo(that.getComponent());
+        if (compComp != 0) {
+            return compComp;
+        }
+
+        IIngredientMatcher<T, M> matcher = this.getComponent().getMatcher();
+        int compProt = matcher.compare(this.getPrototype(), (T) that.getPrototype());
+        if (compProt != 0) {
+            return compProt;
+        }
+
+        return matcher.conditionCompare(this.getCondition(), (M) that.getCondition());
+    }
 }

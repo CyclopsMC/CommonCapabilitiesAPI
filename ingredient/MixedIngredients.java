@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.cyclops.commoncapabilities.api.capability.recipehandler.IRecipeDefinition;
+import org.cyclops.cyclopscore.helper.CollectionHelpers;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -116,5 +117,25 @@ public class MixedIngredients implements IMixedIngredients {
             ingredients.put(component, instances);
         }
         return new MixedIngredients(ingredients);
+    }
+
+    @Override
+    public int compareTo(IMixedIngredients that) {
+        // Compare input components
+        int compComp = CollectionHelpers.compareCollection(this.getComponents(), that.getComponents());
+        if (compComp != 0) {
+            return compComp;
+        }
+
+        // Compare instances
+        for (IngredientComponent component : getComponents()) {
+            int compInstance = CollectionHelpers.compareCollection(
+                    this.getInstances(component), that.getInstances(component), component.getMatcher());
+            if (compInstance != 0) {
+                return compInstance;
+            }
+        }
+
+        return 0;
     }
 }

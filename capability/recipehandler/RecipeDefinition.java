@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients;
 import org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
+import org.cyclops.cyclopscore.helper.CollectionHelpers;
 
 import java.util.Collections;
 import java.util.List;
@@ -103,5 +104,41 @@ public class RecipeDefinition implements IRecipeDefinition {
         List<List<IPrototypedIngredient<T, M>>> ingredients = Lists.newArrayList();
         ingredients.add(ingredient);
         return ofIngredients(component, ingredients, output);
+    }
+
+    @Override
+    public int compareTo(IRecipeDefinition that) {
+        // Compare output
+        int compOutput = this.getOutput().compareTo(that.getOutput());
+        if (compOutput != 0) {
+            return compOutput;
+        }
+
+        // Compare input components
+        int compComp = CollectionHelpers.compareCollection(this.getInputComponents(), that.getInputComponents());
+        if (compComp != 0) {
+            return compComp;
+        }
+
+        // Compare input instances
+        for (IngredientComponent component : getInputComponents()) {
+            List<List<IPrototypedIngredient>> thisInputs = this.getInputs(component);
+            List<List<IPrototypedIngredient>> thatInputs = that.getInputs(component);
+
+            if (thisInputs.size() != thatInputs.size()) {
+                return thisInputs.size() - thatInputs.size();
+            }
+
+            Object[] aArray = thisInputs.toArray();
+            Object[] bArray = thatInputs.toArray();
+            for (int i = 0; i < aArray.length; i++) {
+                int compCol = CollectionHelpers.compareCollection((List<IPrototypedIngredient>) aArray[i], (List<IPrototypedIngredient>) bArray[i]);
+                if (compCol != 0) {
+                    return compCol;
+                }
+            }
+        }
+
+        return 0;
     }
 }

@@ -9,7 +9,7 @@ package org.cyclops.commoncapabilities.api.ingredient;
  * @param <M> The matching condition parameter, may be Void.
  * @author rubensworks
  */
-public interface IPrototypedIngredient<T, M> {
+public interface IPrototypedIngredient<T, M> extends Comparable<IPrototypedIngredient<?, ?>> {
 
     /**
      * @return The type of ingredient component this prototype exists for.

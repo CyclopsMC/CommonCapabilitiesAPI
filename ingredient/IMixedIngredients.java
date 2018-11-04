@@ -15,7 +15,7 @@ import java.util.Set;
  * A collection of ingredient instances of different types.
  * @author rubensworks
  */
-public interface IMixedIngredients {
+public interface IMixedIngredients extends Comparable<IMixedIngredients> {
 
     /**
      * @return The ingredient component types.
