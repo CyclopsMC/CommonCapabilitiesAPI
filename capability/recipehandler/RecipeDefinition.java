@@ -6,7 +6,7 @@ import com.google.common.collect.Sets;
 import org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients;
 import org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
-import org.cyclops.cyclopscore.helper.CollectionHelpers;
+import org.cyclops.commoncapabilities.api.ingredient.MixedIngredients;
 
 import java.util.Collections;
 import java.util.List;
@@ -115,7 +115,7 @@ public class RecipeDefinition implements IRecipeDefinition {
         }
 
         // Compare input components
-        int compComp = CollectionHelpers.compareCollection(this.getInputComponents(), that.getInputComponents());
+        int compComp = MixedIngredients.compareCollection(this.getInputComponents(), that.getInputComponents());
         if (compComp != 0) {
             return compComp;
         }
@@ -132,7 +132,7 @@ public class RecipeDefinition implements IRecipeDefinition {
             Object[] aArray = thisInputs.toArray();
             Object[] bArray = thatInputs.toArray();
             for (int i = 0; i < aArray.length; i++) {
-                int compCol = CollectionHelpers.compareCollection((List<IPrototypedIngredient>) aArray[i], (List<IPrototypedIngredient>) bArray[i]);
+                int compCol = MixedIngredients.compareCollection((List<IPrototypedIngredient>) aArray[i], (List<IPrototypedIngredient>) bArray[i]);
                 if (compCol != 0) {
                     return compCol;
                 }
