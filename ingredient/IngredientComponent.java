@@ -10,10 +10,14 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityDispatcher;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.RegistryBuilder;
 import org.cyclops.commoncapabilities.api.ingredient.capability.AttachCapabilitiesEventIngredientComponent;
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorage;
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorageHandler;
@@ -32,11 +36,20 @@ import java.util.Objects;
  * @param <M> The matching condition parameter, may be Void. Instances MUST properly implement the equals method.
  * @author rubensworks
  */
+@Mod.EventBusSubscriber
 public final class IngredientComponent<T, M> implements IForgeRegistryEntry<IngredientComponent<?, ?>>,
         Comparable<IngredientComponent<?, ?>> {
 
     public static final IForgeRegistry<IngredientComponent<?, ?>> REGISTRY = (IForgeRegistry) GameRegistry
             .findRegistry(IngredientComponent.class);
+
+    @SubscribeEvent
+    public static void onRegistriesCreate(RegistryEvent.NewRegistry event) {
+        new RegistryBuilder<IngredientComponent<?, ?>>()
+                .setName(new ResourceLocation("commoncapabilities", "registry:recipecomponents"))
+                .setType((Class<IngredientComponent<?, ?>>) (Class) IngredientComponent.class)
+                .create();
+    }
 
     @GameRegistry.ObjectHolder("minecraft:itemstack")
     public static final IngredientComponent<ItemStack, Integer> ITEMSTACK = null;
