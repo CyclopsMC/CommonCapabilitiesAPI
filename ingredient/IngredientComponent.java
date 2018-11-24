@@ -36,16 +36,15 @@ import java.util.Objects;
  * @param <M> The matching condition parameter, may be Void. Instances MUST properly implement the equals method.
  * @author rubensworks
  */
-@Mod.EventBusSubscriber
+@Mod.EventBusSubscriber(modid = "commoncapabilities")
 public final class IngredientComponent<T, M> implements IForgeRegistryEntry<IngredientComponent<?, ?>>,
         Comparable<IngredientComponent<?, ?>> {
 
-    public static final IForgeRegistry<IngredientComponent<?, ?>> REGISTRY = (IForgeRegistry) GameRegistry
-            .findRegistry(IngredientComponent.class);
+    public static IForgeRegistry<IngredientComponent<?, ?>> REGISTRY;
 
     @SubscribeEvent
     public static void onRegistriesCreate(RegistryEvent.NewRegistry event) {
-        new RegistryBuilder<IngredientComponent<?, ?>>()
+        REGISTRY = new RegistryBuilder<IngredientComponent<?, ?>>()
                 .setName(new ResourceLocation("commoncapabilities", "registry:recipecomponents"))
                 .setType((Class<IngredientComponent<?, ?>>) (Class) IngredientComponent.class)
                 .create();
