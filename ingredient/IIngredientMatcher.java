@@ -136,4 +136,12 @@ public interface IIngredientMatcher<T, M> extends Comparator<T> {
      */
     public int conditionCompare(M a, M b);
 
+    /**
+     * Return the localized name of the given instance.
+     * This should not include the instance quantity.
+     * @param instance An instance.
+     * @return The localized name of the given instance.
+     */
+    public String localize(T instance);
+
 }
