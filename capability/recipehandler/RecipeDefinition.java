@@ -3,6 +3,7 @@ package org.cyclops.commoncapabilities.api.capability.recipehandler;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.cyclops.commoncapabilities.api.ingredient.IIngredientMatcher;
 import org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients;
 import org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
@@ -62,7 +63,11 @@ public class RecipeDefinition implements IRecipeDefinition {
 
     @Override
     public int hashCode() {
-        return 578 | inputs.hashCode() << 2 | output.hashCode();
+        int inputsHash = 333;
+        for (List<List<IPrototypedIngredient<?, ?>>> values : inputs.values()) {
+            inputsHash |= values.hashCode();
+        }
+        return 578 | inputsHash << 2 | output.hashCode();
     }
 
     @Override
