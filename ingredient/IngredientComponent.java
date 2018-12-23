@@ -60,6 +60,8 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     @CapabilityInject(IIngredientComponentStorageHandler.class)
     private static Capability<IIngredientComponentStorageHandler> CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLER = null;
 
+    private static Map<Capability<?>, IngredientComponent<?, ?>> STORAGE_WRAPPER_CAPABILITIES_COMPONENTS = Maps.newIdentityHashMap();
+
     private final IIngredientMatcher<T, M> matcher;
     private final IIngredientSerializer<T, M> serializer;
     private final List<IngredientComponentCategoryType<T, M, ?>> categoryTypes;
@@ -217,6 +219,12 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
                                              IIngredientComponentStorageWrapperHandler<T, M, ? super S> storageWrapperHandler) {
         if (this.storageWrapperHandler.put(capability, storageWrapperHandler) == null) {
             this.storageWrapperCapabilities.add(capability);
+            IngredientComponent<?, ?> previousValue = IngredientComponent.STORAGE_WRAPPER_CAPABILITIES_COMPONENTS.put(capability, this);
+            if (previousValue != null) {
+                throw new IllegalStateException(String.format(
+                        "Tried registering a storage capability (%s) for %s that was already registered to %s",
+                        capability.getName(), this, previousValue));
+            }
         }
     }
 
@@ -237,6 +245,16 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
      */
     public Collection<Capability<?>> getStorageWrapperHandlerCapabilities() {
         return this.storageWrapperCapabilities;
+    }
+
+    /**
+     * Get the ingredient component that was attached to the given storage capability.
+     * @param capability A storage capability.
+     * @return The attached ingredient component, or null.
+     */
+    @Nullable
+    public static IngredientComponent<?, ?> getIngredientComponentForStorageCapability(Capability<?> capability) {
+        return IngredientComponent.STORAGE_WRAPPER_CAPABILITIES_COMPONENTS.get(capability);
     }
 
     /**
