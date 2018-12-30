@@ -35,7 +35,7 @@ public class RecipeDefinition implements IRecipeDefinition {
     }
 
     @Override
-    public <T, R, M> List<List<IPrototypedIngredient<T, M>>> getInputs(IngredientComponent<T, M> ingredientComponent) {
+    public <T, M> List<List<IPrototypedIngredient<T, M>>> getInputs(IngredientComponent<T, M> ingredientComponent) {
         return (List<List<IPrototypedIngredient<T, M>>>) (List) inputs.getOrDefault(ingredientComponent, Collections.emptyList());
     }
 

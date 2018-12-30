@@ -40,11 +40,10 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
      *
      * @param ingredientComponent An ingredient component type.
      * @param <T> The instance type.
-     * @param <R> The recipe target type, may be Void.
      * @param <M> The matching condition parameter, may be Void.
      * @return Input prototypes.
      */
-    public <T, R, M> List<List<IPrototypedIngredient<T, M>>> getInputs(IngredientComponent<T, M> ingredientComponent);
+    public <T, M> List<List<IPrototypedIngredient<T, M>>> getInputs(IngredientComponent<T, M> ingredientComponent);
 
     /**
      * @return The output ingredients.
