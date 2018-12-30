@@ -25,6 +25,14 @@ public class MixedIngredients implements IMixedIngredients {
 
     public MixedIngredients(Map<IngredientComponent<?, ?>, List<?>> ingredients) {
         this.ingredients = ingredients;
+
+        // Ensure that the lists are non-empty
+        for (Map.Entry<IngredientComponent<?, ?>, List<?>> entry : this.ingredients.entrySet()) {
+            if (entry.getValue().isEmpty()) {
+                throw new IllegalArgumentException(String.format("Invalid MixedIngredients input, empty list for %s",
+                        entry.getKey().getName()));
+            }
+        }
     }
 
     @Override
