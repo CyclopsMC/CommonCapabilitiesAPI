@@ -51,6 +51,7 @@ public interface IBlockCapabilityProvider {
      * @param pos The position at which the given block exists
      * @param facing The Side to check from:
      *   CAN BE NULL. Null is defined to represent 'internal' or 'self'
+     * @param <T> The capability type.
      * @return The requested capability. Returns null when
      *         {@link #hasCapability(IBlockState, Capability, IBlockAccess, BlockPos, EnumFacing)}} would return false.
      */

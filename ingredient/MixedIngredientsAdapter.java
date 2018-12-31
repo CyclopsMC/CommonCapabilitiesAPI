@@ -108,6 +108,7 @@ public abstract class MixedIngredientsAdapter implements IMixedIngredients {
      * Compare two collections with a custom comparator.
      * @param a A first collection.
      * @param b A second collection.
+     * @param comparator The element comparator.
      * @param <T> The type of the elements.
      * @return The comparator value.
      */

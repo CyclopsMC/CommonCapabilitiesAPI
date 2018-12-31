@@ -33,6 +33,8 @@ public interface IPrototypedIngredient<T, M> extends Comparable<IPrototypedIngre
     /**
      * Deserialize an ingredient to NBT.
      * @param prototypedIngredient Ingredient.
+     * @param <T> The instance type.
+     * @param <M> The matching condition parameter, may be Void.
      * @return An NBT representation of the given ingredient.
      */
     public static <T, M> NBTTagCompound serialize(IPrototypedIngredient<T, M> prototypedIngredient) {
