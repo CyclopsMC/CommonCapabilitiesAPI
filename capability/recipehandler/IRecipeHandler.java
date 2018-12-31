@@ -36,7 +36,7 @@ public interface IRecipeHandler {
      * @param size      A certain length of recipe component instances.
      * @return If the given size of recipe component instances can be used by this recipe handler.
      */
-    public boolean isValidSizeInput(IngredientComponent component, int size);
+    public boolean isValidSizeInput(IngredientComponent<?, ?> component, int size);
 
     /**
      * @return Recipes that are available through this handler, this list is not necessarily exhaustive, but SHOULD be.
