@@ -45,7 +45,7 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     @SubscribeEvent
     public static void onRegistriesCreate(RegistryEvent.NewRegistry event) {
         REGISTRY = new RegistryBuilder<IngredientComponent<?, ?>>()
-                .setName(new ResourceLocation("commoncapabilities", "registry:recipecomponents"))
+                .setName(new ResourceLocation("commoncapabilities", "registry:ingredientcomponents"))
                 .setType((Class<IngredientComponent<?, ?>>) (Class) IngredientComponent.class)
                 .create();
     }
