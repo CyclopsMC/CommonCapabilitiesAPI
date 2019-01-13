@@ -18,10 +18,10 @@ import java.util.Iterator;
  * Note: The storage provider MUST ensure deterministic behaviour for extraction and insertion.
  *       For example, the three first returned ingredients hereafter must equal each other.
  *       <pre>
- *          ingredient1 = insertIngredient(myIngredient, true);
- *          ingredient2 = insertIngredient(myIngredient, true);
- *          ingredient3 = insertIngredient(myIngredient, false);
- *          ingredient4 = insertIngredient(myIngredient, true); // Can be different again
+ *          ingredient1 = insert(myIngredient, true);
+ *          ingredient2 = insert(myIngredient, true);
+ *          ingredient3 = insert(myIngredient, false);
+ *          ingredient4 = insert(myIngredient, true); // Can be different again
  *       </pre>
  *       The same applies to extraction.
  *
