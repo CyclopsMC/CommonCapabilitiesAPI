@@ -70,7 +70,7 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     private final IngredientComponentCategoryType<T, M, ?> primaryQuantifier;
     private final CapabilityDispatcher capabilityDispatcher;
     private ResourceLocation name;
-    private String unlocalizedName;
+    private String translationKey;
 
     public IngredientComponent(ResourceLocation name, IIngredientMatcher<T, M> matcher,
                                IIngredientSerializer<T, M> serializer,
@@ -159,16 +159,16 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
         return capabilityDispatcher == null ? null : capabilityDispatcher.getCapability(capability, null);
     }
 
-    public IngredientComponent<T, M> setUnlocalizedName(String unlocalizedName) {
-        this.unlocalizedName = unlocalizedName;
+    public IngredientComponent<T, M> setTranslationKey(String translationKey) {
+        this.translationKey = translationKey;
         return this;
     }
 
     /**
      * @return The unlocalized name.
      */
-    public String getUnlocalizedName() {
-        return unlocalizedName;
+    public String getTranslationKey() {
+        return translationKey;
     }
 
     /**

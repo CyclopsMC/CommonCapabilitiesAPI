@@ -6,11 +6,8 @@ import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ResourceLocation;
-import org.cyclops.commoncapabilities.api.ingredient.IIngredientSerializer;
 import org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients;
-import org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
-import org.cyclops.commoncapabilities.api.ingredient.PrototypedIngredient;
 
 import java.util.List;
 import java.util.Map;
@@ -43,7 +40,7 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
      * @param <M> The matching condition parameter, may be Void.
      * @return Input prototypes.
      */
-    public <T, M> List<List<IPrototypedIngredient<T, M>>> getInputs(IngredientComponent<T, M> ingredientComponent);
+    public <T, M> List<IPrototypedIngredientAlternatives<T, M>> getInputs(IngredientComponent<T, M> ingredientComponent);
 
     /**
      * @return The output ingredients.
@@ -60,16 +57,12 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
         NBTTagCompound inputTag = new NBTTagCompound();
         for (IngredientComponent<?, ?> component : recipe.getInputComponents()) {
             NBTTagList instances = new NBTTagList();
-            IIngredientSerializer serializer = component.getSerializer();
-            for (Object ingredient : recipe.getInputs(component)) {
-                NBTTagList prototypes = new NBTTagList();
-                for (IPrototypedIngredient prototypedIngredient : (List<IPrototypedIngredient>) ingredient) {
-                    NBTTagCompound prototypeTag = new NBTTagCompound();
-                    prototypeTag.setTag("prototype", serializer.serializeInstance(prototypedIngredient.getPrototype()));
-                    prototypeTag.setTag("condition", serializer.serializeCondition(prototypedIngredient.getCondition()));
-                    prototypes.appendTag(prototypeTag);
-                }
-                instances.appendTag(prototypes);
+            for (IPrototypedIngredientAlternatives ingredient : recipe.getInputs(component)) {
+                NBTTagCompound subTag = new NBTTagCompound();
+                IPrototypedIngredientAlternatives.ISerializer serializer = ingredient.getSerializer();
+                subTag.setTag("val", serializer.serialize(component, ingredient));
+                subTag.setByte("type", serializer.getId());
+                instances.appendTag(subTag);
             }
             inputTag.setTag(component.getRegistryName().toString(), instances);
         }
@@ -85,7 +78,7 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
      * @throws IllegalArgumentException If the given tag is invalid or does not contain data on the given recipe.
      */
     public static RecipeDefinition deserialize(NBTTagCompound tag) throws IllegalArgumentException {
-        Map<IngredientComponent<?, ?>, List<List<IPrototypedIngredient<?, ?>>>> inputs = Maps.newIdentityHashMap();
+        Map<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> inputs = Maps.newIdentityHashMap();
         if (!tag.hasKey("input")) {
             throw new IllegalArgumentException("A recipe tag did not contain a valid input tag");
         }
@@ -103,30 +96,27 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
                 throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid list of instances");
             }
             NBTTagList instancesTag = (NBTTagList) subTag;
-            IIngredientSerializer serializer = component.getSerializer();
-            List<List<IPrototypedIngredient<?, ?>>> instances = Lists.newArrayList();
+            List<IPrototypedIngredientAlternatives<?, ?>> instances = Lists.newArrayList();
             for (NBTBase instanceTag : instancesTag) {
-                if (!(instanceTag instanceof NBTTagList)) {
-                    throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid sublist of instances");
+                IPrototypedIngredientAlternatives.ISerializer alternativeSerializer;
+                NBTBase deserializeTag;
+                if (instanceTag instanceof NBTTagList) {
+                    // TODO: remove backwards compat in 1.13
+                    alternativeSerializer = PrototypedIngredientAlternativesList.SERIALIZER;
+                    deserializeTag = instanceTag;
+                } else if (instanceTag instanceof NBTTagCompound) {
+                    NBTTagCompound instanceTagCompound = (NBTTagCompound) instanceTag;
+                    byte type = instanceTagCompound.getByte("type");
+                    alternativeSerializer = IPrototypedIngredientAlternatives.SERIALIZERS.get(type);
+                    if (alternativeSerializer == null) {
+                        throw new IllegalArgumentException("Could not find a prototyped ingredient alternative serializer for id " + type);
+                    }
+                    deserializeTag = ((NBTTagCompound) instanceTag).getTag("val");
+                } else {
+                    throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid reference to instances");
                 }
-                NBTTagList prototypesTag = (NBTTagList) instanceTag;
-                List prototypes = Lists.newArrayList();
-                for (NBTBase prototypeTag : prototypesTag) {
-                    if (!(prototypeTag instanceof NBTTagCompound)) {
-                        throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid sublist with NBTTagCompunds");
-                    }
-                    NBTTagCompound safePrototypeTag = (NBTTagCompound) prototypeTag;
-                    if (!safePrototypeTag.hasKey("prototype")) {
-                        throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid sublist with a prototype entry");
-                    }
-                    if (!safePrototypeTag.hasKey("condition")) {
-                        throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid sublist with a condition entry");
-                    }
-                    prototypes.add(new PrototypedIngredient(component,
-                            serializer.deserializeInstance(safePrototypeTag.getTag("prototype")),
-                            serializer.deserializeCondition(safePrototypeTag.getTag("condition"))));
-                }
-                instances.add(prototypes);
+                IPrototypedIngredientAlternatives alternatives = alternativeSerializer.deserialize(component, deserializeTag);
+                instances.add(alternatives);
             }
             inputs.put(component, instances);
         }

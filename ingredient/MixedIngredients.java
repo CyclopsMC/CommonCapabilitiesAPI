@@ -72,7 +72,7 @@ public class MixedIngredients extends MixedIngredientsAdapter {
             IIngredientMatcher<?, ?> matcher = component.getMatcher();
             List<?> instances = recipe.getInputs(component).stream()
                     .map(ingredient -> {
-                        IPrototypedIngredient<?, ?> firstIngredient = Iterables.getFirst(ingredient, null);
+                        IPrototypedIngredient<?, ?> firstIngredient = Iterables.getFirst(ingredient.getAlternatives(), null);
                         if (firstIngredient == null) {
                             return matcher.getEmptyInstance();
                         }

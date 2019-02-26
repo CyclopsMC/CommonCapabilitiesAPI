@@ -3,7 +3,6 @@ package org.cyclops.commoncapabilities.api.capability.recipehandler;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.cyclops.commoncapabilities.api.ingredient.IIngredientMatcher;
 import org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients;
 import org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
@@ -13,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A recipe definition based on maps.
@@ -20,10 +20,10 @@ import java.util.Set;
  */
 public class RecipeDefinition implements IRecipeDefinition {
 
-    private final Map<IngredientComponent<?, ?>, List<List<IPrototypedIngredient<?, ?>>>> inputs;
+    private final Map<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> inputs;
     private final IMixedIngredients output;
 
-    public RecipeDefinition(Map<IngredientComponent<?, ?>, List<List<IPrototypedIngredient<?, ?>>>> inputs,
+    public RecipeDefinition(Map<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> inputs,
                             IMixedIngredients output) {
         this.inputs = inputs;
         this.output = output;
@@ -35,8 +35,8 @@ public class RecipeDefinition implements IRecipeDefinition {
     }
 
     @Override
-    public <T, M> List<List<IPrototypedIngredient<T, M>>> getInputs(IngredientComponent<T, M> ingredientComponent) {
-        return (List<List<IPrototypedIngredient<T, M>>>) (List) inputs.getOrDefault(ingredientComponent, Collections.emptyList());
+    public <T, M> List<IPrototypedIngredientAlternatives<T, M>> getInputs(IngredientComponent<T, M> ingredientComponent) {
+        return (List<IPrototypedIngredientAlternatives<T, M>>) (List) inputs.getOrDefault(ingredientComponent, Collections.emptyList());
     }
 
     @Override
@@ -64,7 +64,7 @@ public class RecipeDefinition implements IRecipeDefinition {
     @Override
     public int hashCode() {
         int inputsHash = 333;
-        for (List<List<IPrototypedIngredient<?, ?>>> values : inputs.values()) {
+        for (List<IPrototypedIngredientAlternatives<?, ?>> values : inputs.values()) {
             inputsHash |= values.hashCode();
         }
         return 578 | inputsHash << 2 | output.hashCode();
@@ -73,6 +73,24 @@ public class RecipeDefinition implements IRecipeDefinition {
     @Override
     public String toString() {
         return "[RecipeDefinition input: " + inputs.toString() + "; output: " + output.toString() + "]";
+    }
+
+    /**
+     * Create a new recipe definition for a single component type input and a list of alternatives.
+     * @param component A component type.
+     * @param alternatives The alternatives for the given component type.
+     * @param output The recipe output.
+     * @param <T> The instance type.
+     * @param <R> The recipe target type, may be Void.
+     * @param <M> The matching condition parameter, may be Void.
+     * @return A new recipe definition.
+     */
+    public static <T, R, M> RecipeDefinition ofAlternatives(IngredientComponent<T, M> component,
+                                                           List<IPrototypedIngredientAlternatives<T, M>> alternatives,
+                                                           IMixedIngredients output) {
+        Map<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> inputs = Maps.newIdentityHashMap();
+        inputs.put(component, (List) alternatives);
+        return new RecipeDefinition(inputs, output);
     }
 
     /**
@@ -88,9 +106,9 @@ public class RecipeDefinition implements IRecipeDefinition {
     public static <T, R, M> RecipeDefinition ofIngredients(IngredientComponent<T, M> component,
                                                            List<List<IPrototypedIngredient<T, M>>> ingredients,
                                                            IMixedIngredients output) {
-        Map<IngredientComponent<?, ?>, List<List<IPrototypedIngredient<?, ?>>>> inputs = Maps.newIdentityHashMap();
-        inputs.put(component, (List) ingredients);
-        return new RecipeDefinition(inputs, output);
+        return ofAlternatives(component, ingredients.stream()
+                .map(PrototypedIngredientAlternativesList::new)
+                .collect(Collectors.toList()), output);
     }
 
     /**
