@@ -2,6 +2,7 @@ package org.cyclops.commoncapabilities.api.capability.itemhandler;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
+import org.cyclops.commoncapabilities.ingredient.NBTBaseComparator;
 
 /**
  * Item matching flags to be used in {@link ISlotlessItemHandler}.
@@ -49,7 +50,17 @@ public final class ItemMatch {
                         && (!item || a.getItem() == b.getItem())
                         && (!damage || a.getItemDamage() == b.getItemDamage())
                         && (!stackSize || a.getCount() == b.getCount())
-                        && (!nbt || ItemStack.areItemStackTagsEqual(a, b)));
+                        && (!nbt || areItemStackTagsEqual(a, b)));
+    }
+
+    public static boolean areItemStackTagsEqual(ItemStack a, ItemStack b) {
+        if (a.getTagCompound() == null && b.getTagCompound() != null) {
+            return false;
+        } else {
+            return (a.getTagCompound() == null
+                    || NBTBaseComparator.INSTANCE.compare(a.getTagCompound(), b.getTagCompound()) == 0);
+            // We don't include a.areCapsCompatible(b), because we expect that differing caps have different NBT tags.
+        }
     }
 
 }
