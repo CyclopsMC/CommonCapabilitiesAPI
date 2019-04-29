@@ -4,20 +4,20 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
+import net.minecraft.util.NonNullList;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.oredict.OreDictionary;
 import org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 import org.cyclops.commoncapabilities.api.ingredient.PrototypedIngredient;
-import org.cyclops.cyclopscore.helper.ItemStackHelpers;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -51,6 +51,22 @@ public class PrototypedIngredientAlternativesItemStackOredictionary implements I
         this.matchCondition = matchCondition;
     }
 
+    /**
+     * Get a list of variants from the given stack if its damage value is the wildcard value,
+     * otherwise the list will only contain the given itemstack.
+     * @param itemStack The itemstack
+     * @return The list of variants.
+     */
+    public static List<ItemStack> getItemStackVariants(ItemStack itemStack) {
+        NonNullList<ItemStack> output = NonNullList.create();
+        if(itemStack.getItemDamage() == OreDictionary.WILDCARD_VALUE) {
+            itemStack.getItem().getSubItems(CreativeTabs.SEARCH, output);
+        } else {
+            output.add(itemStack);
+        }
+        return output;
+    }
+
     public Collection<IPrototypedIngredient<ItemStack, Integer>> getAlternatives() {
         return this.keys.stream().flatMap((key) -> {
             try {
@@ -58,7 +74,7 @@ public class PrototypedIngredientAlternativesItemStackOredictionary implements I
             } catch (ExecutionException e) {
                 return Stream.empty();
             }
-        }).flatMap(itemStack -> ItemStackHelpers.getVariants(itemStack).stream())
+        }).flatMap(itemStack -> getItemStackVariants(itemStack).stream())
                 .map(itemStack -> new PrototypedIngredient<>(IngredientComponent.ITEMSTACK, itemStack, this.matchCondition))
                 .collect(Collectors.toList());
     }
