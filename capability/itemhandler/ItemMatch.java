@@ -61,7 +61,8 @@ public final class ItemMatch {
     }
 
     public static boolean areItemStackTagsEqual(ItemStack a, ItemStack b) {
-        if (a.getTagCompound() == null && b.getTagCompound() != null) {
+        if ((a.getTagCompound() == null && b.getTagCompound() != null)
+                || a.getTagCompound() != null && b.getTagCompound() == null) {
             return false;
         } else {
             return (a.getTagCompound() == null || NBT_COMPARATOR.compare(a.getTagCompound(), b.getTagCompound()) == 0);
