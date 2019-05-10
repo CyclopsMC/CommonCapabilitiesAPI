@@ -31,6 +31,22 @@ public interface IMixedIngredients extends Comparable<IMixedIngredients> {
     public <T> List<T> getInstances(IngredientComponent<T, ?> ingredientComponent);
 
     /**
+     * Get the first non-empty instance of the given type.
+     * @param ingredientComponent An ingredient component type.
+     * @param <T> The instance type.
+     * @return The first non-empty instance, or the empty instance if none could be found.
+     */
+    public default <T> T getFirstNonEmpty(IngredientComponent<T, ?> ingredientComponent) {
+        IIngredientMatcher<T, ?> matcher = ingredientComponent.getMatcher();
+        for (T instance : getInstances(ingredientComponent)) {
+            if (!matcher.isEmpty(instance)) {
+                return instance;
+            }
+        }
+        return matcher.getEmptyInstance();
+    }
+
+    /**
      * Deserialize ingredients to NBT.
      * @param ingredients Ingredients.
      * @return An NBT representation of the given ingredients.
