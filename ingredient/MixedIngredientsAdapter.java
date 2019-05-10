@@ -27,6 +27,8 @@ public abstract class MixedIngredientsAdapter implements IMixedIngredients {
                                 return false;
                             }
                         }
+                    } else {
+                        return false;
                     }
                 }
                 return true;
