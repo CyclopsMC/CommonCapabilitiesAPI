@@ -7,6 +7,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ResourceLocation;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,6 +45,56 @@ public interface IMixedIngredients extends Comparable<IMixedIngredients> {
             }
         }
         return matcher.getEmptyInstance();
+    }
+
+    /**
+     * Check if at least all ingredients from the supplied mixed ingredients are contained in this mixed ingredients.
+     * This mixed ingredients could contain more ingredients.
+     * @param that The ingredients to look for.
+     * @return If at least all ingredients in that are contained in this.
+     */
+    public default boolean containsAll(IMixedIngredients that) {
+        if (!this.getComponents().containsAll(that.getComponents())) {
+            return false;
+        }
+
+        for (IngredientComponent<?, ?> component : that.getComponents()) {
+            List<?> thisInstances = Lists.newArrayList(this.getInstances(component));
+            List<?> thatInstances = that.getInstances(component);
+            IIngredientMatcher matcher = component.getMatcher();
+
+            for (Object thatInstance : thatInstances) {
+                boolean found = false;
+                Iterator<?> it = thisInstances.iterator();
+                while (it.hasNext() && !found) {
+                    if (matcher.matchesExactly(thatInstance, it.next())) {
+                        found = true;
+                        it.remove();
+                    }
+                }
+
+                if (!found) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @return If at least one non-empty ingredient is present.
+     */
+    public default boolean isEmpty() {
+        for (IngredientComponent<?, ?> component : getComponents()) {
+            IIngredientMatcher matcher = component.getMatcher();
+            for (Object instance : getInstances(component)) {
+                if (!matcher.isEmpty(instance)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**
