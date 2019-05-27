@@ -145,8 +145,8 @@ public class RecipeDefinition implements IRecipeDefinition {
 
         // Compare input instances
         for (IngredientComponent component : getInputComponents()) {
-            List<List<IPrototypedIngredient>> thisInputs = this.getInputs(component);
-            List<List<IPrototypedIngredient>> thatInputs = that.getInputs(component);
+            List<IPrototypedIngredientAlternatives<?, ?>> thisInputs = this.getInputs(component);
+            List<IPrototypedIngredientAlternatives<?, ?>> thatInputs = that.getInputs(component);
 
             if (thisInputs.size() != thatInputs.size()) {
                 return thisInputs.size() - thatInputs.size();
@@ -155,7 +155,10 @@ public class RecipeDefinition implements IRecipeDefinition {
             Object[] aArray = thisInputs.toArray();
             Object[] bArray = thatInputs.toArray();
             for (int i = 0; i < aArray.length; i++) {
-                int compCol = MixedIngredients.compareCollection((List<IPrototypedIngredient>) aArray[i], (List<IPrototypedIngredient>) bArray[i]);
+                int compCol = MixedIngredients.compareCollection(
+                        ((IPrototypedIngredientAlternatives) aArray[i]).getAlternatives(),
+                        ((IPrototypedIngredientAlternatives) bArray[i]).getAlternatives()
+                );
                 if (compCol != 0) {
                     return compCol;
                 }
