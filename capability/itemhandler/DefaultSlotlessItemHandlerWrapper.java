@@ -19,21 +19,25 @@ public class DefaultSlotlessItemHandlerWrapper implements ISlotlessItemHandler {
         this.itemHandler = itemHandler;
     }
 
+    public IItemHandler getItemHandler() {
+        return itemHandler;
+    }
+
     @Override
     public Iterator<ItemStack> getItems() {
-        return new ItemHandlerItemStackIterator(itemHandler);
+        return new ItemHandlerItemStackIterator(getItemHandler());
     }
 
     @Override
     public Iterator<ItemStack> findItems(@Nonnull ItemStack stack, int matchFlags) {
-        return new FilteredItemHandlerItemStackIterator(itemHandler, stack, matchFlags);
+        return new FilteredItemHandlerItemStackIterator(getItemHandler(), stack, matchFlags);
     }
 
     @Override
     @Nonnull
     public ItemStack insertItem(@Nonnull ItemStack stack, boolean simulate) {
-        for (int i = 0; i < itemHandler.getSlots(); i++) {
-            stack = itemHandler.insertItem(i, stack, simulate);
+        for (int i = 0; i < getItemHandler().getSlots(); i++) {
+            stack = getItemHandler().insertItem(i, stack, simulate);
             if (stack.isEmpty()) {
                 return ItemStack.EMPTY;
             }
@@ -44,6 +48,7 @@ public class DefaultSlotlessItemHandlerWrapper implements ISlotlessItemHandler {
     @Override
     @Nonnull
     public ItemStack extractItem(int amount, boolean simulate) {
+        IItemHandler itemHandler = getItemHandler();
         for (int i = 0; i < itemHandler.getSlots(); i++) {
             ItemStack itemStack = itemHandler.extractItem(i, amount, simulate);
             if (!itemStack.isEmpty()) {
@@ -56,6 +61,7 @@ public class DefaultSlotlessItemHandlerWrapper implements ISlotlessItemHandler {
     @Override
     @Nonnull
     public ItemStack extractItem(@Nonnull ItemStack matchStack, int matchFlags, boolean simulate) {
+        IItemHandler itemHandler = getItemHandler();
         for (int i = 0; i < itemHandler.getSlots(); i++) {
             int amount = matchStack.getCount();
             ItemStack tempItemStack;
@@ -72,6 +78,7 @@ public class DefaultSlotlessItemHandlerWrapper implements ISlotlessItemHandler {
 
     @Override
     public int getLimit() {
+        IItemHandler itemHandler = getItemHandler();
         int total = 0;
         for (int i = 0; i < itemHandler.getSlots(); i++) {
             total += itemHandler.getSlotLimit(i);
