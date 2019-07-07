@@ -114,7 +114,7 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
 
     @Override
     public String toString() {
-        return "[Recipe Component " + this.name + " " + hashCode() + "]";
+        return "[IngredientComponent " + this.name + " " + hashCode() + "]";
     }
 
     @Override
