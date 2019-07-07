@@ -36,7 +36,7 @@ import java.util.Objects;
  * @param <M> The matching condition parameter, may be Void. Instances MUST properly implement the equals method.
  * @author rubensworks
  */
-@Mod.EventBusSubscriber(modid = "commoncapabilities")
+@Mod.EventBusSubscriber
 public final class IngredientComponent<T, M> implements IForgeRegistryEntry<IngredientComponent<?, ?>>,
         Comparable<IngredientComponent<?, ?>> {
 
