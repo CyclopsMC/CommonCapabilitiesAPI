@@ -13,6 +13,7 @@ import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.oredict.OreDictionary;
+import org.cyclops.commoncapabilities.api.ingredient.IIngredientMatcher;
 import org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 import org.cyclops.commoncapabilities.api.ingredient.PrototypedIngredient;
@@ -45,10 +46,12 @@ public class PrototypedIngredientAlternativesItemStackOredictionary implements I
 
     private final List<String> keys;
     private final Integer matchCondition;
+    private final long quantity;
 
-    public PrototypedIngredientAlternativesItemStackOredictionary(List<String> keys, Integer matchCondition) {
+    public PrototypedIngredientAlternativesItemStackOredictionary(List<String> keys, Integer matchCondition, long quantity) {
         this.keys = keys;
         this.matchCondition = matchCondition;
+        this.quantity = quantity;
     }
 
     /**
@@ -68,6 +71,7 @@ public class PrototypedIngredientAlternativesItemStackOredictionary implements I
     }
 
     public Collection<IPrototypedIngredient<ItemStack, Integer>> getAlternatives() {
+        IIngredientMatcher<ItemStack, Integer> matcher = IngredientComponent.ITEMSTACK.getMatcher();
         return this.keys.stream().flatMap((key) -> {
             try {
                 return CACHE_OREDICT.get(key).stream();
@@ -75,6 +79,7 @@ public class PrototypedIngredientAlternativesItemStackOredictionary implements I
                 return Stream.empty();
             }
         }).flatMap(itemStack -> getItemStackVariants(itemStack).stream())
+                .map(itemStack -> matcher.withQuantity(itemStack, getQuantity()))
                 .map(itemStack -> new PrototypedIngredient<>(IngredientComponent.ITEMSTACK, itemStack, this.matchCondition))
                 .collect(Collectors.toList());
     }
@@ -99,6 +104,10 @@ public class PrototypedIngredientAlternativesItemStackOredictionary implements I
         return 1235 | inputsHash << 2;
     }
 
+    public long getQuantity() {
+        return quantity;
+    }
+
     @Override
     public String toString() {
         return "[PrototypedIngredientAlternativesList: " + getAlternatives().toString() + "]";
@@ -119,6 +128,7 @@ public class PrototypedIngredientAlternativesItemStackOredictionary implements I
             }
             tag.setTag("keys", keys);
             tag.setInteger("match", alternatives.matchCondition);
+            tag.setLong("quantity", alternatives.quantity);
             return tag;
         }
 
@@ -137,7 +147,8 @@ public class PrototypedIngredientAlternativesItemStackOredictionary implements I
                 keys.add(((NBTTagString) key).getString());
             }
             int matchCondition = tagCompound.getInteger("match");
-            return new PrototypedIngredientAlternativesItemStackOredictionary(keys, matchCondition);
+            long quantity = tagCompound.hasKey("quantity") ? tagCompound.getLong("quantity") : 1; // TODO: remove check in 1.13
+            return new PrototypedIngredientAlternativesItemStackOredictionary(keys, matchCondition, quantity);
         }
     }
 }
