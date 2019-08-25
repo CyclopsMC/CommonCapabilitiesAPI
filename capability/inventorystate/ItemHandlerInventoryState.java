@@ -4,6 +4,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 import java.util.Random;
 
@@ -58,5 +59,10 @@ public class ItemHandlerInventoryState implements IInventoryState, IItemHandler 
     @Override
     public int getSlotLimit(int slot) {
         return itemHandler.getSlotLimit(slot);
+    }
+
+    @Override
+    public boolean isItemValid(int slot, @Nonnull ItemStack itemStack) {
+        return itemHandler.isItemValid(slot, itemStack);
     }
 }

@@ -85,7 +85,7 @@ public abstract class SlotlessItemHandlerWrapper implements ISlotlessItemHandler
         ItemStack stackSimulate = stack;
 
         // First, do a simulated insertion without mutating anything.
-        PrimitiveIterator.OfInt itNonFull = getNonFullSlotsWithItemStack(stackSimulate, ItemMatch.ITEM | ItemMatch.DAMAGE | ItemMatch.NBT);
+        PrimitiveIterator.OfInt itNonFull = getNonFullSlotsWithItemStack(stackSimulate, ItemMatch.ITEM | ItemMatch.NBT);
         IntList applicableSlots = simulate ? null : new IntArrayList();
         while (itNonFull.hasNext() && !stackSimulate.isEmpty()) {
             int slot = itNonFull.nextInt();
@@ -143,7 +143,7 @@ public abstract class SlotlessItemHandlerWrapper implements ISlotlessItemHandler
                     if (!simulate) {
                         applicableSlots.add(slot);
                     }
-                } else if (ItemMatch.areItemStacksEqual(extracted, extractedAcc, ItemMatch.ITEM | ItemMatch.DAMAGE | ItemMatch.NBT)) {
+                } else if (ItemMatch.areItemStacksEqual(extracted, extractedAcc, ItemMatch.ITEM | ItemMatch.NBT)) {
                     amountSimulate -= extracted.getCount();
                     extractedAcc.grow(extracted.getCount());
                     if (!simulate) {
@@ -166,7 +166,7 @@ public abstract class SlotlessItemHandlerWrapper implements ISlotlessItemHandler
                         ItemStack extracted = itemHandler.extractItem(slot, amount, false);
                         extractedAcc = extracted.copy();
                         amount -= extracted.getCount();
-                    } else if (ItemMatch.areItemStacksEqual(extractedSimulated, extractedAcc, ItemMatch.ITEM | ItemMatch.DAMAGE | ItemMatch.NBT)) {
+                    } else if (ItemMatch.areItemStacksEqual(extractedSimulated, extractedAcc, ItemMatch.ITEM | ItemMatch.NBT)) {
                         ItemStack extracted = itemHandler.extractItem(slot, amount, false);
                         amount -= extracted.getCount();
                         extractedAcc.grow(extracted.getCount());

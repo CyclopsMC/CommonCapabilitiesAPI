@@ -1,6 +1,6 @@
 package org.cyclops.commoncapabilities.api.ingredient;
 
-import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.INBT;
 
 /**
  * An serializer for instances and condition parameters of a certain component type.
@@ -15,7 +15,7 @@ public interface IIngredientSerializer<T, M> {
      * @param instance An instance.
      * @return An NBT tag.
      */
-    public NBTBase serializeInstance(T instance);
+    public INBT serializeInstance(T instance);
 
     /**
      * Deserialize an instance from NBT.
@@ -23,14 +23,14 @@ public interface IIngredientSerializer<T, M> {
      * @return An instance.
      * @throws IllegalArgumentException If the given tag is invalid or does not contain data on the given instance.
      */
-    public T deserializeInstance(NBTBase tag) throws IllegalArgumentException;
+    public T deserializeInstance(INBT tag) throws IllegalArgumentException;
 
     /**
      * Serialize a match condition to NBT.
      * @param matchCondition A match condition.
      * @return An NBT tag.
      */
-    public NBTBase serializeCondition(M matchCondition);
+    public INBT serializeCondition(M matchCondition);
 
     /**
      * Deserialize a match condition from NBT.
@@ -38,6 +38,6 @@ public interface IIngredientSerializer<T, M> {
      * @return A match condition.
      * @throws IllegalArgumentException If the given tag is invalid or does not contain data on the given match condition.
      */
-    public M deserializeCondition(NBTBase tag) throws IllegalArgumentException;
+    public M deserializeCondition(INBT tag) throws IllegalArgumentException;
 
 }

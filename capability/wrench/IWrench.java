@@ -1,14 +1,14 @@
 package org.cyclops.commoncapabilities.api.capability.wrench;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 
 /**
  * Indicates that something can be used as wrench.
  * This must be used by targets (like blocks or entities) to determine if the thing that activated them is a wrench.
- * The target is responsible for checking if the wrench can be used for this target using {@link IWrench#canUse(EntityPlayer, WrenchTarget)}.
- * If it can be used, the target must first call {@link IWrench#beforeUse(EntityPlayer, WrenchTarget)}.
+ * The target is responsible for checking if the wrench can be used for this target using {@link IWrench#canUse(PlayerEntity, WrenchTarget)}.
+ * If it can be used, the target must first call {@link IWrench#beforeUse(PlayerEntity, WrenchTarget)}.
  * After that the target can call its own logic.
- * Finally, the target must call {@link IWrench#afterUse(EntityPlayer, WrenchTarget)}.
+ * Finally, the target must call {@link IWrench#afterUse(PlayerEntity, WrenchTarget)}.
  * @author rubensworks
  */
 public interface IWrench {
@@ -19,7 +19,7 @@ public interface IWrench {
      * @param target The target that is being wrenched.
      * @return If it can be used.
      */
-    public boolean canUse(EntityPlayer player, WrenchTarget target);
+    public boolean canUse(PlayerEntity player, WrenchTarget target);
 
     /**
      * Called before the wrench is being used after the canUse check if done.
@@ -27,7 +27,7 @@ public interface IWrench {
      * @param player The player.
      * @param target The target that is being wrenched.
      */
-    public void beforeUse(EntityPlayer player, WrenchTarget target);
+    public void beforeUse(PlayerEntity player, WrenchTarget target);
 
     /**
      * Called after the wrench is used.
@@ -35,6 +35,6 @@ public interface IWrench {
      * @param player The player.
      * @param target The target that is being wrenched.
      */
-    public void afterUse(EntityPlayer player, WrenchTarget target);
+    public void afterUse(PlayerEntity player, WrenchTarget target);
 
 }

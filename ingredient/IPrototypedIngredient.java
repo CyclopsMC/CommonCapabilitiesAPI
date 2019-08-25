@@ -1,6 +1,6 @@
 package org.cyclops.commoncapabilities.api.ingredient;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants;
 
@@ -37,15 +37,15 @@ public interface IPrototypedIngredient<T, M> extends Comparable<IPrototypedIngre
      * @param <M> The matching condition parameter, may be Void.
      * @return An NBT representation of the given ingredient.
      */
-    public static <T, M> NBTTagCompound serialize(IPrototypedIngredient<T, M> prototypedIngredient) {
-        NBTTagCompound tag = new NBTTagCompound();
+    public static <T, M> CompoundNBT serialize(IPrototypedIngredient<T, M> prototypedIngredient) {
+        CompoundNBT tag = new CompoundNBT();
 
         IngredientComponent<T, M> component = prototypedIngredient.getComponent();
-        tag.setString("ingredientComponent", component.getName().toString());
+        tag.putString("ingredientComponent", component.getName().toString());
 
         IIngredientSerializer<T, M> serializer = component.getSerializer();
-        tag.setTag("prototype", serializer.serializeInstance(prototypedIngredient.getPrototype()));
-        tag.setTag("condition", serializer.serializeCondition(prototypedIngredient.getCondition()));
+        tag.put("prototype", serializer.serializeInstance(prototypedIngredient.getPrototype()));
+        tag.put("condition", serializer.serializeCondition(prototypedIngredient.getCondition()));
 
         return tag;
     }
@@ -56,14 +56,14 @@ public interface IPrototypedIngredient<T, M> extends Comparable<IPrototypedIngre
      * @return A new ingredient instance.
      * @throws IllegalArgumentException If the given tag is invalid or does not contain data on the given ingredient.
      */
-    public static PrototypedIngredient deserialize(NBTTagCompound tag) throws IllegalArgumentException {
-        if (!tag.hasKey("ingredientComponent", Constants.NBT.TAG_STRING)) {
+    public static PrototypedIngredient deserialize(CompoundNBT tag) throws IllegalArgumentException {
+        if (!tag.contains("ingredientComponent", Constants.NBT.TAG_STRING)) {
             throw new IllegalArgumentException("Could not find a ingredientComponent entry in the given tag");
         }
-        if (!tag.hasKey("prototype")) {
+        if (!tag.contains("prototype")) {
             throw new IllegalArgumentException("Could not find a prototype entry in the given tag");
         }
-        if (!tag.hasKey("condition")) {
+        if (!tag.contains("condition")) {
             throw new IllegalArgumentException("Could not find a condition entry in the given tag");
         }
 
@@ -74,8 +74,8 @@ public interface IPrototypedIngredient<T, M> extends Comparable<IPrototypedIngre
         }
 
         IIngredientSerializer serializer = component.getSerializer();
-        Object prototype = serializer.deserializeInstance(tag.getTag("prototype"));
-        Object condition = serializer.deserializeCondition(tag.getTag("condition"));
+        Object prototype = serializer.deserializeInstance(tag.get("prototype"));
+        Object condition = serializer.deserializeCondition(tag.get("condition"));
 
         return new PrototypedIngredient(component, prototype, condition);
 }

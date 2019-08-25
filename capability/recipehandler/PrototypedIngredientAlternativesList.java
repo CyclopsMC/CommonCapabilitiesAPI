@@ -1,9 +1,9 @@
 package org.cyclops.commoncapabilities.api.capability.recipehandler;
 
 import com.google.common.collect.Lists;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.CompoundNBT;
 import org.cyclops.commoncapabilities.api.ingredient.IIngredientSerializer;
 import org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
@@ -64,38 +64,38 @@ public class PrototypedIngredientAlternativesList<T, M> implements IPrototypedIn
         }
 
         @Override
-        public <T, M> NBTBase serialize(IngredientComponent<T, M> ingredientComponent, PrototypedIngredientAlternativesList<?, ?> alternatives) {
-            NBTTagList prototypes = new NBTTagList();
+        public <T, M> INBT serialize(IngredientComponent<T, M> ingredientComponent, PrototypedIngredientAlternativesList<?, ?> alternatives) {
+            ListNBT prototypes = new ListNBT();
             IIngredientSerializer serializer = ingredientComponent.getSerializer();
             for (IPrototypedIngredient prototypedIngredient : (List<IPrototypedIngredient>) (List) alternatives.alternatives) {
-                NBTTagCompound prototypeTag = new NBTTagCompound();
-                prototypeTag.setTag("prototype", serializer.serializeInstance(prototypedIngredient.getPrototype()));
-                prototypeTag.setTag("condition", serializer.serializeCondition(prototypedIngredient.getCondition()));
-                prototypes.appendTag(prototypeTag);
+                CompoundNBT prototypeTag = new CompoundNBT();
+                prototypeTag.put("prototype", serializer.serializeInstance(prototypedIngredient.getPrototype()));
+                prototypeTag.put("condition", serializer.serializeCondition(prototypedIngredient.getCondition()));
+                prototypes.add(prototypeTag);
             }
             return prototypes;
         }
 
         @Override
-        public <T, M> PrototypedIngredientAlternativesList<?, ?> deserialize(IngredientComponent<T, M> ingredientComponent, NBTBase tag) {
+        public <T, M> PrototypedIngredientAlternativesList<?, ?> deserialize(IngredientComponent<T, M> ingredientComponent, INBT tag) {
             String componentName = ingredientComponent.getName().toString();
-            NBTTagList instancesTag = (NBTTagList) tag;
+            ListNBT instancesTag = (ListNBT) tag;
             List<IPrototypedIngredient<T, M>> instances = Lists.newArrayList();
             IIngredientSerializer<T, M> serializer = ingredientComponent.getSerializer();
-            for (NBTBase prototypeTag : instancesTag) {
-                if (!(prototypeTag instanceof NBTTagCompound)) {
+            for (INBT prototypeTag : instancesTag) {
+                if (!(prototypeTag instanceof CompoundNBT)) {
                     throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid sublist with NBTTagCompunds");
                 }
-                NBTTagCompound safePrototypeTag = (NBTTagCompound) prototypeTag;
-                if (!safePrototypeTag.hasKey("prototype")) {
+                CompoundNBT safePrototypeTag = (CompoundNBT) prototypeTag;
+                if (!safePrototypeTag.contains("prototype")) {
                     throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid sublist with a prototype entry");
                 }
-                if (!safePrototypeTag.hasKey("condition")) {
+                if (!safePrototypeTag.contains("condition")) {
                     throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid sublist with a condition entry");
                 }
                 instances.add(new PrototypedIngredient<>(ingredientComponent,
-                        serializer.deserializeInstance(safePrototypeTag.getTag("prototype")),
-                        serializer.deserializeCondition(safePrototypeTag.getTag("condition"))));
+                        serializer.deserializeInstance(safePrototypeTag.get("prototype")),
+                        serializer.deserializeCondition(safePrototypeTag.get("condition"))));
             }
             return new PrototypedIngredientAlternativesList<>(instances);
         }

@@ -1,7 +1,7 @@
 package org.cyclops.commoncapabilities.api.capability.wrench;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
@@ -16,10 +16,10 @@ public class WrenchTarget {
     private final RayTraceResult.Type type;
     private final World world;
     private final BlockPos pos;
-    private final EnumFacing side;
+    private final Direction side;
     private final Entity entity;
 
-    protected WrenchTarget(RayTraceResult.Type type, World world, BlockPos pos, EnumFacing side, Entity entity) {
+    protected WrenchTarget(RayTraceResult.Type type, World world, BlockPos pos, Direction side, Entity entity) {
         this.type = type;
         this.world = world;
         this.pos = pos;
@@ -27,7 +27,7 @@ public class WrenchTarget {
         this.entity = entity;
     }
 
-    public static WrenchTarget forBlock(World world, BlockPos pos, EnumFacing side) {
+    public static WrenchTarget forBlock(World world, BlockPos pos, Direction side) {
         return new WrenchTarget(RayTraceResult.Type.BLOCK, world, pos, side, null);
     }
 
@@ -51,7 +51,8 @@ public class WrenchTarget {
         return pos;
     }
 
-    public @Nullable EnumFacing getSide() {
+    public @Nullable
+    Direction getSide() {
         return side;
     }
 

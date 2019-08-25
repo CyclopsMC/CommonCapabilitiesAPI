@@ -3,16 +3,17 @@ package org.cyclops.commoncapabilities.api.capability.block;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IBlockReader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nonnull;
@@ -82,48 +83,25 @@ public class BlockCapabilities implements IBlockCapabilityProvider {
         this.capabilityConstructors = null;
     }
 
-    @Override
-    public boolean hasCapability(@Nonnull IBlockState blockState, @Nonnull Capability<?> capability,
-                                 @Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nullable EnumFacing facing) {
-        IBlockCapabilityProvider[] providers = this.providers.get(blockState.getBlock());
-        if (providers != null) {
-            for (IBlockCapabilityProvider provider : providers) {
-                if (provider.hasCapability(blockState, capability, world, pos, facing)) {
-                    return true;
-                }
-            }
-
-        } else {
-            providers = this.providers.get(null);
-            if (providers != null) {
-                for (IBlockCapabilityProvider provider : providers) {
-                    if (provider.hasCapability(blockState, capability, world, pos, facing)) {
-                        return true;
-                    }
-                }
-
-            }
-        }
-        return false;
-    }
-
     @Nullable
     @Override
-    public <T> T getCapability(@Nonnull IBlockState blockState, @Nonnull Capability<T> capability,
-                               @Nonnull IBlockAccess world, @Nonnull BlockPos pos, @Nullable EnumFacing facing) {
+    public <T> LazyOptional<T> getCapability(@Nonnull BlockState blockState, @Nonnull Capability<T> capability,
+                                          @Nonnull IBlockReader world, @Nonnull BlockPos pos, @Nullable Direction facing) {
         IBlockCapabilityProvider[] providers = this.providers.get(blockState.getBlock());
         if (providers != null) {
             for (IBlockCapabilityProvider provider : providers) {
-                if (provider.hasCapability(blockState, capability, world, pos, facing)) {
-                    return provider.getCapability(blockState, capability, world, pos, facing);
+                LazyOptional<T> capabilityHolder = provider.getCapability(blockState, capability, world, pos, facing);
+                if (capabilityHolder.isPresent()) {
+                    return capabilityHolder;
                 }
             }
         } else {
             providers = this.providers.get(null);
             if (providers != null) {
                 for (IBlockCapabilityProvider provider : providers) {
-                    if (provider.hasCapability(blockState, capability, world, pos, facing)) {
-                        return provider.getCapability(blockState, capability, world, pos, facing);
+                    LazyOptional<T> capabilityHolder = provider.getCapability(blockState, capability, world, pos, facing);
+                    if (capabilityHolder.isPresent()) {
+                        return capabilityHolder;
                     }
                 }
 
@@ -131,4 +109,5 @@ public class BlockCapabilities implements IBlockCapabilityProvider {
         }
         return null;
     }
+
 }

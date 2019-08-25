@@ -3,20 +3,22 @@ package org.cyclops.commoncapabilities.api.ingredient;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityDispatcher;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.ObjectHolder;
 import net.minecraftforge.registries.RegistryBuilder;
 import org.cyclops.commoncapabilities.api.ingredient.capability.AttachCapabilitiesEventIngredientComponent;
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorage;
@@ -25,6 +27,7 @@ import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponen
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -36,7 +39,7 @@ import java.util.Objects;
  * @param <M> The matching condition parameter, may be Void. Instances MUST properly implement the equals method.
  * @author rubensworks
  */
-@Mod.EventBusSubscriber
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class IngredientComponent<T, M> implements IForgeRegistryEntry<IngredientComponent<?, ?>>,
         Comparable<IngredientComponent<?, ?>> {
 
@@ -45,16 +48,16 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     @SubscribeEvent
     public static void onRegistriesCreate(RegistryEvent.NewRegistry event) {
         REGISTRY = new RegistryBuilder<IngredientComponent<?, ?>>()
-                .setName(new ResourceLocation("commoncapabilities", "registry:ingredientcomponents"))
+                .setName(new ResourceLocation("commoncapabilities", "ingredientcomponents"))
                 .setType((Class<IngredientComponent<?, ?>>) (Class) IngredientComponent.class)
                 .create();
     }
 
-    @GameRegistry.ObjectHolder("minecraft:itemstack")
+    @ObjectHolder("minecraft:itemstack")
     public static final IngredientComponent<ItemStack, Integer> ITEMSTACK = null;
-    @GameRegistry.ObjectHolder("minecraft:fluidstack")
+    @ObjectHolder("minecraft:fluidstack")
     public static final IngredientComponent<FluidStack, Integer> FLUIDSTACK = null;
-    @GameRegistry.ObjectHolder("minecraft:energy")
+    @ObjectHolder("minecraft:energy")
     public static final IngredientComponent<Integer, Boolean> ENERGY = null;
 
     @CapabilityInject(IIngredientComponentStorageHandler.class)
@@ -137,25 +140,16 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     protected CapabilityDispatcher gatherCapabilities() {
         AttachCapabilitiesEventIngredientComponent<T, M> event = new AttachCapabilitiesEventIngredientComponent<>(this);
         MinecraftForge.EVENT_BUS.post(event);
-        return event.getCapabilities().size() > 0 ? new CapabilityDispatcher(event.getCapabilities()) : null;
-    }
-
-    /**
-     * If this component has the given capability.
-     * @param capability The capability to check.
-     * @return If this has the given capability/
-     */
-    public boolean hasCapability(Capability<?> capability) {
-        return capabilityDispatcher != null && capabilityDispatcher.hasCapability(capability, null);
+        return event.getCapabilities().size() > 0 ? new CapabilityDispatcher(event.getCapabilities(), Collections.emptyList()) : null;
     }
 
     /**
      * Get the given capability.
      * @param capability The capability to get.
      * @param <TC> The capability type.
-     * @return The capability instance.
+     * @return The lazy optional capability instance.
      */
-    public <TC> TC getCapability(Capability<TC> capability) {
+    public <TC> LazyOptional<TC> getCapability(Capability<TC> capability) {
         return capabilityDispatcher == null ? null : capabilityDispatcher.getCapability(capability, null);
     }
 
@@ -272,12 +266,12 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     @SuppressWarnings("unchecked")
     @Nullable
     public IIngredientComponentStorage<T, M> getStorage(ICapabilityProvider capabilityProvider,
-                                                        @Nullable EnumFacing facing) {
+                                                        @Nullable Direction facing) {
         // Check IIngredientComponentStorageHandler capability
-        if (capabilityProvider.hasCapability(CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLER, facing)) {
-            IIngredientComponentStorageHandler storageHandler = capabilityProvider.getCapability(
-                    CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLER, facing);
-            IIngredientComponentStorage<T, M> storage = storageHandler.getStorage(this);
+        LazyOptional<IIngredientComponentStorageHandler> storageHandler = capabilityProvider.getCapability(
+                CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLER, facing);
+        if (storageHandler.isPresent()) {
+            IIngredientComponentStorage<T, M> storage = storageHandler.orElse(null).getStorage(this);
             if (storage != null) {
                 return storage;
             }

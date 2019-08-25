@@ -1,6 +1,6 @@
 package org.cyclops.commoncapabilities.api.capability.wrench;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.RayTraceResult;
 
 /**
@@ -9,17 +9,17 @@ import net.minecraft.util.math.RayTraceResult;
  */
 public class DefaultWrench implements IWrench {
     @Override
-    public boolean canUse(EntityPlayer player, WrenchTarget target) {
+    public boolean canUse(PlayerEntity player, WrenchTarget target) {
         return target.getType() == RayTraceResult.Type.BLOCK;
     }
 
     @Override
-    public void beforeUse(EntityPlayer player, WrenchTarget target) {
+    public void beforeUse(PlayerEntity player, WrenchTarget target) {
 
     }
 
     @Override
-    public void afterUse(EntityPlayer player, WrenchTarget target) {
+    public void afterUse(PlayerEntity player, WrenchTarget target) {
 
     }
 }
