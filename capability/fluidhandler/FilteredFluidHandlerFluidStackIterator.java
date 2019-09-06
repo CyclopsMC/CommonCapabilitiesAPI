@@ -2,7 +2,6 @@ package org.cyclops.commoncapabilities.api.capability.fluidhandler;
 
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -13,22 +12,22 @@ import java.util.NoSuchElementException;
  */
 public class FilteredFluidHandlerFluidStackIterator implements Iterator<FluidStack> {
 
-    private final IFluidTankProperties[] fluidTankProperties;
+    private final IFluidHandler fluidHandler;
     private final FluidStack prototype;
     private final int matchFlags;
     private int slot = 0;
     private FluidStack next;
 
     public FilteredFluidHandlerFluidStackIterator(IFluidHandler fluidHandler, FluidStack prototype, int matchFlags) {
-        this.fluidTankProperties = fluidHandler.getTankProperties();
+        this.fluidHandler = fluidHandler;
         this.prototype = prototype;
         this.matchFlags = matchFlags;
         this.next = findNext();
     }
 
     protected FluidStack findNext() {
-        while(slot < fluidTankProperties.length) {
-            FluidStack fluidStack = fluidTankProperties[slot++].getContents();
+        while(slot < fluidHandler.getTanks()) {
+            FluidStack fluidStack = fluidHandler.getFluidInTank(slot++);
             if (FluidMatch.areFluidStacksEqual(fluidStack, prototype, matchFlags)) {
                 return fluidStack;
             }

@@ -41,7 +41,7 @@ public final class FluidMatch {
         return a == b ||
                 (a != null && b != null
                         && (!fluid || a.getFluid() == b.getFluid())
-                        && (!amount || a.amount == b.amount)
+                        && (!amount || a.getAmount() == b.getAmount())
                         && (!nbt || FluidStack.areFluidStackTagsEqual(a, b)));
     }
 

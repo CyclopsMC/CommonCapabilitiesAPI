@@ -2,7 +2,6 @@ package org.cyclops.commoncapabilities.api.capability.fluidhandler;
 
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -13,11 +12,11 @@ import java.util.NoSuchElementException;
  */
 public class FluidHandlerFluidStackIterator implements Iterator<FluidStack> {
 
-    private final IFluidTankProperties[] fluidTankProperties;
+    private final IFluidHandler fluidHandler;
     private int slot;
 
     public FluidHandlerFluidStackIterator(IFluidHandler fluidHandler, int offset) {
-        this.fluidTankProperties = fluidHandler.getTankProperties();
+        this.fluidHandler = fluidHandler;
         this.slot = offset;
     }
 
@@ -27,7 +26,7 @@ public class FluidHandlerFluidStackIterator implements Iterator<FluidStack> {
 
     @Override
     public boolean hasNext() {
-        return slot < fluidTankProperties.length;
+        return slot < fluidHandler.getTanks();
     }
 
     @Override
@@ -35,6 +34,6 @@ public class FluidHandlerFluidStackIterator implements Iterator<FluidStack> {
         if (!hasNext()) {
             throw new NoSuchElementException("Slot out of bounds");
         }
-        return fluidTankProperties[slot++].getContents();
+        return fluidHandler.getFluidInTank(slot++);
     }
 }
