@@ -40,7 +40,7 @@ public class PrototypedIngredientAlternativesItemStackTag implements IPrototyped
             .expireAfterWrite(1, TimeUnit.MINUTES).build(new CacheLoader<String, Collection<Item>>() {
                 @Override
                 public Collection<Item> load(String key) {
-                    return ItemTags.getCollection().get(ResourceLocation.tryCreate(key)).getAllElements();
+                    return ItemTags.getCollection().get(new ResourceLocation(key)).getAllElements();
                 }
             });
 
