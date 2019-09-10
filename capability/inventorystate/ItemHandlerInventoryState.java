@@ -26,7 +26,7 @@ public class ItemHandlerInventoryState implements IInventoryState, IItemHandler 
     }
 
     @Override
-    public int getHash() {
+    public int getState() {
         return this.hash;
     }
 
