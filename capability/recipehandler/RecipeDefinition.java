@@ -27,6 +27,14 @@ public class RecipeDefinition implements IRecipeDefinition {
                             IMixedIngredients output) {
         this.inputs = inputs;
         this.output = output;
+
+        // Ensure that the lists are non-empty
+        for (Map.Entry<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> entry : this.inputs.entrySet()) {
+            if (entry.getValue().isEmpty()) {
+                throw new IllegalArgumentException(String.format("Invalid RecipeDefinition input, empty list for %s",
+                        entry.getKey().getName()));
+            }
+        }
     }
 
     @Override

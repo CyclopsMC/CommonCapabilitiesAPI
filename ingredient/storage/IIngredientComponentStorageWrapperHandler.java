@@ -2,6 +2,7 @@ package org.cyclops.commoncapabilities.api.ingredient.storage;
 
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.LazyOptional;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 
 import javax.annotation.Nullable;
@@ -42,8 +43,7 @@ public interface IIngredientComponentStorageWrapperHandler<T, M, S> {
      * @param facing The side to get the storage from.
      * @return A storage, or null if it does not exist.
      */
-    @Nullable
-    public S getStorage(ICapabilityProvider capabilityProvider, @Nullable Direction facing);
+    public LazyOptional<S> getStorage(ICapabilityProvider capabilityProvider, @Nullable Direction facing);
 
     /**
      * Get the ingredient storage within the given capability provider.
@@ -53,8 +53,8 @@ public interface IIngredientComponentStorageWrapperHandler<T, M, S> {
      */
     public default IIngredientComponentStorage<T, M> getComponentStorage(ICapabilityProvider capabilityProvider,
                                                                          @Nullable Direction facing) {
-        S storage = getStorage(capabilityProvider, facing);
-        return storage == null ? new IngredientComponentStorageEmpty<>(getComponent()) : wrapComponentStorage(storage);
+        LazyOptional<S> storage = getStorage(capabilityProvider, facing);
+        return storage.map(this::wrapComponentStorage).orElseGet(() -> new IngredientComponentStorageEmpty<>(getComponent()));
     }
 
 }

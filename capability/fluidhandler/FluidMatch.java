@@ -2,8 +2,6 @@ package org.cyclops.commoncapabilities.api.capability.fluidhandler;
 
 import net.minecraftforge.fluids.FluidStack;
 
-import javax.annotation.Nullable;
-
 /**
  * Fluid matching flags.
  * @author rubensworks
@@ -31,15 +29,15 @@ public final class FluidMatch {
      */
     public static final int EXACT = FLUID | NBT | AMOUNT;
 
-    public static boolean areFluidStacksEqual(@Nullable FluidStack a, @Nullable FluidStack b, int matchFlags) {
+    public static boolean areFluidStacksEqual(FluidStack a, FluidStack b, int matchFlags) {
         if (matchFlags == ANY) {
             return true;
         }
         boolean fluid  = (matchFlags & FLUID ) > 0;
         boolean nbt    = (matchFlags & NBT   ) > 0;
         boolean amount = (matchFlags & AMOUNT) > 0;
-        return a == b ||
-                (a != null && b != null
+        return a == b || a.isEmpty() && b.isEmpty() ||
+                (!a.isEmpty() && !b.isEmpty()
                         && (!fluid || a.getFluid() == b.getFluid())
                         && (!amount || a.getAmount() == b.getAmount())
                         && (!nbt || FluidStack.areFluidStackTagsEqual(a, b)));
