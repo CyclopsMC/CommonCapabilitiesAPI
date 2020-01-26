@@ -13,6 +13,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -35,7 +36,7 @@ public class BlockCapabilities implements IBlockCapabilityProvider {
     private static final BlockCapabilities INSTANCE = new BlockCapabilities();
 
     private BlockCapabilities() {
-        MinecraftForge.EVENT_BUS.register(this);
+        FMLJavaModLoadingContext.get().getModEventBus().register(this);
     }
 
     public static BlockCapabilities getInstance() {
