@@ -114,7 +114,7 @@ public class PrototypedIngredientAlternativesItemStackTag implements IPrototyped
             CompoundNBT tag = new CompoundNBT();
             ListNBT keys = new ListNBT();
             for (String key : alternatives.keys) {
-                keys.add(new StringNBT(key));
+                keys.add(StringNBT.valueOf(key));
             }
             tag.put("keys", keys);
             tag.putInt("match", alternatives.matchCondition);
