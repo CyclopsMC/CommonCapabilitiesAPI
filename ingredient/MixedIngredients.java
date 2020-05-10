@@ -79,7 +79,9 @@ public class MixedIngredients extends MixedIngredientsAdapter {
                         return firstIngredient.getPrototype();
                     })
                     .collect(Collectors.toList());
-            ingredients.put(component, instances);
+            if (!instances.isEmpty()) {
+                ingredients.put(component, instances);
+            }
         }
         return new MixedIngredients(ingredients);
     }
