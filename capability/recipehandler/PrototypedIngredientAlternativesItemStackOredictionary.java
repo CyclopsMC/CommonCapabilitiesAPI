@@ -20,6 +20,7 @@ import org.cyclops.commoncapabilities.api.ingredient.PrototypedIngredient;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -91,17 +92,15 @@ public class PrototypedIngredientAlternativesItemStackOredictionary implements I
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof IPrototypedIngredientAlternatives
-                && this.getAlternatives().equals(((IPrototypedIngredientAlternatives) obj).getAlternatives());
+        return obj instanceof PrototypedIngredientAlternativesItemStackOredictionary
+                && this.keys.equals(((PrototypedIngredientAlternativesItemStackOredictionary) obj).keys)
+                && Objects.equals(this.matchCondition, ((PrototypedIngredientAlternativesItemStackOredictionary) obj).matchCondition)
+                && Objects.equals(this.quantity, ((PrototypedIngredientAlternativesItemStackOredictionary) obj).quantity);
     }
 
     @Override
     public int hashCode() {
-        int inputsHash = 333;
-        for (IPrototypedIngredient<ItemStack, Integer> value : getAlternatives()) {
-            inputsHash |= value.hashCode();
-        }
-        return 1235 | inputsHash << 2;
+        return 1235 | this.keys.hashCode() << 2 | matchCondition | (int) quantity;
     }
 
     public long getQuantity() {
@@ -110,7 +109,7 @@ public class PrototypedIngredientAlternativesItemStackOredictionary implements I
 
     @Override
     public String toString() {
-        return "[PrototypedIngredientAlternativesList: " + getAlternatives().toString() + "]";
+        return "[PrototypedIngredientAlternativesList: " + this.keys.toString() + "]";
     }
 
     public static class Serializer implements IPrototypedIngredientAlternatives.ISerializer<PrototypedIngredientAlternativesItemStackOredictionary> {
