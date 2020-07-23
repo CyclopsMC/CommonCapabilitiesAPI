@@ -210,7 +210,8 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
      */
     public <S> void setStorageWrapperHandler(Capability<S> capability,
                                              IIngredientComponentStorageWrapperHandler<T, M, ? super S> storageWrapperHandler) {
-        if (capability != null && this.storageWrapperHandler.put(capability, storageWrapperHandler) == null) {
+        Objects.requireNonNull(capability, "Registered a storage wrapper handler before capabilities are registered.");
+        if (this.storageWrapperHandler.put(capability, storageWrapperHandler) == null) {
             this.storageWrapperCapabilities.add(capability);
             IngredientComponent<?, ?> previousValue = IngredientComponent.STORAGE_WRAPPER_CAPABILITIES_COMPONENTS.put(capability, this);
             if (previousValue != null) {
