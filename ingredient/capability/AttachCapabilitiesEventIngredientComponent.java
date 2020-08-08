@@ -4,7 +4,7 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 
 /**
- * Event for when an {@link IngredientComponent} is being constructed.
+ * Event for when an {@link IngredientComponent} is being constructed that is emitted on the mod event bus.
  * @param <T> The instance type.
  * @param <M> The matching condition parameter.
  * @author rubensworks

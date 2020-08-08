@@ -15,10 +15,12 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.ObjectHolder;
 import net.minecraftforge.registries.RegistryBuilder;
+import org.cyclops.commoncapabilities.CommonCapabilities;
 import org.cyclops.commoncapabilities.api.ingredient.capability.AttachCapabilitiesEventIngredientComponent;
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorage;
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorageHandler;
@@ -138,7 +140,9 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
 
     protected CapabilityDispatcher gatherCapabilities() {
         AttachCapabilitiesEventIngredientComponent<T, M> event = new AttachCapabilitiesEventIngredientComponent<>(this);
-        MinecraftForge.EVENT_BUS.post(event);
+        if (CommonCapabilities._instance != null) { // Can be null during unit tests
+            CommonCapabilities._instance.getModEventBus().post(event);
+        }
         return event.getCapabilities().size() > 0 ? new CapabilityDispatcher(event.getCapabilities(), Collections.emptyList()) : null;
     }
 
@@ -149,7 +153,7 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
      * @return The lazy optional capability instance.
      */
     public <TC> LazyOptional<TC> getCapability(Capability<TC> capability) {
-        return capabilityDispatcher == null ? null : capabilityDispatcher.getCapability(capability, null);
+        return capabilityDispatcher == null ? LazyOptional.empty() : capabilityDispatcher.getCapability(capability);
     }
 
     public IngredientComponent<T, M> setTranslationKey(String translationKey) {
