@@ -109,7 +109,6 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     public IngredientComponent(String name, IIngredientMatcher<T, M> matcher, IIngredientSerializer<T, M> serializer,
                                List<IngredientComponentCategoryType<T, M, ?>> categoryTypes) {
         this(new ResourceLocation(name), matcher, serializer, categoryTypes);
-        gatherCapabilities();
     }
 
     public ResourceLocation getName() {
