@@ -108,7 +108,7 @@ public class BlockCapabilities implements IBlockCapabilityProvider {
 
             }
         }
-        return null;
+        return LazyOptional.empty();
     }
 
 }
