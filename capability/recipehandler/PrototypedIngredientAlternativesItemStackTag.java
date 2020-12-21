@@ -11,7 +11,7 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants;
 import org.cyclops.commoncapabilities.api.ingredient.IIngredientMatcher;
@@ -42,7 +42,7 @@ public class PrototypedIngredientAlternativesItemStackTag implements IPrototyped
             .expireAfterWrite(1, TimeUnit.MINUTES).build(new CacheLoader<String, Collection<Item>>() {
                 @Override
                 public Collection<Item> load(String key) {
-                    Tag<Item> tag = ItemTags.getCollection().get(new ResourceLocation(key));
+                    ITag<Item> tag = ItemTags.getCollection().get(new ResourceLocation(key));
                     if (tag == null) {
                         return Collections.emptyList();
                     }
