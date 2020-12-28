@@ -150,7 +150,7 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
      * @return The lazy optional capability instance.
      */
     public <TC> LazyOptional<TC> getCapability(Capability<TC> capability) {
-        return capabilityDispatcher == null ? null : capabilityDispatcher.getCapability(capability, null);
+        return capabilityDispatcher == null ? LazyOptional.empty() : capabilityDispatcher.getCapability(capability, null);
     }
 
     public IngredientComponent<T, M> setTranslationKey(String translationKey) {
