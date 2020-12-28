@@ -1,6 +1,7 @@
 package org.cyclops.commoncapabilities.api.ingredient.capability;
 
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.fml.event.lifecycle.IModBusEvent;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 
 /**
@@ -9,7 +10,7 @@ import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
  * @param <M> The matching condition parameter.
  * @author rubensworks
  */
-public class AttachCapabilitiesEventIngredientComponent<T, M> extends AttachCapabilitiesEvent<IngredientComponent<T, M>> {
+public class AttachCapabilitiesEventIngredientComponent<T, M> extends AttachCapabilitiesEvent<IngredientComponent<T, M>> implements IModBusEvent {
 
     public AttachCapabilitiesEventIngredientComponent(IngredientComponent<T, M> ingredientComponent) {
         super((Class<IngredientComponent<T, M>>) (Class) IngredientComponent.class, ingredientComponent);

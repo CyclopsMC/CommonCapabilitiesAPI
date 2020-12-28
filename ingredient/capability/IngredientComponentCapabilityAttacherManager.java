@@ -5,6 +5,7 @@ import com.google.common.collect.MultimapBuilder;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.cyclops.commoncapabilities.CommonCapabilities;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 
 /**
@@ -24,7 +25,7 @@ public class IngredientComponentCapabilityAttacherManager {
 
     public IngredientComponentCapabilityAttacherManager() {
         this.attachers = MultimapBuilder.hashKeys().arrayListValues().build();
-        MinecraftForge.EVENT_BUS.register(this);
+        CommonCapabilities._instance.getModEventBus().register(this);
     }
 
     /**
