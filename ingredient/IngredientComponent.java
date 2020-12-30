@@ -15,7 +15,7 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.ObjectHolder;
@@ -109,7 +109,6 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     public IngredientComponent(String name, IIngredientMatcher<T, M> matcher, IIngredientSerializer<T, M> serializer,
                                List<IngredientComponentCategoryType<T, M, ?>> categoryTypes) {
         this(new ResourceLocation(name), matcher, serializer, categoryTypes);
-        gatherCapabilities();
     }
 
     public ResourceLocation getName() {
@@ -215,7 +214,8 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
      */
     public <S> void setStorageWrapperHandler(Capability<S> capability,
                                              IIngredientComponentStorageWrapperHandler<T, M, ? super S> storageWrapperHandler) {
-        if (capability != null && this.storageWrapperHandler.put(capability, storageWrapperHandler) == null) {
+        Objects.requireNonNull(capability, "Registered a storage wrapper handler before capabilities are registered.");
+        if (this.storageWrapperHandler.put(capability, storageWrapperHandler) == null) {
             this.storageWrapperCapabilities.add(capability);
             IngredientComponent<?, ?> previousValue = IngredientComponent.STORAGE_WRAPPER_CAPABILITIES_COMPONENTS.put(capability, this);
             if (previousValue != null) {
