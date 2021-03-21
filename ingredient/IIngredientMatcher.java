@@ -1,5 +1,7 @@
 package org.cyclops.commoncapabilities.api.ingredient;
 
+import net.minecraft.util.text.IFormattableTextComponent;
+
 import java.util.Comparator;
 
 /**
@@ -139,9 +141,20 @@ public interface IIngredientMatcher<T, M> extends Comparator<T> {
     /**
      * Return the localized name of the given instance.
      * This should not include the instance quantity.
+     *
+     * Should only be called client-side!
+     *
      * @param instance An instance.
      * @return The localized name of the given instance.
      */
     public String localize(T instance);
+
+    /**
+     * Return the display name of the given instance.
+     * This should not include the instance quantity.
+     * @param instance An instance.
+     * @return The display name of the given instance.
+     */
+    public IFormattableTextComponent getDisplayName(T instance);
 
 }
