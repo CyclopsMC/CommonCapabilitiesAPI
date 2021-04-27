@@ -59,7 +59,7 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     @ObjectHolder("minecraft:fluidstack")
     public static final IngredientComponent<FluidStack, Integer> FLUIDSTACK = null;
     @ObjectHolder("minecraft:energy")
-    public static final IngredientComponent<Integer, Boolean> ENERGY = null;
+    public static final IngredientComponent<Long, Boolean> ENERGY = null;
 
     @CapabilityInject(IIngredientComponentStorageHandler.class)
     private static Capability<IIngredientComponentStorageHandler> CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLER = null;
