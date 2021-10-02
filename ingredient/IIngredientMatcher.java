@@ -157,4 +157,12 @@ public interface IIngredientMatcher<T, M> extends Comparator<T> {
      */
     public IFormattableTextComponent getDisplayName(T instance);
 
+    /**
+     * Return a stringified version of the given instance.
+     * These strings are mainly used for development purposes.
+     * @param instance An instance.
+     * @return The string version of the given instance.
+     */
+    public String toString(T instance);
+
 }
