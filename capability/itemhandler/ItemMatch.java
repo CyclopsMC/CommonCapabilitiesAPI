@@ -1,6 +1,7 @@
 package org.cyclops.commoncapabilities.api.capability.itemhandler;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 
 import java.util.Comparator;
@@ -52,11 +53,18 @@ public final class ItemMatch {
     }
 
     public static boolean areItemStackTagsEqual(ItemStack a, ItemStack b) {
-        if ((a.getTag() == null && b.getTag() != null)
-                || a.getTag() != null && b.getTag() == null) {
-            return false;
+        CompoundNBT tagA = a.getTag();
+        CompoundNBT tagB = b.getTag();
+        if (tagA == null && tagB == null) {
+            return true;
         } else {
-            return (a.getTag() == null || NBT_COMPARATOR.compare(a.getTag(), b.getTag()) == 0);
+            if (tagA == null) {
+                tagA = new CompoundNBT();
+            }
+            if (tagB == null) {
+                tagB = new CompoundNBT();
+            }
+            return NBT_COMPARATOR.compare(tagA, tagB) == 0;
             // We don't include a.areCapsCompatible(b), because we expect that differing caps have different NBT tags.
         }
     }
