@@ -7,7 +7,7 @@ import java.util.function.Function;
 /**
  * A categorizer for an instance type.
  * @param <T> An instance type.
- * @param <C> A category type.
+ * @param <M> A match condition type.
  * @param <C> A classifier type.
  * @author rubensworks
  */
