@@ -2,6 +2,7 @@ package org.cyclops.commoncapabilities.api.ingredient;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import cpw.mods.modlauncher.TransformingClassLoader;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -60,7 +61,8 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     @ObjectHolder("minecraft:energy")
     public static final IngredientComponent<Integer, Boolean> ENERGY = null;
 
-    private static Capability<IIngredientComponentStorageHandler> CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLER = CapabilityManager.get(new CapabilityToken<>(){});
+    // This check if needed to make this code run in unit tests
+    private static Capability<IIngredientComponentStorageHandler> CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? CapabilityManager.get(new CapabilityToken<>(){}) : null;
 
     private static Map<Capability<?>, IngredientComponent<?, ?>> STORAGE_WRAPPER_CAPABILITIES_COMPONENTS = Maps.newIdentityHashMap();
 
