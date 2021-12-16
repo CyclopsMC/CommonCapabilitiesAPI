@@ -6,11 +6,11 @@ package org.cyclops.commoncapabilities.api.capability.work;
  * work on something and have their state detected.
  * This capability does not store anything itself,
  * the information should be supplied by its owner.
- * 
+ *
  * For this implementation to be sane, it is expected
  * that when hasWork() and canWork() are both true,
  * that the target is actually performing its work.
- *  
+ *
  * @author rubensworks
  */
 public interface IWorker {
@@ -20,7 +20,7 @@ public interface IWorker {
      *         is a valid smeltable in its input slot.
      **/
     boolean hasWork();
-    
+
     /**
      * @return If the target is able to start working in its current state,
      *         and if it is not being blocked by some external or internal factor.
