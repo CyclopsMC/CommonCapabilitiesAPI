@@ -1,6 +1,6 @@
 package org.cyclops.commoncapabilities.api.capability.block;
 
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 
 import javax.annotation.Nullable;
 

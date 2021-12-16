@@ -2,10 +2,10 @@ package org.cyclops.commoncapabilities.api.ingredient;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Iterator;
 import java.util.List;
@@ -102,10 +102,10 @@ public interface IMixedIngredients extends Comparable<IMixedIngredients> {
      * @param ingredients Ingredients.
      * @return An NBT representation of the given ingredients.
      */
-    public static CompoundNBT serialize(IMixedIngredients ingredients) {
-        CompoundNBT tag = new CompoundNBT();
+    public static CompoundTag serialize(IMixedIngredients ingredients) {
+        CompoundTag tag = new CompoundTag();
         for (IngredientComponent<?, ?> component : ingredients.getComponents()) {
-            ListNBT instances = new ListNBT();
+            ListTag instances = new ListTag();
             IIngredientSerializer serializer = component.getSerializer();
             for (Object instance : ingredients.getInstances(component)) {
                 instances.add(serializer.serializeInstance(instance));
@@ -121,21 +121,21 @@ public interface IMixedIngredients extends Comparable<IMixedIngredients> {
      * @return A new mixed ingredients instance.
      * @throws IllegalArgumentException If the given tag is invalid or does not contain data on the given ingredients.
      */
-    public static MixedIngredients deserialize(CompoundNBT tag) throws IllegalArgumentException {
+    public static MixedIngredients deserialize(CompoundTag tag) throws IllegalArgumentException {
         Map<IngredientComponent<?, ?>, List<?>> ingredients = Maps.newIdentityHashMap();
-        for (String componentName : tag.keySet()) {
+        for (String componentName : tag.getAllKeys()) {
             IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.getValue(new ResourceLocation(componentName));
             if (component == null) {
                 throw new IllegalArgumentException("Could not find the ingredient component type " + componentName);
             }
-            INBT subTag = tag.get(componentName);
-            if (!(subTag instanceof ListNBT)) {
+            Tag subTag = tag.get(componentName);
+            if (!(subTag instanceof ListTag)) {
                 throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid list of instances");
             }
-            ListNBT instancesTag = (ListNBT) subTag;
+            ListTag instancesTag = (ListTag) subTag;
             IIngredientSerializer serializer = component.getSerializer();
             List instances = Lists.newArrayList();
-            for (INBT instanceTag : instancesTag) {
+            for (Tag instanceTag : instancesTag) {
                 instances.add(serializer.deserializeInstance(instanceTag));
             }
             ingredients.put(component, instances);

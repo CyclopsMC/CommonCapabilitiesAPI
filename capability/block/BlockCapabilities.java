@@ -2,12 +2,11 @@ package org.cyclops.commoncapabilities.api.capability.block;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.RegistryEvent;
@@ -87,7 +86,7 @@ public class BlockCapabilities implements IBlockCapabilityProvider {
     @Nullable
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull BlockState blockState, @Nonnull Capability<T> capability,
-                                          @Nonnull IBlockReader world, @Nonnull BlockPos pos, @Nullable Direction facing) {
+                                             @Nonnull BlockGetter world, @Nonnull BlockPos pos, @Nullable Direction facing) {
         IBlockCapabilityProvider[] providers = this.providers.get(blockState.getBlock());
         if (providers != null) {
             for (IBlockCapabilityProvider provider : providers) {

@@ -1,6 +1,6 @@
 package org.cyclops.commoncapabilities.api.ingredient.capability;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * A base implementation of {@link IIngredientComponentCapabilityAttacher}.

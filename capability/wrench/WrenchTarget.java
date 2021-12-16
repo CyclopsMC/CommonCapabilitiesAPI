@@ -1,10 +1,10 @@
 package org.cyclops.commoncapabilities.api.capability.wrench;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.HitResult;
 
 import javax.annotation.Nullable;
 
@@ -13,13 +13,13 @@ import javax.annotation.Nullable;
  * @author rubensworks
  */
 public class WrenchTarget {
-    private final RayTraceResult.Type type;
-    private final World world;
+    private final HitResult.Type type;
+    private final Level world;
     private final BlockPos pos;
     private final Direction side;
     private final Entity entity;
 
-    protected WrenchTarget(RayTraceResult.Type type, World world, BlockPos pos, Direction side, Entity entity) {
+    protected WrenchTarget(HitResult.Type type, Level world, BlockPos pos, Direction side, Entity entity) {
         this.type = type;
         this.world = world;
         this.pos = pos;
@@ -27,23 +27,23 @@ public class WrenchTarget {
         this.entity = entity;
     }
 
-    public static WrenchTarget forBlock(World world, BlockPos pos, Direction side) {
-        return new WrenchTarget(RayTraceResult.Type.BLOCK, world, pos, side, null);
+    public static WrenchTarget forBlock(Level world, BlockPos pos, Direction side) {
+        return new WrenchTarget(HitResult.Type.BLOCK, world, pos, side, null);
     }
 
     public static WrenchTarget forEntity(Entity entity) {
-        return new WrenchTarget(RayTraceResult.Type.ENTITY, null, null, null, entity);
+        return new WrenchTarget(HitResult.Type.ENTITY, null, null, null, entity);
     }
 
     public static WrenchTarget forNone() {
-        return new WrenchTarget(RayTraceResult.Type.MISS, null, null, null, null);
+        return new WrenchTarget(HitResult.Type.MISS, null, null, null, null);
     }
 
-    public RayTraceResult.Type getType() {
+    public HitResult.Type getType() {
         return type;
     }
 
-    public @Nullable World getWorld() {
+    public @Nullable Level getLevel() {
         return world;
     }
 

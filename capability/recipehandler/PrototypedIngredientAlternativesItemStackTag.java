@@ -4,16 +4,14 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.resources.ResourceLocation;
 import org.cyclops.commoncapabilities.api.ingredient.IIngredientMatcher;
 import org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
@@ -42,11 +40,11 @@ public class PrototypedIngredientAlternativesItemStackTag implements IPrototyped
             .expireAfterWrite(1, TimeUnit.MINUTES).build(new CacheLoader<String, Collection<Item>>() {
                 @Override
                 public Collection<Item> load(String key) {
-                    ITag<Item> tag = ItemTags.getCollection().get(new ResourceLocation(key));
+                    net.minecraft.tags.Tag<Item> tag = ItemTags.getAllTags().getTag(new ResourceLocation(key));
                     if (tag == null) {
                         return Collections.emptyList();
                     }
-                    return tag.getAllElements();
+                    return tag.getValues();
                 }
             });
 
@@ -110,11 +108,11 @@ public class PrototypedIngredientAlternativesItemStackTag implements IPrototyped
         }
 
         @Override
-        public <T, M> INBT serialize(IngredientComponent<T, M> ingredientComponent, PrototypedIngredientAlternativesItemStackTag alternatives) {
-            CompoundNBT tag = new CompoundNBT();
-            ListNBT keys = new ListNBT();
+        public <T, M> Tag serialize(IngredientComponent<T, M> ingredientComponent, PrototypedIngredientAlternativesItemStackTag alternatives) {
+            CompoundTag tag = new CompoundTag();
+            ListTag keys = new ListTag();
             for (String key : alternatives.keys) {
-                keys.add(StringNBT.valueOf(key));
+                keys.add(StringTag.valueOf(key));
             }
             tag.put("keys", keys);
             tag.putInt("match", alternatives.matchCondition);
@@ -123,18 +121,18 @@ public class PrototypedIngredientAlternativesItemStackTag implements IPrototyped
         }
 
         @Override
-        public <T, M> PrototypedIngredientAlternativesItemStackTag deserialize(IngredientComponent<T, M> ingredientComponent, INBT tag) {
-            CompoundNBT tagCompound = (CompoundNBT) tag;
+        public <T, M> PrototypedIngredientAlternativesItemStackTag deserialize(IngredientComponent<T, M> ingredientComponent, Tag tag) {
+            CompoundTag tagCompound = (CompoundTag) tag;
             if (!tagCompound.contains("keys")) {
                 throw new IllegalArgumentException("A oredict prototyped alternatives did not contain valid keys");
             }
             if (!tagCompound.contains("match")) {
                 throw new IllegalArgumentException("A oredict prototyped alternatives did not contain a valid match");
             }
-            ListNBT keysTag = tagCompound.getList("keys", Constants.NBT.TAG_STRING);
+            ListTag keysTag = tagCompound.getList("keys", Tag.TAG_STRING);
             List<String> keys = Lists.newArrayList();
-            for (INBT key : keysTag) {
-                keys.add(key.getString());
+            for (Tag key : keysTag) {
+                keys.add(key.getAsString());
             }
             int matchCondition = tagCompound.getInt("match");
             long quantity = tagCompound.getLong("quantity");

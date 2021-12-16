@@ -1,9 +1,9 @@
 package org.cyclops.commoncapabilities.api.capability.block;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
@@ -34,6 +34,6 @@ public interface IBlockCapabilityProvider {
      * @return The requested capability.
      */
     <T> LazyOptional<T> getCapability(@Nonnull BlockState blockState, @Nonnull Capability<T> capability,
-                                      @Nonnull IBlockReader world, @Nonnull BlockPos pos, @Nullable Direction facing);
+                                      @Nonnull BlockGetter world, @Nonnull BlockPos pos, @Nullable Direction facing);
 
 }

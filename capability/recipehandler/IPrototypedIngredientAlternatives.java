@@ -2,7 +2,7 @@ package org.cyclops.commoncapabilities.api.capability.recipehandler;
 
 import it.unimi.dsi.fastutil.bytes.Byte2ObjectArrayMap;
 import it.unimi.dsi.fastutil.bytes.Byte2ObjectMap;
-import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.Tag;
 import org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 
@@ -27,9 +27,9 @@ public interface IPrototypedIngredientAlternatives<T, M> {
 
         public byte getId();
 
-        public <T, M> INBT serialize(IngredientComponent<T, M> ingredientComponent, A alternatives);
+        public <T, M> Tag serialize(IngredientComponent<T, M> ingredientComponent, A alternatives);
 
-        public <T, M> A deserialize(IngredientComponent<T, M> ingredientComponent, INBT tag);
+        public <T, M> A deserialize(IngredientComponent<T, M> ingredientComponent, Tag tag);
 
     }
 

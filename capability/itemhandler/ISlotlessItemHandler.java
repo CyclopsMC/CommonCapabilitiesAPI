@@ -1,6 +1,6 @@
 package org.cyclops.commoncapabilities.api.capability.itemhandler;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
 import java.util.Iterator;

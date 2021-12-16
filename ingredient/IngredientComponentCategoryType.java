@@ -1,6 +1,6 @@
 package org.cyclops.commoncapabilities.api.ingredient;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Function;
 

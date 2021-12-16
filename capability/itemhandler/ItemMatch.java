@@ -1,7 +1,7 @@
 package org.cyclops.commoncapabilities.api.capability.itemhandler;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.INBT;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.Tag;
 
 import java.util.Comparator;
 
@@ -35,7 +35,7 @@ public final class ItemMatch {
     /**
      * A comparator for NBT tags. (This is set in GeneralConfig)
      */
-    public static Comparator<INBT> NBT_COMPARATOR;
+    public static Comparator<Tag> NBT_COMPARATOR;
 
     public static boolean areItemStacksEqual(ItemStack a, ItemStack b, int matchFlags) {
         if (matchFlags == ANY) {

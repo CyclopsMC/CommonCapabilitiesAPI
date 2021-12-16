@@ -1,6 +1,6 @@
 package org.cyclops.commoncapabilities.api.capability.inventorystate;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
 
 /**

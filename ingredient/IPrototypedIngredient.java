@@ -1,8 +1,8 @@
 package org.cyclops.commoncapabilities.api.ingredient;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * An ingredient that is identified by a given instance and can be matched with other instances under a given condition.
@@ -37,8 +37,8 @@ public interface IPrototypedIngredient<T, M> extends Comparable<IPrototypedIngre
      * @param <M> The matching condition parameter, may be Void.
      * @return An NBT representation of the given ingredient.
      */
-    public static <T, M> CompoundNBT serialize(IPrototypedIngredient<T, M> prototypedIngredient) {
-        CompoundNBT tag = new CompoundNBT();
+    public static <T, M> CompoundTag serialize(IPrototypedIngredient<T, M> prototypedIngredient) {
+        CompoundTag tag = new CompoundTag();
 
         IngredientComponent<T, M> component = prototypedIngredient.getComponent();
         tag.putString("ingredientComponent", component.getName().toString());
@@ -56,8 +56,8 @@ public interface IPrototypedIngredient<T, M> extends Comparable<IPrototypedIngre
      * @return A new ingredient instance.
      * @throws IllegalArgumentException If the given tag is invalid or does not contain data on the given ingredient.
      */
-    public static PrototypedIngredient deserialize(CompoundNBT tag) throws IllegalArgumentException {
-        if (!tag.contains("ingredientComponent", Constants.NBT.TAG_STRING)) {
+    public static PrototypedIngredient deserialize(CompoundTag tag) throws IllegalArgumentException {
+        if (!tag.contains("ingredientComponent", Tag.TAG_STRING)) {
             throw new IllegalArgumentException("Could not find a ingredientComponent entry in the given tag");
         }
         if (!tag.contains("prototype")) {

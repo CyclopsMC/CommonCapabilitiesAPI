@@ -1,9 +1,9 @@
 package org.cyclops.commoncapabilities.api.capability.recipehandler;
 
 import com.google.common.collect.Lists;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.CompoundTag;
 import org.cyclops.commoncapabilities.api.ingredient.IIngredientSerializer;
 import org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
@@ -64,11 +64,11 @@ public class PrototypedIngredientAlternativesList<T, M> implements IPrototypedIn
         }
 
         @Override
-        public <T, M> INBT serialize(IngredientComponent<T, M> ingredientComponent, PrototypedIngredientAlternativesList<?, ?> alternatives) {
-            ListNBT prototypes = new ListNBT();
+        public <T, M> Tag serialize(IngredientComponent<T, M> ingredientComponent, PrototypedIngredientAlternativesList<?, ?> alternatives) {
+            ListTag prototypes = new ListTag();
             IIngredientSerializer serializer = ingredientComponent.getSerializer();
             for (IPrototypedIngredient prototypedIngredient : (List<IPrototypedIngredient>) (List) alternatives.alternatives) {
-                CompoundNBT prototypeTag = new CompoundNBT();
+                CompoundTag prototypeTag = new CompoundTag();
                 prototypeTag.put("prototype", serializer.serializeInstance(prototypedIngredient.getPrototype()));
                 prototypeTag.put("condition", serializer.serializeCondition(prototypedIngredient.getCondition()));
                 prototypes.add(prototypeTag);
@@ -77,16 +77,16 @@ public class PrototypedIngredientAlternativesList<T, M> implements IPrototypedIn
         }
 
         @Override
-        public <T, M> PrototypedIngredientAlternativesList<?, ?> deserialize(IngredientComponent<T, M> ingredientComponent, INBT tag) {
+        public <T, M> PrototypedIngredientAlternativesList<?, ?> deserialize(IngredientComponent<T, M> ingredientComponent, Tag tag) {
             String componentName = ingredientComponent.getName().toString();
-            ListNBT instancesTag = (ListNBT) tag;
+            ListTag instancesTag = (ListTag) tag;
             List<IPrototypedIngredient<T, M>> instances = Lists.newArrayList();
             IIngredientSerializer<T, M> serializer = ingredientComponent.getSerializer();
-            for (INBT prototypeTag : instancesTag) {
-                if (!(prototypeTag instanceof CompoundNBT)) {
+            for (Tag prototypeTag : instancesTag) {
+                if (!(prototypeTag instanceof CompoundTag)) {
                     throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid sublist with NBTTagCompunds");
                 }
-                CompoundNBT safePrototypeTag = (CompoundNBT) prototypeTag;
+                CompoundTag safePrototypeTag = (CompoundTag) prototypeTag;
                 if (!safePrototypeTag.contains("prototype")) {
                     throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid sublist with a prototype entry");
                 }
