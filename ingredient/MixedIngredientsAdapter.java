@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Abstract implementation of mixed ingredients.
@@ -53,11 +54,11 @@ public abstract class MixedIngredientsAdapter implements IMixedIngredients {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (IngredientComponent<?, ?> component : getComponents()) {
+        for (IngredientComponent component : getComponents()) {
             sb.append('{');
             sb.append(component);
             sb.append(':');
-            sb.append(getInstances(component));
+            sb.append(getInstances(component).stream().map(instance -> component.getMatcher().toString(instance)).collect(Collectors.toList()));
             sb.append('}');
         }
         return "[MixedIngredients ingredients: " + sb + "]";

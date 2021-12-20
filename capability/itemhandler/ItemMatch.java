@@ -1,7 +1,8 @@
 package org.cyclops.commoncapabilities.api.capability.itemhandler;
 
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Comparator;
 
@@ -22,7 +23,7 @@ public final class ItemMatch {
     /**
      * Match ItemStack NBT tags.
      */
-    public static final int NBT = 4;
+    public static final int TAG = 4;
     /**
      * Match ItemStack stacksizes.
      */
@@ -30,19 +31,19 @@ public final class ItemMatch {
     /**
      * Convenience value matching ItemStacks exactly by item, NBT tag and stacksize.
      */
-    public static final int EXACT = ITEM | NBT | STACKSIZE;
+    public static final int EXACT = ITEM | TAG | STACKSIZE;
 
     /**
      * A comparator for NBT tags. (This is set in GeneralConfig)
      */
-    public static Comparator<Tag> NBT_COMPARATOR;
+    public static Comparator<Tag> TAG_COMPARATOR;
 
     public static boolean areItemStacksEqual(ItemStack a, ItemStack b, int matchFlags) {
         if (matchFlags == ANY) {
             return true;
         }
         boolean item      = (matchFlags & ITEM     ) > 0;
-        boolean nbt       = (matchFlags & NBT      ) > 0;
+        boolean nbt       = (matchFlags & TAG) > 0;
         boolean stackSize = (matchFlags & STACKSIZE) > 0;
         return a == b || a.isEmpty() && b.isEmpty() ||
                 (!a.isEmpty() && !b.isEmpty()
@@ -52,11 +53,18 @@ public final class ItemMatch {
     }
 
     public static boolean areItemStackTagsEqual(ItemStack a, ItemStack b) {
-        if ((a.getTag() == null && b.getTag() != null)
-                || a.getTag() != null && b.getTag() == null) {
-            return false;
+        CompoundTag tagA = a.getTag();
+        CompoundTag tagB = b.getTag();
+        if (tagA == null && tagB == null) {
+            return true;
         } else {
-            return (a.getTag() == null || NBT_COMPARATOR.compare(a.getTag(), b.getTag()) == 0);
+            if (tagA == null) {
+                tagA = new CompoundTag();
+            }
+            if (tagB == null) {
+                tagB = new CompoundTag();
+            }
+            return TAG_COMPARATOR.compare(tagA, tagB) == 0;
             // We don't include a.areCapsCompatible(b), because we expect that differing caps have different NBT tags.
         }
     }

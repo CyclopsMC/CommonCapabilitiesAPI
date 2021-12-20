@@ -19,7 +19,7 @@ public final class FluidMatch {
     /**
      * Match FluidStacks NBT tags.
      */
-    public static final int NBT = 2;
+    public static final int TAG = 2;
     /**
      * Match FluidStacks amounts.
      */
@@ -27,14 +27,14 @@ public final class FluidMatch {
     /**
      * Convenience value matching FluidStacks exactly by fluid, NBT tag and amount.
      */
-    public static final int EXACT = FLUID | NBT | AMOUNT;
+    public static final int EXACT = FLUID | TAG | AMOUNT;
 
     public static boolean areFluidStacksEqual(FluidStack a, FluidStack b, int matchFlags) {
         if (matchFlags == ANY) {
             return true;
         }
         boolean fluid  = (matchFlags & FLUID ) > 0;
-        boolean nbt    = (matchFlags & NBT   ) > 0;
+        boolean nbt    = (matchFlags & TAG) > 0;
         boolean amount = (matchFlags & AMOUNT) > 0;
         return a == b || a.isEmpty() && b.isEmpty() ||
                 (!a.isEmpty() && !b.isEmpty()

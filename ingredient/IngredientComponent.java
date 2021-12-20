@@ -6,7 +6,6 @@ import cpw.mods.modlauncher.TransformingClassLoader;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityDispatcher;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -21,6 +20,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.ObjectHolder;
 import net.minecraftforge.registries.RegistryBuilder;
+import org.cyclops.commoncapabilities.CommonCapabilities;
 import org.cyclops.commoncapabilities.api.ingredient.capability.AttachCapabilitiesEventIngredientComponent;
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorage;
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorageHandler;
@@ -55,11 +55,11 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     }
 
     @ObjectHolder("minecraft:itemstack")
-    public static final IngredientComponent<ItemStack, Integer> ITEMSTACK = null;
+    public static IngredientComponent<ItemStack, Integer> ITEMSTACK = null;
     @ObjectHolder("minecraft:fluidstack")
-    public static final IngredientComponent<FluidStack, Integer> FLUIDSTACK = null;
+    public static IngredientComponent<FluidStack, Integer> FLUIDSTACK = null;
     @ObjectHolder("minecraft:energy")
-    public static final IngredientComponent<Integer, Boolean> ENERGY = null;
+    public static IngredientComponent<Long, Boolean> ENERGY = null;
 
     // This check if needed to make this code run in unit tests
     private static Capability<IIngredientComponentStorageHandler> CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? CapabilityManager.get(new CapabilityToken<>(){}) : null;
@@ -109,7 +109,6 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     public IngredientComponent(String name, IIngredientMatcher<T, M> matcher, IIngredientSerializer<T, M> serializer,
                                List<IngredientComponentCategoryType<T, M, ?>> categoryTypes) {
         this(new ResourceLocation(name), matcher, serializer, categoryTypes);
-        gatherCapabilities();
     }
 
     public ResourceLocation getName() {
@@ -140,7 +139,10 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
 
     protected CapabilityDispatcher gatherCapabilities() {
         AttachCapabilitiesEventIngredientComponent<T, M> event = new AttachCapabilitiesEventIngredientComponent<>(this);
-        MinecraftForge.EVENT_BUS.post(event);
+        if (CommonCapabilities._instance != null) {
+            // Can be null in unit tests
+            CommonCapabilities._instance.getModEventBus().post(event);
+        }
         return event.getCapabilities().size() > 0 ? new CapabilityDispatcher(event.getCapabilities(), Collections.emptyList()) : null;
     }
 
@@ -151,7 +153,7 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
      * @return The lazy optional capability instance.
      */
     public <TC> LazyOptional<TC> getCapability(Capability<TC> capability) {
-        return capabilityDispatcher == null ? null : capabilityDispatcher.getCapability(capability, null);
+        return capabilityDispatcher == null ? LazyOptional.empty() : capabilityDispatcher.getCapability(capability, null);
     }
 
     public IngredientComponent<T, M> setTranslationKey(String translationKey) {
@@ -212,7 +214,8 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
      */
     public <S> void setStorageWrapperHandler(Capability<S> capability,
                                              IIngredientComponentStorageWrapperHandler<T, M, ? super S> storageWrapperHandler) {
-        if (capability != null && this.storageWrapperHandler.put(capability, storageWrapperHandler) == null) {
+        Objects.requireNonNull(capability, "Registered a storage wrapper handler before capabilities are registered.");
+        if (this.storageWrapperHandler.put(capability, storageWrapperHandler) == null) {
             this.storageWrapperCapabilities.add(capability);
             IngredientComponent<?, ?> previousValue = IngredientComponent.STORAGE_WRAPPER_CAPABILITIES_COMPONENTS.put(capability, this);
             if (previousValue != null) {

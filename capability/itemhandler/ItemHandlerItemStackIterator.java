@@ -13,10 +13,13 @@ import java.util.NoSuchElementException;
 public class ItemHandlerItemStackIterator implements Iterator<ItemStack> {
 
     private final IItemHandler itemHandler;
+    private final int maxSlots;
     private int slot;
 
     public ItemHandlerItemStackIterator(IItemHandler itemHandler, int offset) {
         this.itemHandler = itemHandler;
+        // Cache the total slot count, since it can be an expensive operation on composite inventories
+        this.maxSlots = itemHandler.getSlots();
         this.slot = offset;
     }
 
@@ -26,7 +29,7 @@ public class ItemHandlerItemStackIterator implements Iterator<ItemStack> {
 
     @Override
     public boolean hasNext() {
-        return slot < itemHandler.getSlots();
+        return slot < maxSlots;
     }
 
     @Override

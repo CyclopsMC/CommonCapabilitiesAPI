@@ -3,8 +3,8 @@ package org.cyclops.commoncapabilities.api.ingredient.capability;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.cyclops.commoncapabilities.CommonCapabilities;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 
 /**
@@ -24,7 +24,7 @@ public class IngredientComponentCapabilityAttacherManager {
 
     public IngredientComponentCapabilityAttacherManager() {
         this.attachers = MultimapBuilder.hashKeys().arrayListValues().build();
-        MinecraftForge.EVENT_BUS.register(this);
+        CommonCapabilities._instance.getModEventBus().register(this);
     }
 
     /**
@@ -38,7 +38,6 @@ public class IngredientComponentCapabilityAttacherManager {
     @SubscribeEvent
     public void onIngredientComponentsLoad(AttachCapabilitiesEventIngredientComponent event) {
         onIngredientComponentLoad(event, event.getIngredientComponent());
-
     }
 
     protected <T, M> void onIngredientComponentLoad(AttachCapabilitiesEventIngredientComponent event,

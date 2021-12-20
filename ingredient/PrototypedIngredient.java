@@ -57,7 +57,7 @@ public class PrototypedIngredient<T, M> implements IPrototypedIngredient<T, M> {
     @Override
     public String toString() {
         return "[PrototypedIngredient ingredientComponent: " + ingredientComponent.toString()
-                + "; prototype: " + Objects.toString(prototype)
+                + "; prototype: " + getComponent().getMatcher().toString(prototype)
                 + "; condition: " + Objects.toString(condition)
                 + "]";
     }

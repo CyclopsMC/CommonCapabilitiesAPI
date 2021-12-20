@@ -83,7 +83,6 @@ public class BlockCapabilities implements IBlockCapabilityProvider {
         this.capabilityConstructors = null;
     }
 
-    @Nullable
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull BlockState blockState, @Nonnull Capability<T> capability,
                                              @Nonnull BlockGetter world, @Nonnull BlockPos pos, @Nullable Direction facing) {
@@ -107,7 +106,7 @@ public class BlockCapabilities implements IBlockCapabilityProvider {
 
             }
         }
-        return null;
+        return LazyOptional.empty();
     }
 
 }
