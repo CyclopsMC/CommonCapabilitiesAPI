@@ -15,12 +15,13 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.ObjectHolder;
 import net.minecraftforge.registries.RegistryBuilder;
-import org.cyclops.commoncapabilities.CommonCapabilities;
 import org.cyclops.commoncapabilities.api.ingredient.capability.AttachCapabilitiesEventIngredientComponent;
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorage;
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorageHandler;
@@ -139,10 +140,8 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
 
     protected CapabilityDispatcher gatherCapabilities() {
         AttachCapabilitiesEventIngredientComponent<T, M> event = new AttachCapabilitiesEventIngredientComponent<>(this);
-        if (CommonCapabilities._instance != null) {
-            // Can be null in unit tests
-            CommonCapabilities._instance.getModEventBus().post(event);
-        }
+        ModList.get().getModContainerById("commoncapabilities")
+                .ifPresent(modContainer -> ((FMLModContainer) modContainer).getEventBus().post(event));
         return event.getCapabilities().size() > 0 ? new CapabilityDispatcher(event.getCapabilities(), Collections.emptyList()) : null;
     }
 

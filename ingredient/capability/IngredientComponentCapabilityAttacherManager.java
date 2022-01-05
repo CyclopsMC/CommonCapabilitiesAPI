@@ -4,7 +4,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.cyclops.commoncapabilities.CommonCapabilities;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 
 /**
@@ -24,7 +25,8 @@ public class IngredientComponentCapabilityAttacherManager {
 
     public IngredientComponentCapabilityAttacherManager() {
         this.attachers = MultimapBuilder.hashKeys().arrayListValues().build();
-        CommonCapabilities._instance.getModEventBus().register(this);
+        ModList.get().getModContainerById("commoncapabilities")
+                        .ifPresent(modContainer -> ((FMLModContainer) modContainer).getEventBus().register(this));
     }
 
     /**
