@@ -140,8 +140,10 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
 
     protected CapabilityDispatcher gatherCapabilities() {
         AttachCapabilitiesEventIngredientComponent<T, M> event = new AttachCapabilitiesEventIngredientComponent<>(this);
-        ModList.get().getModContainerById("commoncapabilities")
-                .ifPresent(modContainer -> ((FMLModContainer) modContainer).getEventBus().post(event));
+        if (ModList.get() != null) {
+            ModList.get().getModContainerById("commoncapabilities")
+                    .ifPresent(modContainer -> ((FMLModContainer) modContainer).getEventBus().post(event));
+        }
         return event.getCapabilities().size() > 0 ? new CapabilityDispatcher(event.getCapabilities(), Collections.emptyList()) : null;
     }
 
