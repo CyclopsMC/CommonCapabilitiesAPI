@@ -20,6 +20,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.ObjectHolder;
 import net.minecraftforge.registries.RegistryBuilder;
 import org.cyclops.commoncapabilities.api.ingredient.capability.AttachCapabilitiesEventIngredientComponent;
@@ -48,11 +49,11 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     public static IForgeRegistry<IngredientComponent<?, ?>> REGISTRY;
 
     @SubscribeEvent
-    public static void onRegistriesCreate(RegistryEvent.NewRegistry event) {
-        REGISTRY = new RegistryBuilder<IngredientComponent<?, ?>>()
+    public static void onRegistriesCreate(NewRegistryEvent event) {
+        event.create(new RegistryBuilder<IngredientComponent<?, ?>>()
                 .setName(new ResourceLocation("commoncapabilities", "ingredientcomponents"))
-                .setType((Class<IngredientComponent<?, ?>>) (Class) IngredientComponent.class)
-                .create();
+                .setType((Class<IngredientComponent<?, ?>>) (Class) IngredientComponent.class),
+                registry -> REGISTRY = registry);
     }
 
     @ObjectHolder("minecraft:itemstack")

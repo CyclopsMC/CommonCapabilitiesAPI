@@ -4,6 +4,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import net.minecraft.core.Registry;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
@@ -12,6 +14,8 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.tags.ITag;
 import org.cyclops.commoncapabilities.api.ingredient.IIngredientMatcher;
 import org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
@@ -41,11 +45,10 @@ public class PrototypedIngredientAlternativesItemStackTag implements IPrototyped
             .expireAfterWrite(1, TimeUnit.MINUTES).build(new CacheLoader<String, Collection<Item>>() {
                 @Override
                 public Collection<Item> load(String key) {
-                    net.minecraft.tags.Tag<Item> tag = ItemTags.getAllTags().getTag(new ResourceLocation(key));
-                    if (tag == null) {
-                        return Collections.emptyList();
-                    }
-                    return tag.getValues();
+                    return ForgeRegistries.ITEMS.tags()
+                            .getTag(TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(key)))
+                            .stream()
+                            .toList();
                 }
             });
 
