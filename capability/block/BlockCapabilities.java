@@ -9,11 +9,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nonnull;
@@ -76,11 +76,13 @@ public class BlockCapabilities implements IBlockCapabilityProvider {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void afterBlocksRegistered(RegistryEvent.Register<Block> event) {
-        for (IBlockCapabilityConstructor capabilityConstructor : this.capabilityConstructors) {
-            register(capabilityConstructor.getBlock(), capabilityConstructor.createProvider());
+    public void afterBlocksRegistered(RegisterEvent event) {
+        if (event.getRegistryKey().equals(ForgeRegistries.BLOCKS.getRegistryKey())) {
+            for (IBlockCapabilityConstructor capabilityConstructor : this.capabilityConstructors) {
+                register(capabilityConstructor.getBlock(), capabilityConstructor.createProvider());
+            }
+            this.capabilityConstructors = null;
         }
-        this.capabilityConstructors = null;
     }
 
     @Override

@@ -18,7 +18,6 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.ObjectHolder;
 import net.minecraftforge.registries.RegistryBuilder;
@@ -42,24 +41,22 @@ import java.util.Objects;
  * @author rubensworks
  */
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
-public final class IngredientComponent<T, M> implements IForgeRegistryEntry<IngredientComponent<?, ?>>,
-        Comparable<IngredientComponent<?, ?>> {
+public final class IngredientComponent<T, M> implements Comparable<IngredientComponent<?, ?>> {
 
     public static IForgeRegistry<IngredientComponent<?, ?>> REGISTRY;
 
     @SubscribeEvent
     public static void onRegistriesCreate(NewRegistryEvent event) {
         event.create(new RegistryBuilder<IngredientComponent<?, ?>>()
-                .setName(new ResourceLocation("commoncapabilities", "ingredientcomponents"))
-                .setType((Class<IngredientComponent<?, ?>>) (Class) IngredientComponent.class),
+                .setName(new ResourceLocation("commoncapabilities", "ingredientcomponents")),
                 registry -> REGISTRY = registry);
     }
 
-    @ObjectHolder("minecraft:itemstack")
+    @ObjectHolder(registryName = "commoncapabilities:ingredientcomponents", value = "minecraft:itemstack")
     public static IngredientComponent<ItemStack, Integer> ITEMSTACK = null;
-    @ObjectHolder("minecraft:fluidstack")
+    @ObjectHolder(registryName = "commoncapabilities:ingredientcomponents", value = "minecraft:fluidstack")
     public static IngredientComponent<FluidStack, Integer> FLUIDSTACK = null;
-    @ObjectHolder("minecraft:energy")
+    @ObjectHolder(registryName = "commoncapabilities:ingredientcomponents", value = "minecraft:energy")
     public static IngredientComponent<Long, Boolean> ENERGY = null;
 
     // This check if needed to make this code run in unit tests
@@ -74,13 +71,13 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     private final Map<Capability<?>, IIngredientComponentStorageWrapperHandler<T, M, ?>> storageWrapperHandler;
     private final IngredientComponentCategoryType<T, M, ?> primaryQuantifier;
     private final CapabilityDispatcher capabilityDispatcher;
-    private ResourceLocation name;
+    private final ResourceLocation name;
     private String translationKey;
 
     public IngredientComponent(ResourceLocation name, IIngredientMatcher<T, M> matcher,
                                IIngredientSerializer<T, M> serializer,
                                List<IngredientComponentCategoryType<T, M, ?>> categoryTypes) {
-        this.setRegistryName(name);
+        this.name = name;
         this.matcher = matcher;
         this.serializer = serializer;
         this.categoryTypes = Lists.newArrayList(categoryTypes);
@@ -119,23 +116,6 @@ public final class IngredientComponent<T, M> implements IForgeRegistryEntry<Ingr
     @Override
     public String toString() {
         return "[IngredientComponent " + this.name + " " + hashCode() + "]";
-    }
-
-    @Override
-    public IngredientComponent<T, M> setRegistryName(ResourceLocation name) {
-        this.name = name;
-        return this;
-    }
-
-    @Nullable
-    @Override
-    public ResourceLocation getRegistryName() {
-        return this.name;
-    }
-
-    @Override
-    public Class<IngredientComponent<?, ?>> getRegistryType() {
-        return (Class) IngredientComponent.class;
     }
 
     protected CapabilityDispatcher gatherCapabilities() {

@@ -64,7 +64,7 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
                 subTag.putByte("type", serializer.getId());
                 instances.add(subTag);
             }
-            inputTag.put(component.getRegistryName().toString(), instances);
+            inputTag.put(IngredientComponent.REGISTRY.getKey(component).toString(), instances);
         }
         tag.put("input", inputTag);
         tag.put("output", IMixedIngredients.serialize(recipe.getOutput()));

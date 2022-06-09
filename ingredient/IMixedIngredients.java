@@ -110,7 +110,7 @@ public interface IMixedIngredients extends Comparable<IMixedIngredients> {
             for (Object instance : ingredients.getInstances(component)) {
                 instances.add(serializer.serializeInstance(instance));
             }
-            tag.put(component.getRegistryName().toString(), instances);
+            tag.put(IngredientComponent.REGISTRY.getKey(component).toString(), instances);
         }
         return tag;
     }
