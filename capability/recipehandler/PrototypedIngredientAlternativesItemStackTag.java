@@ -4,7 +4,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -43,7 +43,7 @@ public class PrototypedIngredientAlternativesItemStackTag implements IPrototyped
                 @Override
                 public Collection<Item> load(String key) {
                     return ForgeRegistries.ITEMS.tags()
-                            .getTag(TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(key)))
+                            .getTag(TagKey.create(Registries.ITEM, new ResourceLocation(key)))
                             .stream()
                             .toList();
                 }
