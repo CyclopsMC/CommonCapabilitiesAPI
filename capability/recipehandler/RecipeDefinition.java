@@ -21,11 +21,19 @@ import java.util.stream.Collectors;
 public class RecipeDefinition implements IRecipeDefinition {
 
     private final Map<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> inputs;
+    private final Map<IngredientComponent<?, ?>, List<Boolean>> inputsReusable;
     private final IMixedIngredients output;
 
     public RecipeDefinition(Map<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> inputs,
                             IMixedIngredients output) {
+        this(inputs, Maps.newIdentityHashMap(), output);
+    }
+
+    public RecipeDefinition(Map<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> inputs,
+                            Map<IngredientComponent<?, ?>, List<Boolean>> inputsReusable,
+                            IMixedIngredients output) {
         this.inputs = inputs;
+        this.inputsReusable = inputsReusable;
         this.output = output;
 
         // Ensure that the lists are non-empty
@@ -48,6 +56,12 @@ public class RecipeDefinition implements IRecipeDefinition {
     }
 
     @Override
+    public <T, M> boolean isInputReusable(IngredientComponent<T, M> ingredientComponent, int index) {
+        List<Boolean> values = this.inputsReusable.get(ingredientComponent);
+        return values != null && index < values.size() && values.get(index);
+    }
+
+    @Override
     public IMixedIngredients getOutput() {
         return output;
     }
@@ -59,8 +73,14 @@ public class RecipeDefinition implements IRecipeDefinition {
             if (Sets.newHashSet(this.getInputComponents()).equals(Sets.newHashSet(that.getInputComponents()))
                     && this.getOutput().equals(that.getOutput())) {
                 for (IngredientComponent<?, ?> component : getInputComponents()) {
-                    if (!this.getInputs(component).equals(that.getInputs(component))) {
+                    List<? extends IPrototypedIngredientAlternatives<?, ?>> thisInputs = this.getInputs(component);
+                    if (!thisInputs.equals(that.getInputs(component))) {
                         return false;
+                    }
+                    for (int i = 0; i < thisInputs.size(); i++) {
+                        if (this.isInputReusable(component, i) != that.isInputReusable(component, i)) {
+                            return false;
+                        }
                     }
                 }
                 return true;
@@ -75,12 +95,15 @@ public class RecipeDefinition implements IRecipeDefinition {
         for (List<IPrototypedIngredientAlternatives<?, ?>> values : inputs.values()) {
             inputsHash |= values.hashCode();
         }
+        for (List<Boolean> values : inputsReusable.values()) {
+            inputsHash |= values.hashCode();
+        }
         return 578 | inputsHash << 2 | output.hashCode();
     }
 
     @Override
     public String toString() {
-        return "[RecipeDefinition input: " + inputs.toString() + "; output: " + output.toString() + "]";
+        return "[RecipeDefinition input: " + inputs.toString() + "; inputsReusable: " + inputsReusable.toString() + "; output: " + output.toString() + "]";
     }
 
     /**
@@ -169,6 +192,13 @@ public class RecipeDefinition implements IRecipeDefinition {
                 );
                 if (compCol != 0) {
                     return compCol;
+                }
+            }
+
+            for (int i = 0; i < thisInputs.size(); i++) {
+                int compare = Boolean.compare(this.isInputReusable(component, i), that.isInputReusable(component, i));
+                if (compare != 0) {
+                    return compare;
                 }
             }
         }
