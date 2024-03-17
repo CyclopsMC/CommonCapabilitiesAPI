@@ -3,35 +3,43 @@ package org.cyclops.commoncapabilities.api.ingredient;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import cpw.mods.modlauncher.TransformingClassLoader;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityDispatcher;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.CapabilityToken;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLModContainer;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.NewRegistryEvent;
-import net.minecraftforge.registries.ObjectHolder;
-import net.minecraftforge.registries.RegistryBuilder;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModLoader;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.capabilities.BaseCapability;
+import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.capabilities.EntityCapability;
+import net.neoforged.neoforge.capabilities.ItemCapability;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.registries.NewRegistryEvent;
+import net.neoforged.neoforge.registries.RegisterEvent;
+import net.neoforged.neoforge.registries.RegistryBuilder;
 import org.cyclops.commoncapabilities.api.ingredient.capability.AttachCapabilitiesEventIngredientComponent;
+import org.cyclops.commoncapabilities.api.ingredient.capability.ICapabilityGetter;
+import org.cyclops.commoncapabilities.api.ingredient.capability.IngredientComponentCapability;
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorage;
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorageHandler;
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorageWrapperHandler;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A IngredientComponent is a type of component that can be used as ingredients inside recipes.
@@ -43,34 +51,47 @@ import java.util.Objects;
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class IngredientComponent<T, M> implements Comparable<IngredientComponent<?, ?>> {
 
-    public static IForgeRegistry<IngredientComponent<?, ?>> REGISTRY;
+    public static Registry<IngredientComponent<?, ?>> REGISTRY;
 
     @SubscribeEvent
     public static void onRegistriesCreate(NewRegistryEvent event) {
-        event.create(new RegistryBuilder<IngredientComponent<?, ?>>()
-                .setName(new ResourceLocation("commoncapabilities", "ingredientcomponents")),
-                registry -> REGISTRY = registry);
+        REGISTRY = event.create(new RegistryBuilder<>(
+                ResourceKey.createRegistryKey(new ResourceLocation("commoncapabilities", "ingredientcomponents"))
+        ));
     }
 
-    @ObjectHolder(registryName = "commoncapabilities:ingredientcomponents", value = "minecraft:itemstack")
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onRegistriesFilled(RegisterEvent event) {
+        if (event.getRegistry() == REGISTRY) {
+            ITEMSTACK = (IngredientComponent<ItemStack, Integer>) REGISTRY.get(new ResourceLocation("minecraft:itemstack"));
+            FLUIDSTACK = (IngredientComponent<FluidStack, Integer>) REGISTRY.get(new ResourceLocation("minecraft:fluidstack"));
+            ENERGY = (IngredientComponent<Long, Boolean>) REGISTRY.get(new ResourceLocation("minecraft:energy"));
+        }
+    }
+
     public static IngredientComponent<ItemStack, Integer> ITEMSTACK = null;
-    @ObjectHolder(registryName = "commoncapabilities:ingredientcomponents", value = "minecraft:fluidstack")
     public static IngredientComponent<FluidStack, Integer> FLUIDSTACK = null;
-    @ObjectHolder(registryName = "commoncapabilities:ingredientcomponents", value = "minecraft:energy")
     public static IngredientComponent<Long, Boolean> ENERGY = null;
 
-    // This check if needed to make this code run in unit tests
-    private static Capability<IIngredientComponentStorageHandler> CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? CapabilityManager.get(new CapabilityToken<>(){}) : null;
+    // This check is needed to make this code run in unit tests
+    private static BlockCapability<IIngredientComponentStorageHandler, Direction> CAPABILITY_BLOCK_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? BlockCapability.createSided(new ResourceLocation("commoncapabilities", "ingredient_component_storage_handler"), IIngredientComponentStorageHandler.class) : null;
+    private static EntityCapability<IIngredientComponentStorageHandler, Direction> CAPABILITY_ENTITY_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? EntityCapability.createSided(new ResourceLocation("commoncapabilities", "ingredient_component_storage_handler"), IIngredientComponentStorageHandler.class) : null;
+    private static ItemCapability<IIngredientComponentStorageHandler, Void> CAPABILITY_ITEM_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? ItemCapability.createVoid(new ResourceLocation("commoncapabilities", "ingredient_component_storage_handler"), IIngredientComponentStorageHandler.class) : null;
+    private static Map<Class<?>, BaseCapability<IIngredientComponentStorageHandler, ?>> CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLERS = Maps.newIdentityHashMap();
+    static {
+        CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLERS.put(Block.class, CAPABILITY_BLOCK_INGREDIENT_COMPONENT_STORAGE_HANDLER);
+        CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLERS.put(Entity.class, CAPABILITY_ENTITY_INGREDIENT_COMPONENT_STORAGE_HANDLER);
+        CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLERS.put(Item.class, CAPABILITY_ITEM_INGREDIENT_COMPONENT_STORAGE_HANDLER);
+    }
 
-    private static Map<Capability<?>, IngredientComponent<?, ?>> STORAGE_WRAPPER_CAPABILITIES_COMPONENTS = Maps.newIdentityHashMap();
+    private static Map<BaseCapability<?, ?>, IngredientComponent<?, ?>> STORAGE_WRAPPER_CAPABILITIES_COMPONENTS = Maps.newIdentityHashMap();
 
     private final IIngredientMatcher<T, M> matcher;
     private final IIngredientSerializer<T, M> serializer;
     private final List<IngredientComponentCategoryType<T, M, ?>> categoryTypes;
-    private final List<Capability<?>> storageWrapperCapabilities;
-    private final Map<Capability<?>, IIngredientComponentStorageWrapperHandler<T, M, ?>> storageWrapperHandler;
+    private final List<BaseCapability<?, ?>> storageWrapperCapabilities;
+    private final Map<BaseCapability<?, ?>, IIngredientComponentStorageWrapperHandler<T, M, ?, ?>> storageWrapperHandler;
     private final IngredientComponentCategoryType<T, M, ?> primaryQuantifier;
-    private final CapabilityDispatcher capabilityDispatcher;
     private final ResourceLocation name;
     private String translationKey;
 
@@ -83,7 +104,6 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
         this.categoryTypes = Lists.newArrayList(categoryTypes);
         this.storageWrapperCapabilities = Lists.newArrayList();
         this.storageWrapperHandler = Maps.newIdentityHashMap();
-        this.capabilityDispatcher = gatherCapabilities();
 
         // Validate if the combination of all match conditions equals the exact match condition.
         M matchCondition = this.matcher.getAnyMatchCondition();
@@ -118,13 +138,9 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
         return "[IngredientComponent " + this.name + " " + hashCode() + "]";
     }
 
-    protected CapabilityDispatcher gatherCapabilities() {
+    protected void gatherCapabilities() {
         AttachCapabilitiesEventIngredientComponent<T, M> event = new AttachCapabilitiesEventIngredientComponent<>(this);
-        if (ModList.get() != null) {
-            ModList.get().getModContainerById("commoncapabilities")
-                    .ifPresent(modContainer -> ((FMLModContainer) modContainer).getEventBus().post(event));
-        }
-        return event.getCapabilities().size() > 0 ? new CapabilityDispatcher(event.getCapabilities(), Collections.emptyList()) : null;
+        ModLoader.get().postEventWrapContainerInModOrder(event);
     }
 
     /**
@@ -133,8 +149,8 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
      * @param <TC> The capability type.
      * @return The lazy optional capability instance.
      */
-    public <TC> LazyOptional<TC> getCapability(Capability<TC> capability) {
-        return capabilityDispatcher == null ? LazyOptional.empty() : capabilityDispatcher.getCapability(capability, null);
+    public <TC> Optional<TC> getCapability(IngredientComponentCapability<TC, Void> capability) {
+        return Optional.ofNullable(capability.getCapability(this, null));
     }
 
     public IngredientComponent<T, M> setTranslationKey(String translationKey) {
@@ -193,8 +209,8 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
      * @param storageWrapperHandler The storage wrapper handler.
      * @param <S> The capability type.
      */
-    public <S> void setStorageWrapperHandler(Capability<S> capability,
-                                             IIngredientComponentStorageWrapperHandler<T, M, ? super S> storageWrapperHandler) {
+    public <S> void setStorageWrapperHandler(BaseCapability<?, ?> capability,
+                                             IIngredientComponentStorageWrapperHandler<T, M, ? super S, ?> storageWrapperHandler) {
         Objects.requireNonNull(capability, "Registered a storage wrapper handler before capabilities are registered.");
         if (this.storageWrapperHandler.put(capability, storageWrapperHandler) == null) {
             this.storageWrapperCapabilities.add(capability);
@@ -202,7 +218,7 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
             if (previousValue != null) {
                 throw new IllegalStateException(String.format(
                         "Tried registering a storage capability (%s) for %s that was already registered to %s",
-                        capability.getName(), this, previousValue));
+                        capability.name(), this, previousValue));
             }
         }
     }
@@ -215,14 +231,14 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
      */
     @SuppressWarnings("unchecked")
     @Nullable
-    public <S> IIngredientComponentStorageWrapperHandler<T, M, S> getStorageWrapperHandler(Capability<S> capability) {
-        return (IIngredientComponentStorageWrapperHandler<T, M, S>) storageWrapperHandler.get(capability);
+    public <S, C> IIngredientComponentStorageWrapperHandler<T, M, S, C> getStorageWrapperHandler(BaseCapability<S, ?> capability) {
+        return (IIngredientComponentStorageWrapperHandler<T, M, S, C>) storageWrapperHandler.get(capability);
     }
 
     /**
      * @return All supported capabilities that have registered wrapper handlers
      */
-    public Collection<Capability<?>> getStorageWrapperHandlerCapabilities() {
+    public Collection<BaseCapability<?, ?>> getStorageWrapperHandlerCapabilities() {
         return this.storageWrapperCapabilities;
     }
 
@@ -232,7 +248,7 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
      * @return The attached ingredient component, or null.
      */
     @Nullable
-    public static IngredientComponent<?, ?> getIngredientComponentForStorageCapability(Capability<?> capability) {
+    public static IngredientComponent<?, ?> getIngredientComponentForStorageCapability(IngredientComponentCapability<?, Void> capability) {
         return IngredientComponent.STORAGE_WRAPPER_CAPABILITIES_COMPONENTS.get(capability);
     }
 
@@ -244,28 +260,36 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
      * If this fails, then the storage wrapper handlers that are registered in this ingredient component
      * will be iterated and the first successful one will be returned.
      *
-     * @param capabilityProvider A capability provider.
-     * @param facing The side to get the storage from.
+     * @param capabilityType capabilityType The type of capability, usually Block.class, Item.class, or Entity.class.
+     * @param capabilityGetter A capability provider.
+     * @param context The context to get the storage from.
      * @return An ingredient storage, or null if it does not exist.
      */
     @SuppressWarnings("unchecked")
     @Nullable
-    public IIngredientComponentStorage<T, M> getStorage(ICapabilityProvider capabilityProvider,
-                                                        @Nullable Direction facing) {
+    public <O, C> IIngredientComponentStorage<T, M> getStorage(
+            Class<O> capabilityType,
+            ICapabilityGetter<C> capabilityGetter,
+            C context
+    ) {
+        BaseCapability<IIngredientComponentStorageHandler, ?> capabilityIngredientComponentStorageHandler = CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLERS.get(capabilityType);
+        if (capabilityIngredientComponentStorageHandler == null) {
+            throw new IllegalStateException("No capability is know for type " + capabilityType.getName());
+        }
+
         // Check IIngredientComponentStorageHandler capability
-        LazyOptional<IIngredientComponentStorageHandler> storageHandler = capabilityProvider.getCapability(
-                CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLER, facing);
-        if (storageHandler.isPresent()) {
-            IIngredientComponentStorage<T, M> storage = storageHandler.orElse(null).getStorage(this);
+        IIngredientComponentStorageHandler storageHandler = capabilityGetter.getCapability((BaseCapability<IIngredientComponentStorageHandler, C>) capabilityIngredientComponentStorageHandler, context);
+        if (storageHandler != null) {
+            IIngredientComponentStorage<T, M> storage = storageHandler.getStorage(this);
             if (storage != null) {
                 return storage;
             }
         }
 
         // Check registered wrapper handlers
-        for (Capability<?> capability : getStorageWrapperHandlerCapabilities()) {
-            IIngredientComponentStorageWrapperHandler<T, M, ?> wrapperHandler = getStorageWrapperHandler(capability);
-            IIngredientComponentStorage<T, M> storage = wrapperHandler.getComponentStorage(capabilityProvider, facing);
+        for (BaseCapability<?, ?> capability : getStorageWrapperHandlerCapabilities()) {
+            IIngredientComponentStorageWrapperHandler<T, M, O, C> wrapperHandler = getStorageWrapperHandler((BaseCapability<O, ?>) capability);
+            IIngredientComponentStorage<T, M> storage = wrapperHandler.getComponentStorage(capabilityGetter, context);
             if (storage != null) {
                 return storage;
             }
@@ -273,6 +297,45 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
 
         // Otherwise, fail
         return null;
+    }
+
+    @Nullable
+    public <O, C> IIngredientComponentStorage<T, M> getBlockStorage(
+            Level level, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, C context
+    ) {
+        return getStorage(Block.class, new ICapabilityGetter<>() {
+            @Nullable
+            @Override
+            public <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context) {
+                return (T) level.getCapability((BlockCapability<?, C>) capability, pos, state, blockEntity, context);
+            }
+        }, context);
+    }
+
+    @Nullable
+    public <O, C> IIngredientComponentStorage<T, M> getEntityStorage(
+            Entity entity, C context
+    ) {
+        return getStorage(Entity.class, new ICapabilityGetter<>() {
+            @Nullable
+            @Override
+            public <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context) {
+                return (T) entity.getCapability((EntityCapability<?, C>) capability, context);
+            }
+        }, context);
+    }
+
+    @Nullable
+    public <O, C> IIngredientComponentStorage<T, M> getItemStorage(
+            ItemStack itemStack, C context
+    ) {
+        return getStorage(Item.class, new ICapabilityGetter<>() {
+            @Nullable
+            @Override
+            public <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context) {
+                return (T) itemStack.getCapability((ItemCapability<?, C>) capability, context);
+            }
+        }, context);
     }
 
     @Override

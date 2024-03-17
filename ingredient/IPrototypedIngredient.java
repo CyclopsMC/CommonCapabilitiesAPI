@@ -68,7 +68,7 @@ public interface IPrototypedIngredient<T, M> extends Comparable<IPrototypedIngre
         }
 
         String componentName = tag.getString("ingredientComponent");
-        IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.getValue(new ResourceLocation(componentName));
+        IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(new ResourceLocation(componentName));
         if (component == null) {
             throw new IllegalArgumentException("Could not find the ingredient component type " + componentName);
         }

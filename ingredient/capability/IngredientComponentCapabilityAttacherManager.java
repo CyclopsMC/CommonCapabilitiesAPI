@@ -3,9 +3,9 @@ package org.cyclops.commoncapabilities.api.ingredient.capability;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.javafmlmod.FMLModContainer;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.javafmlmod.FMLModContainer;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 
 /**
@@ -45,8 +45,11 @@ public class IngredientComponentCapabilityAttacherManager {
     protected <T, M> void onIngredientComponentLoad(AttachCapabilitiesEventIngredientComponent event,
                                                     IngredientComponent<T, M> ingredientComponent) {
         for (IIngredientComponentCapabilityAttacher<?, ?> attacher : attachers.get(ingredientComponent.getName())) {
-            event.addCapability(attacher.getCapabilityProviderName(), ((IIngredientComponentCapabilityAttacher<T, M>) attacher)
-                    .createCapabilityProvider(ingredientComponent));
+            event.register(
+                    attacher.getCapability(),
+                    ingredientComponent,
+                    ((IIngredientComponentCapabilityAttacher<T, M>) attacher).createCapabilityProvider(ingredientComponent)
+            );
         }
     }
 

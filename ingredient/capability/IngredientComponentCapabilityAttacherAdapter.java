@@ -9,11 +9,11 @@ import net.minecraft.resources.ResourceLocation;
 public abstract class IngredientComponentCapabilityAttacherAdapter<T, M> implements IIngredientComponentCapabilityAttacher<T, M> {
 
     private final ResourceLocation targetName;
-    private final ResourceLocation capabilityProviderName;
+    private final IngredientComponentCapability<?, ?> capability;
 
-    public IngredientComponentCapabilityAttacherAdapter(ResourceLocation targetName, ResourceLocation capabilityProviderName) {
+    public IngredientComponentCapabilityAttacherAdapter(ResourceLocation targetName, IngredientComponentCapability<?, ?> capability) {
         this.targetName = targetName;
-        this.capabilityProviderName = capabilityProviderName;
+        this.capability = capability;
     }
 
     @Override
@@ -22,8 +22,7 @@ public abstract class IngredientComponentCapabilityAttacherAdapter<T, M> impleme
     }
 
     @Override
-    public ResourceLocation getCapabilityProviderName() {
-        return this.capabilityProviderName;
+    public IngredientComponentCapability<?, ?> getCapability() {
+        return this.capability;
     }
-
 }

@@ -1,11 +1,9 @@
 package org.cyclops.commoncapabilities.api.ingredient.storage;
 
-import net.minecraft.core.Direction;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.LazyOptional;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
+import org.cyclops.commoncapabilities.api.ingredient.capability.ICapabilityGetter;
 
-import javax.annotation.Nullable;
+import java.util.Optional;
 
 /**
  * A handler for wrapping external storage interfaces into {@link IIngredientComponentStorage}
@@ -16,7 +14,7 @@ import javax.annotation.Nullable;
  * @param <S> The external storage type.
  * @author rubensworks
  */
-public interface IIngredientComponentStorageWrapperHandler<T, M, S> {
+public interface IIngredientComponentStorageWrapperHandler<T, M, S, C> {
 
     /**
      * @return The ingredient component.
@@ -39,21 +37,21 @@ public interface IIngredientComponentStorageWrapperHandler<T, M, S> {
 
     /**
      * Get the storage within the given capability provider.
-     * @param capabilityProvider A capability provider.
-     * @param facing The side to get the storage from.
+     * @param capabilityGetter A capability provider.
+     * @param context The context to get the storage with.
      * @return A storage, or null if it does not exist.
      */
-    public LazyOptional<S> getStorage(ICapabilityProvider capabilityProvider, @Nullable Direction facing);
+    public Optional<S> getStorage(ICapabilityGetter<C> capabilityGetter, C context);
 
     /**
      * Get the ingredient storage within the given capability provider.
-     * @param capabilityProvider A capability provider.
-     * @param facing The side to get the storage from.
+     * @param capabilityGetter A capability provider.
+     * @param context The context to get the storage with.
      * @return An ingredient storage, or null if it does not exist.
      */
-    public default IIngredientComponentStorage<T, M> getComponentStorage(ICapabilityProvider capabilityProvider,
-                                                                         @Nullable Direction facing) {
-        LazyOptional<S> storage = getStorage(capabilityProvider, facing);
+    public default IIngredientComponentStorage<T, M> getComponentStorage(ICapabilityGetter<C> capabilityGetter,
+                                                                         C context) {
+        Optional<S> storage = getStorage(capabilityGetter, context);
         return storage.map(this::wrapComponentStorage).orElseGet(() -> new IngredientComponentStorageEmpty<>(getComponent()));
     }
 

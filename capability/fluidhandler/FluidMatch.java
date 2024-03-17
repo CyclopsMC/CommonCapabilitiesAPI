@@ -1,6 +1,6 @@
 package org.cyclops.commoncapabilities.api.capability.fluidhandler;
 
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
  * Fluid matching flags.

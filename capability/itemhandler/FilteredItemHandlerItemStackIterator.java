@@ -1,7 +1,7 @@
 package org.cyclops.commoncapabilities.api.capability.itemhandler;
 
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;

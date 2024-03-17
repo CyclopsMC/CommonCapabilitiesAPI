@@ -87,7 +87,7 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
         }
         CompoundTag inputTag = tag.getCompound("input");
         for (String componentName : inputTag.getAllKeys()) {
-            IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.getValue(new ResourceLocation(componentName));
+            IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(new ResourceLocation(componentName));
             if (component == null) {
                 throw new IllegalArgumentException("Could not find the ingredient component type " + componentName);
             }

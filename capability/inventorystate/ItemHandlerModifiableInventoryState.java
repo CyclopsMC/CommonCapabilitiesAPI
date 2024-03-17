@@ -1,7 +1,7 @@
 package org.cyclops.commoncapabilities.api.capability.inventorystate;
 
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 
 /**
  * An inventory state implementation that wraps around an {@link IItemHandlerModifiable}.

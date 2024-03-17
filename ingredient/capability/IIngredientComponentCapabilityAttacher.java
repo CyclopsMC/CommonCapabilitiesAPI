@@ -1,7 +1,7 @@
 package org.cyclops.commoncapabilities.api.ingredient.capability;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.neoforged.neoforge.capabilities.ICapabilityProvider;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 
 /**
@@ -19,15 +19,15 @@ public interface IIngredientComponentCapabilityAttacher<T, M> {
     public ResourceLocation getTargetName();
 
     /**
-     * @return An internally unique name for the capability provider that will be attached.
+     * @return The capability to attach for.
      */
-    public ResourceLocation getCapabilityProviderName();
+    public IngredientComponentCapability<?, ?> getCapability();
 
     /**
      * Create a capability provider for the given ingredient component instance.
      * @param ingredientComponent An ingredient component.
      * @return A capability provider instance.
      */
-    public ICapabilityProvider createCapabilityProvider(IngredientComponent<T, M> ingredientComponent);
+    public ICapabilityProvider<?, ?, ?> createCapabilityProvider(IngredientComponent<T, M> ingredientComponent);
 
 }

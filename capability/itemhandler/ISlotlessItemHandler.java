@@ -6,7 +6,7 @@ import javax.annotation.Nonnull;
 import java.util.Iterator;
 
 /**
- * A simplified form of the {@link net.minecraftforge.items.IItemHandler} that is slot-agnostic.
+ * A simplified form of the {@link net.neoforged.neoforge.items.IItemHandler} that is slot-agnostic.
  * By not taking into account slots, the item handler provider instead of the consumer
  * is responsible for providing an efficient item insertion and extraction algorithm.
  *
