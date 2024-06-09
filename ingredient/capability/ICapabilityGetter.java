@@ -1,6 +1,15 @@
 package org.cyclops.commoncapabilities.api.ingredient.capability;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.BaseCapability;
+import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.capabilities.EntityCapability;
+import net.neoforged.neoforge.capabilities.ItemCapability;
+import net.neoforged.neoforge.common.extensions.ILevelExtension;
 
 import javax.annotation.Nullable;
 
@@ -12,5 +21,45 @@ public interface ICapabilityGetter<C> {
 
     @Nullable
     <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context);
+
+    public static <C> ICapabilityGetter<C> forBlock(ILevelExtension level, BlockPos pos, @Nullable BlockState state, @Nullable BlockEntity blockEntity) {
+        return new ICapabilityGetter<>() {
+            @Nullable
+            @Override
+            public <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context) {
+                return (T) level.getCapability((BlockCapability<?, C>) capability, pos, state, blockEntity, context);
+            }
+        };
+    }
+
+    public static <C> ICapabilityGetter<C> forBlockEntity(BlockEntity blockEntity) {
+        return new ICapabilityGetter<>() {
+            @Nullable
+            @Override
+            public <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context) {
+                return (T) blockEntity.getLevel().getCapability((BlockCapability<?, C>) capability, blockEntity.getBlockPos(), blockEntity.getBlockState(), blockEntity, context);
+            }
+        };
+    }
+
+    public static <C> ICapabilityGetter<C> forEntity(Entity entity) {
+        return new ICapabilityGetter<>() {
+            @Nullable
+            @Override
+            public <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context) {
+                return (T) entity.getCapability((EntityCapability<?, C>) capability, context);
+            }
+        };
+    }
+
+    public static <C> ICapabilityGetter<C> forItem(ItemStack itemStack) {
+        return new ICapabilityGetter<>() {
+            @Nullable
+            @Override
+            public <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context) {
+                return (T) itemStack.getCapability((ItemCapability<?, C>) capability, context);
+            }
+        };
+    }
 
 }

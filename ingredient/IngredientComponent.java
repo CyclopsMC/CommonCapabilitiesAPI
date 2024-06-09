@@ -301,39 +301,21 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
     public <O, C> IIngredientComponentStorage<T, M> getBlockStorage(
             Level level, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, C context
     ) {
-        return getStorage(Block.class, new ICapabilityGetter<>() {
-            @Nullable
-            @Override
-            public <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context) {
-                return (T) level.getCapability((BlockCapability<?, C>) capability, pos, state, blockEntity, context);
-            }
-        }, context);
+        return getStorage(Block.class, ICapabilityGetter.forBlock(level, pos, state, blockEntity), context);
     }
 
     @Nullable
     public <O, C> IIngredientComponentStorage<T, M> getEntityStorage(
             Entity entity, C context
     ) {
-        return getStorage(Entity.class, new ICapabilityGetter<>() {
-            @Nullable
-            @Override
-            public <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context) {
-                return (T) entity.getCapability((EntityCapability<?, C>) capability, context);
-            }
-        }, context);
+        return getStorage(Entity.class, ICapabilityGetter.forEntity(entity), context);
     }
 
     @Nullable
     public <O, C> IIngredientComponentStorage<T, M> getItemStorage(
             ItemStack itemStack, C context
     ) {
-        return getStorage(Item.class, new ICapabilityGetter<>() {
-            @Nullable
-            @Override
-            public <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context) {
-                return (T) itemStack.getCapability((ItemCapability<?, C>) capability, context);
-            }
-        }, context);
+        return getStorage(Item.class, ICapabilityGetter.forItem(itemStack), context);
     }
 
     @Override
