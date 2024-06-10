@@ -22,12 +22,19 @@ public interface ICapabilityGetter<C> {
     @Nullable
     <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context);
 
+    public boolean canHandleCapabilityType(BaseCapability<?, ?> capability);
+
     public static <C> ICapabilityGetter<C> forBlock(ILevelExtension level, BlockPos pos, @Nullable BlockState state, @Nullable BlockEntity blockEntity) {
         return new ICapabilityGetter<>() {
             @Nullable
             @Override
             public <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context) {
                 return (T) level.getCapability((BlockCapability<?, C>) capability, pos, state, blockEntity, context);
+            }
+
+            @Override
+            public boolean canHandleCapabilityType(BaseCapability<?, ?> capability) {
+                return capability instanceof BlockCapability;
             }
         };
     }
@@ -39,6 +46,11 @@ public interface ICapabilityGetter<C> {
             public <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context) {
                 return (T) blockEntity.getLevel().getCapability((BlockCapability<?, C>) capability, blockEntity.getBlockPos(), blockEntity.getBlockState(), blockEntity, context);
             }
+
+            @Override
+            public boolean canHandleCapabilityType(BaseCapability<?, ?> capability) {
+                return capability instanceof BlockCapability;
+            }
         };
     }
 
@@ -49,6 +61,11 @@ public interface ICapabilityGetter<C> {
             public <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context) {
                 return (T) entity.getCapability((EntityCapability<?, C>) capability, context);
             }
+
+            @Override
+            public boolean canHandleCapabilityType(BaseCapability<?, ?> capability) {
+                return capability instanceof EntityCapability;
+            }
         };
     }
 
@@ -58,6 +75,11 @@ public interface ICapabilityGetter<C> {
             @Override
             public <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context) {
                 return (T) itemStack.getCapability((ItemCapability<?, C>) capability, context);
+            }
+
+            @Override
+            public boolean canHandleCapabilityType(BaseCapability<?, ?> capability) {
+                return capability instanceof ItemCapability;
             }
         };
     }

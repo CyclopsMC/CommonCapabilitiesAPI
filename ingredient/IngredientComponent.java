@@ -22,6 +22,7 @@ import net.neoforged.neoforge.capabilities.BaseCapability;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.EntityCapability;
 import net.neoforged.neoforge.capabilities.ItemCapability;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.registries.NewRegistryEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
@@ -136,7 +137,7 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
         return "[IngredientComponent " + this.name + " " + hashCode() + "]";
     }
 
-    protected void gatherCapabilities() {
+    public void gatherCapabilities(RegisterCapabilitiesEvent registerCapabilitiesEvent) {
         AttachCapabilitiesEventIngredientComponent<T, M> event = new AttachCapabilitiesEventIngredientComponent<>(this);
         ModLoader.get().postEventWrapContainerInModOrder(event);
     }
@@ -246,7 +247,7 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
      * @return The attached ingredient component, or null.
      */
     @Nullable
-    public static IngredientComponent<?, ?> getIngredientComponentForStorageCapability(IngredientComponentCapability<?, Void> capability) {
+    public static IngredientComponent<?, ?> getIngredientComponentForStorageCapability(BaseCapability<?, ?> capability) {
         return IngredientComponent.STORAGE_WRAPPER_CAPABILITIES_COMPONENTS.get(capability);
     }
 
@@ -286,10 +287,12 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
 
         // Check registered wrapper handlers
         for (BaseCapability<?, ?> capability : getStorageWrapperHandlerCapabilities()) {
-            IIngredientComponentStorageWrapperHandler<T, M, O, C> wrapperHandler = getStorageWrapperHandler((BaseCapability<O, ?>) capability);
-            IIngredientComponentStorage<T, M> storage = wrapperHandler.getComponentStorage(capabilityGetter, context);
-            if (storage != null) {
-                return storage;
+            if (capabilityGetter.canHandleCapabilityType(capability)) {
+                IIngredientComponentStorageWrapperHandler<T, M, O, C> wrapperHandler = getStorageWrapperHandler((BaseCapability<O, ?>) capability);
+                IIngredientComponentStorage<T, M> storage = wrapperHandler.getComponentStorage(capabilityGetter, context);
+                if (storage != null) {
+                    return storage;
+                }
             }
         }
 
