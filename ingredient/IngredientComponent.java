@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoader;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.capabilities.BaseCapability;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.EntityCapability;
@@ -48,6 +49,7 @@ import java.util.Optional;
  * @param <M> The matching condition parameter, may be Void. Instances MUST properly implement the equals method.
  * @author rubensworks
  */
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public final class IngredientComponent<T, M> implements Comparable<IngredientComponent<?, ?>> {
 
     public static Registry<IngredientComponent<?, ?>> REGISTRY;
@@ -55,16 +57,16 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
     @SubscribeEvent
     public static void onRegistriesCreate(NewRegistryEvent event) {
         REGISTRY = event.create(new RegistryBuilder<>(
-                ResourceKey.createRegistryKey(new ResourceLocation("commoncapabilities", "ingredientcomponents"))
+                ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath("commoncapabilities", "ingredientcomponents"))
         ));
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onRegistriesFilled(RegisterEvent event) {
         if (event.getRegistry() == REGISTRY) {
-            ITEMSTACK = (IngredientComponent<ItemStack, Integer>) REGISTRY.get(new ResourceLocation("minecraft:itemstack"));
-            FLUIDSTACK = (IngredientComponent<FluidStack, Integer>) REGISTRY.get(new ResourceLocation("minecraft:fluidstack"));
-            ENERGY = (IngredientComponent<Long, Boolean>) REGISTRY.get(new ResourceLocation("minecraft:energy"));
+            ITEMSTACK = (IngredientComponent<ItemStack, Integer>) REGISTRY.get(ResourceLocation.parse("minecraft:itemstack"));
+            FLUIDSTACK = (IngredientComponent<FluidStack, Integer>) REGISTRY.get(ResourceLocation.parse("minecraft:fluidstack"));
+            ENERGY = (IngredientComponent<Long, Boolean>) REGISTRY.get(ResourceLocation.parse("minecraft:energy"));
         }
     }
 
@@ -73,9 +75,9 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
     public static IngredientComponent<Long, Boolean> ENERGY = null;
 
     // This check is needed to make this code run in unit tests
-    private static BlockCapability<IIngredientComponentStorageHandler, Direction> CAPABILITY_BLOCK_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? BlockCapability.createSided(new ResourceLocation("commoncapabilities", "ingredient_component_storage_handler"), IIngredientComponentStorageHandler.class) : null;
-    private static EntityCapability<IIngredientComponentStorageHandler, Direction> CAPABILITY_ENTITY_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? EntityCapability.createSided(new ResourceLocation("commoncapabilities", "ingredient_component_storage_handler"), IIngredientComponentStorageHandler.class) : null;
-    private static ItemCapability<IIngredientComponentStorageHandler, Void> CAPABILITY_ITEM_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? ItemCapability.createVoid(new ResourceLocation("commoncapabilities", "ingredient_component_storage_handler"), IIngredientComponentStorageHandler.class) : null;
+    private static BlockCapability<IIngredientComponentStorageHandler, Direction> CAPABILITY_BLOCK_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? BlockCapability.createSided(ResourceLocation.fromNamespaceAndPath("commoncapabilities", "ingredient_component_storage_handler"), IIngredientComponentStorageHandler.class) : null;
+    private static EntityCapability<IIngredientComponentStorageHandler, Direction> CAPABILITY_ENTITY_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? EntityCapability.createSided(ResourceLocation.fromNamespaceAndPath("commoncapabilities", "ingredient_component_storage_handler"), IIngredientComponentStorageHandler.class) : null;
+    private static ItemCapability<IIngredientComponentStorageHandler, Void> CAPABILITY_ITEM_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? ItemCapability.createVoid(ResourceLocation.fromNamespaceAndPath("commoncapabilities", "ingredient_component_storage_handler"), IIngredientComponentStorageHandler.class) : null;
     private static Map<Class<?>, BaseCapability<IIngredientComponentStorageHandler, ?>> CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLERS = Maps.newIdentityHashMap();
     static {
         CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLERS.put(Block.class, CAPABILITY_BLOCK_INGREDIENT_COMPONENT_STORAGE_HANDLER);
@@ -125,7 +127,7 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
 
     public IngredientComponent(String name, IIngredientMatcher<T, M> matcher, IIngredientSerializer<T, M> serializer,
                                List<IngredientComponentCategoryType<T, M, ?>> categoryTypes) {
-        this(new ResourceLocation(name), matcher, serializer, categoryTypes);
+        this(ResourceLocation.parse(name), matcher, serializer, categoryTypes);
     }
 
     public ResourceLocation getName() {
@@ -139,7 +141,7 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
 
     public void gatherCapabilities(RegisterCapabilitiesEvent registerCapabilitiesEvent) {
         AttachCapabilitiesEventIngredientComponent<T, M> event = new AttachCapabilitiesEventIngredientComponent<>(this);
-        ModLoader.get().postEventWrapContainerInModOrder(event);
+        ModLoader.postEvent(event);
     }
 
     /**

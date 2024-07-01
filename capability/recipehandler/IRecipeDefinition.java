@@ -110,7 +110,7 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
 
         CompoundTag inputTag = tag.getCompound("input");
         for (String componentName : inputTag.getAllKeys()) {
-            IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(new ResourceLocation(componentName));
+            IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName));
             if (component == null) {
                 throw new IllegalArgumentException("Could not find the ingredient component type " + componentName);
             }
@@ -143,7 +143,7 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
         if (tag.contains("inputReusable")) {
             CompoundTag inputReusableTag = tag.getCompound("inputReusable");
             for (String componentName : inputReusableTag.getAllKeys()) {
-                IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(new ResourceLocation(componentName));
+                IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName));
                 if (component == null) {
                     throw new IllegalArgumentException("Could not find the ingredient component type " + componentName);
                 }

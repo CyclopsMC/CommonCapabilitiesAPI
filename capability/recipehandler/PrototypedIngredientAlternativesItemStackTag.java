@@ -45,7 +45,7 @@ public class PrototypedIngredientAlternativesItemStackTag implements IPrototyped
                 @Override
                 public Collection<Item> load(String key) {
                     return BuiltInRegistries.ITEM
-                            .getTag(TagKey.create(Registries.ITEM, new ResourceLocation(key)))
+                            .getTag(TagKey.create(Registries.ITEM, ResourceLocation.parse(key)))
                             .map(named -> named
                                     .stream()
                                     .map(Holder::value).collect(Collectors.toList()))
