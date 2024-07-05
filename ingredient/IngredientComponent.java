@@ -52,13 +52,15 @@ import java.util.Optional;
 @EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public final class IngredientComponent<T, M> implements Comparable<IngredientComponent<?, ?>> {
 
-    public static Registry<IngredientComponent<?, ?>> REGISTRY;
+    public static Registry<IngredientComponent<?, ?>> REGISTRY = null;
 
     @SubscribeEvent
     public static void onRegistriesCreate(NewRegistryEvent event) {
-        REGISTRY = event.create(new RegistryBuilder<>(
-                ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath("commoncapabilities", "ingredientcomponents"))
-        ));
+        if (REGISTRY == null) {
+            REGISTRY = event.create(new RegistryBuilder<>(
+                    ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath("commoncapabilities", "ingredientcomponents"))
+            ));
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

@@ -2,6 +2,8 @@ package org.cyclops.commoncapabilities.api.capability.fluidhandler;
 
 import net.neoforged.neoforge.fluids.FluidStack;
 
+import java.util.Objects;
+
 /**
  * Fluid matching flags.
  * @author rubensworks
@@ -34,13 +36,13 @@ public final class FluidMatch {
             return true;
         }
         boolean fluid  = (matchFlags & FLUID ) > 0;
-        boolean nbt    = (matchFlags & DATA) > 0;
+        boolean data    = (matchFlags & DATA) > 0;
         boolean amount = (matchFlags & AMOUNT) > 0;
         return a == b || a.isEmpty() && b.isEmpty() ||
                 (!a.isEmpty() && !b.isEmpty()
                         && (!fluid || a.getFluid() == b.getFluid())
                         && (!amount || a.getAmount() == b.getAmount())
-                        && (!nbt || FluidStack.isSameFluidSameComponents(a, b)));
+                        && (!data || (a.getComponents().isEmpty() && b.getComponents().isEmpty() ? true : Objects.equals(a.getComponents(), b.getComponents()))));
     }
 
 }

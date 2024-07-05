@@ -57,14 +57,7 @@ public final class ItemMatch {
         if (tagA.isEmpty() && tagB.isEmpty()) {
             return true;
         } else {
-            if (tagA == null) {
-                tagA = DataComponentMap.EMPTY;
-            }
-            if (tagB == null) {
-                tagB = DataComponentMap.EMPTY;
-            }
             return DATA_COMPARATOR.compare(tagA, tagB) == 0;
-            // We don't include a.areCapsCompatible(b), because we expect that differing caps have different NBT tags.
         }
     }
 
