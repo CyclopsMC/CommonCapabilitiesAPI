@@ -2,6 +2,7 @@ package org.cyclops.commoncapabilities.api.ingredient;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -99,16 +100,18 @@ public interface IMixedIngredients extends Comparable<IMixedIngredients> {
 
     /**
      * Deserialize ingredients to NBT.
-     * @param ingredients Ingredients.
+     *
+     * @param lookupProvider The lookup provider.
+     * @param ingredients    Ingredients.
      * @return An NBT representation of the given ingredients.
      */
-    public static CompoundTag serialize(IMixedIngredients ingredients) {
+    public static CompoundTag serialize(HolderLookup.Provider lookupProvider, IMixedIngredients ingredients) {
         CompoundTag tag = new CompoundTag();
         for (IngredientComponent<?, ?> component : ingredients.getComponents()) {
             ListTag instances = new ListTag();
             IIngredientSerializer serializer = component.getSerializer();
             for (Object instance : ingredients.getInstances(component)) {
-                instances.add(serializer.serializeInstance(instance));
+                instances.add(serializer.serializeInstance(lookupProvider, instance));
             }
             tag.put(IngredientComponent.REGISTRY.getKey(component).toString(), instances);
         }
@@ -117,11 +120,13 @@ public interface IMixedIngredients extends Comparable<IMixedIngredients> {
 
     /**
      * Deserialize ingredients from NBT
-     * @param tag An NBT tag.
+     *
+     * @param lookupProvider The lookup provider.
+     * @param tag            An NBT tag.
      * @return A new mixed ingredients instance.
      * @throws IllegalArgumentException If the given tag is invalid or does not contain data on the given ingredients.
      */
-    public static MixedIngredients deserialize(CompoundTag tag) throws IllegalArgumentException {
+    public static MixedIngredients deserialize(HolderLookup.Provider lookupProvider, CompoundTag tag) throws IllegalArgumentException {
         Map<IngredientComponent<?, ?>, List<?>> ingredients = Maps.newIdentityHashMap();
         for (String componentName : tag.getAllKeys()) {
             IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName));
@@ -136,7 +141,7 @@ public interface IMixedIngredients extends Comparable<IMixedIngredients> {
             IIngredientSerializer serializer = component.getSerializer();
             List instances = Lists.newArrayList();
             for (Tag instanceTag : instancesTag) {
-                instances.add(serializer.deserializeInstance(instanceTag));
+                instances.add(serializer.deserializeInstance(lookupProvider, instanceTag));
             }
             ingredients.put(component, instances);
         }

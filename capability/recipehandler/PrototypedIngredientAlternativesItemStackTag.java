@@ -5,6 +5,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -111,7 +112,7 @@ public class PrototypedIngredientAlternativesItemStackTag implements IPrototyped
         }
 
         @Override
-        public <T, M> Tag serialize(IngredientComponent<T, M> ingredientComponent, PrototypedIngredientAlternativesItemStackTag alternatives) {
+        public <T, M> Tag serialize(HolderLookup.Provider lookupProvider, IngredientComponent<T, M> ingredientComponent, PrototypedIngredientAlternativesItemStackTag alternatives) {
             CompoundTag tag = new CompoundTag();
             ListTag keys = new ListTag();
             for (String key : alternatives.keys) {
@@ -124,7 +125,7 @@ public class PrototypedIngredientAlternativesItemStackTag implements IPrototyped
         }
 
         @Override
-        public <T, M> PrototypedIngredientAlternativesItemStackTag deserialize(IngredientComponent<T, M> ingredientComponent, Tag tag) {
+        public <T, M> PrototypedIngredientAlternativesItemStackTag deserialize(HolderLookup.Provider lookupProvider, IngredientComponent<T, M> ingredientComponent, Tag tag) {
             CompoundTag tagCompound = (CompoundTag) tag;
             if (!tagCompound.contains("keys")) {
                 throw new IllegalArgumentException("A oredict prototyped alternatives did not contain valid keys");

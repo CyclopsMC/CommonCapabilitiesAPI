@@ -1,5 +1,6 @@
 package org.cyclops.commoncapabilities.api.ingredient;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
@@ -32,19 +33,21 @@ public interface IPrototypedIngredient<T, M> extends Comparable<IPrototypedIngre
 
     /**
      * Deserialize an ingredient to NBT.
+     *
+     * @param <T>                  The instance type.
+     * @param <M>                  The matching condition parameter, may be Void.
+     * @param lookupProvider       The lookup provider.
      * @param prototypedIngredient Ingredient.
-     * @param <T> The instance type.
-     * @param <M> The matching condition parameter, may be Void.
      * @return An NBT representation of the given ingredient.
      */
-    public static <T, M> CompoundTag serialize(IPrototypedIngredient<T, M> prototypedIngredient) {
+    public static <T, M> CompoundTag serialize(HolderLookup.Provider lookupProvider, IPrototypedIngredient<T, M> prototypedIngredient) {
         CompoundTag tag = new CompoundTag();
 
         IngredientComponent<T, M> component = prototypedIngredient.getComponent();
         tag.putString("ingredientComponent", component.getName().toString());
 
         IIngredientSerializer<T, M> serializer = component.getSerializer();
-        tag.put("prototype", serializer.serializeInstance(prototypedIngredient.getPrototype()));
+        tag.put("prototype", serializer.serializeInstance(lookupProvider, prototypedIngredient.getPrototype()));
         tag.put("condition", serializer.serializeCondition(prototypedIngredient.getCondition()));
 
         return tag;
@@ -52,11 +55,13 @@ public interface IPrototypedIngredient<T, M> extends Comparable<IPrototypedIngre
 
     /**
      * Deserialize an ingredient from NBT
-     * @param tag An NBT tag.
+     *
+     * @param lookupProvider The lookup provider.
+     * @param tag            An NBT tag.
      * @return A new ingredient instance.
      * @throws IllegalArgumentException If the given tag is invalid or does not contain data on the given ingredient.
      */
-    public static PrototypedIngredient deserialize(CompoundTag tag) throws IllegalArgumentException {
+    public static PrototypedIngredient deserialize(HolderLookup.Provider lookupProvider, CompoundTag tag) throws IllegalArgumentException {
         if (!tag.contains("ingredientComponent", Tag.TAG_STRING)) {
             throw new IllegalArgumentException("Could not find a ingredientComponent entry in the given tag");
         }
@@ -74,7 +79,7 @@ public interface IPrototypedIngredient<T, M> extends Comparable<IPrototypedIngre
         }
 
         IIngredientSerializer serializer = component.getSerializer();
-        Object prototype = serializer.deserializeInstance(tag.get("prototype"));
+        Object prototype = serializer.deserializeInstance(lookupProvider, tag.get("prototype"));
         Object condition = serializer.deserializeCondition(tag.get("condition"));
 
         return new PrototypedIngredient(component, prototype, condition);

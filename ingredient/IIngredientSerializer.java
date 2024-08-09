@@ -1,5 +1,6 @@
 package org.cyclops.commoncapabilities.api.ingredient;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.Tag;
 
 /**
@@ -12,18 +13,22 @@ public interface IIngredientSerializer<T, M> {
 
     /**
      * Serialize an instance to NBT.
-     * @param instance An instance.
+     *
+     * @param lookupProvider The holder lookup provider.
+     * @param instance       An instance.
      * @return An NBT tag.
      */
-    public Tag serializeInstance(T instance);
+    public Tag serializeInstance(HolderLookup.Provider lookupProvider, T instance);
 
     /**
      * Deserialize an instance from NBT.
-     * @param tag An NBT tag.
+     *
+     * @param lookupProvider The holder lookup provider.
+     * @param tag            An NBT tag.
      * @return An instance.
      * @throws IllegalArgumentException If the given tag is invalid or does not contain data on the given instance.
      */
-    public T deserializeInstance(Tag tag) throws IllegalArgumentException;
+    public T deserializeInstance(HolderLookup.Provider lookupProvider, Tag tag) throws IllegalArgumentException;
 
     /**
      * Serialize a match condition to NBT.

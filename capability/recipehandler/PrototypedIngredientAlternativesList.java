@@ -1,9 +1,10 @@
 package org.cyclops.commoncapabilities.api.capability.recipehandler;
 
 import com.google.common.collect.Lists;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.nbt.CompoundTag;
 import org.cyclops.commoncapabilities.api.ingredient.IIngredientSerializer;
 import org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
@@ -64,12 +65,12 @@ public class PrototypedIngredientAlternativesList<T, M> implements IPrototypedIn
         }
 
         @Override
-        public <T, M> Tag serialize(IngredientComponent<T, M> ingredientComponent, PrototypedIngredientAlternativesList<?, ?> alternatives) {
+        public <T, M> Tag serialize(HolderLookup.Provider lookupProvider, IngredientComponent<T, M> ingredientComponent, PrototypedIngredientAlternativesList<?, ?> alternatives) {
             ListTag prototypes = new ListTag();
             IIngredientSerializer serializer = ingredientComponent.getSerializer();
             for (IPrototypedIngredient prototypedIngredient : (List<IPrototypedIngredient>) (List) alternatives.alternatives) {
                 CompoundTag prototypeTag = new CompoundTag();
-                prototypeTag.put("prototype", serializer.serializeInstance(prototypedIngredient.getPrototype()));
+                prototypeTag.put("prototype", serializer.serializeInstance(lookupProvider, prototypedIngredient.getPrototype()));
                 prototypeTag.put("condition", serializer.serializeCondition(prototypedIngredient.getCondition()));
                 prototypes.add(prototypeTag);
             }
@@ -77,7 +78,7 @@ public class PrototypedIngredientAlternativesList<T, M> implements IPrototypedIn
         }
 
         @Override
-        public <T, M> PrototypedIngredientAlternativesList<?, ?> deserialize(IngredientComponent<T, M> ingredientComponent, Tag tag) {
+        public <T, M> PrototypedIngredientAlternativesList<?, ?> deserialize(HolderLookup.Provider lookupProvider, IngredientComponent<T, M> ingredientComponent, Tag tag) {
             String componentName = ingredientComponent.getName().toString();
             ListTag instancesTag = (ListTag) tag;
             List<IPrototypedIngredient<T, M>> instances = Lists.newArrayList();
@@ -94,7 +95,7 @@ public class PrototypedIngredientAlternativesList<T, M> implements IPrototypedIn
                     throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid sublist with a condition entry");
                 }
                 instances.add(new PrototypedIngredient<>(ingredientComponent,
-                        serializer.deserializeInstance(safePrototypeTag.get("prototype")),
+                        serializer.deserializeInstance(lookupProvider, safePrototypeTag.get("prototype")),
                         serializer.deserializeCondition(safePrototypeTag.get("condition"))));
             }
             return new PrototypedIngredientAlternativesList<>(instances);

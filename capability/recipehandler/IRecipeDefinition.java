@@ -2,6 +2,7 @@ package org.cyclops.commoncapabilities.api.capability.recipehandler;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.ByteArrayTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -62,10 +63,12 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
 
     /**
      * Deserialize a recipe to NBT.
-     * @param recipe A recipe.
+     *
+     * @param lookupProvider The lookup provider.
+     * @param recipe         A recipe.
      * @return An NBT representation of the given recipe.
      */
-    public static CompoundTag serialize(IRecipeDefinition recipe) {
+    public static CompoundTag serialize(HolderLookup.Provider lookupProvider, IRecipeDefinition recipe) {
         CompoundTag tag = new CompoundTag();
         CompoundTag inputTag = new CompoundTag();
         CompoundTag inputReusableTag = new CompoundTag();
@@ -76,7 +79,7 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
             for (IPrototypedIngredientAlternatives ingredient : recipe.getInputs(component)) {
                 CompoundTag subTag = new CompoundTag();
                 IPrototypedIngredientAlternatives.ISerializer serializer = ingredient.getSerializer();
-                subTag.put("val", serializer.serialize(component, ingredient));
+                subTag.put("val", serializer.serialize(lookupProvider, component, ingredient));
                 subTag.putByte("type", serializer.getId());
                 instances.add(subTag);
                 reusableBytes.add((byte) (recipe.isInputReusable(component, index) ? 1 : 0));
@@ -88,17 +91,19 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
         }
         tag.put("input", inputTag);
         tag.put("inputReusable", inputReusableTag);
-        tag.put("output", IMixedIngredients.serialize(recipe.getOutput()));
+        tag.put("output", IMixedIngredients.serialize(lookupProvider, recipe.getOutput()));
         return tag;
     }
 
     /**
      * Deserialize a recipe from NBT
-     * @param tag An NBT tag.
+     *
+     * @param lookupProvider The lookup provider.
+     * @param tag            An NBT tag.
      * @return A new mixed recipe instance.
      * @throws IllegalArgumentException If the given tag is invalid or does not contain data on the given recipe.
      */
-    public static RecipeDefinition deserialize(CompoundTag tag) throws IllegalArgumentException {
+    public static RecipeDefinition deserialize(HolderLookup.Provider lookupProvider, CompoundTag tag) throws IllegalArgumentException {
         Map<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> inputs = Maps.newIdentityHashMap();
         Map<IngredientComponent<?, ?>, List<Boolean>> inputsReusable = Maps.newIdentityHashMap();
         if (!tag.contains("input")) {
@@ -134,7 +139,7 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
                 } else {
                     throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid reference to instances");
                 }
-                IPrototypedIngredientAlternatives alternatives = alternativeSerializer.deserialize(component, deserializeTag);
+                IPrototypedIngredientAlternatives alternatives = alternativeSerializer.deserialize(lookupProvider, component, deserializeTag);
                 instances.add(alternatives);
             }
             inputs.put(component, instances);
@@ -159,7 +164,7 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
             }
         }
 
-        IMixedIngredients output = IMixedIngredients.deserialize(tag.getCompound("output"));
+        IMixedIngredients output = IMixedIngredients.deserialize(lookupProvider, tag.getCompound("output"));
 
         return new RecipeDefinition(inputs, inputsReusable, output);
     }
