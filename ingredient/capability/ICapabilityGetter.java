@@ -29,7 +29,7 @@ public interface ICapabilityGetter<C> {
             @Nullable
             @Override
             public <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context) {
-                return (T) level.getCapability((BlockCapability<?, C>) capability, pos, state, blockEntity, context);
+                return (T) level.getCapability((BlockCapability<?, C>) capability, pos, state, blockEntity, capability.contextClass() == void.class ? null : context);
             }
 
             @Override
@@ -44,7 +44,7 @@ public interface ICapabilityGetter<C> {
             @Nullable
             @Override
             public <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context) {
-                return (T) blockEntity.getLevel().getCapability((BlockCapability<?, C>) capability, blockEntity.getBlockPos(), blockEntity.getBlockState(), blockEntity, context);
+                return (T) blockEntity.getLevel().getCapability((BlockCapability<?, C>) capability, blockEntity.getBlockPos(), blockEntity.getBlockState(), blockEntity, capability.contextClass() == void.class ? null : context);
             }
 
             @Override
@@ -59,7 +59,7 @@ public interface ICapabilityGetter<C> {
             @Nullable
             @Override
             public <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context) {
-                return (T) entity.getCapability((EntityCapability<?, C>) capability, context);
+                return (T) entity.getCapability((EntityCapability<?, C>) capability, capability.contextClass() == void.class ? null : context);
             }
 
             @Override
@@ -74,7 +74,7 @@ public interface ICapabilityGetter<C> {
             @Nullable
             @Override
             public <T> T getCapability(BaseCapability<T, C> capability, @Nullable C context) {
-                return (T) itemStack.getCapability((ItemCapability<?, C>) capability, context);
+                return (T) itemStack.getCapability((ItemCapability<?, C>) capability, capability.contextClass() == void.class ? null : context);
             }
 
             @Override
