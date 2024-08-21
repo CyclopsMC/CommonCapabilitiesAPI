@@ -95,8 +95,11 @@ public class RecipeDefinition implements IRecipeDefinition {
         for (List<IPrototypedIngredientAlternatives<?, ?>> values : inputs.values()) {
             inputsHash |= values.hashCode();
         }
-        for (List<Boolean> values : inputsReusable.values()) {
-            inputsHash |= values.hashCode();
+        for (IngredientComponent<?, ?> component : getInputComponents()) {
+            List<? extends IPrototypedIngredientAlternatives<?, ?>> thisInputs = this.getInputs(component);
+            for (int i = 0; i < thisInputs.size(); i++) {
+                inputsHash |= (i + 1) * Boolean.hashCode(this.isInputReusable(component, i));
+            }
         }
         return 578 | inputsHash << 2 | output.hashCode();
     }
