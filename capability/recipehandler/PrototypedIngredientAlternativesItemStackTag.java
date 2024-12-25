@@ -22,13 +22,13 @@ import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 import org.cyclops.commoncapabilities.api.ingredient.PrototypedIngredient;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * An oredictionary-based {@link IPrototypedIngredientAlternatives} implementation.
@@ -45,12 +45,12 @@ public class PrototypedIngredientAlternativesItemStackTag implements IPrototyped
             .expireAfterWrite(1, TimeUnit.MINUTES).build(new CacheLoader<String, Collection<Item>>() {
                 @Override
                 public Collection<Item> load(String key) {
-                    return BuiltInRegistries.ITEM
-                            .getTag(TagKey.create(Registries.ITEM, ResourceLocation.parse(key)))
-                            .map(named -> named
-                                    .stream()
-                                    .map(Holder::value).collect(Collectors.toList()))
-                            .orElse(Collections.emptyList());
+                    return StreamSupport.stream(
+                            BuiltInRegistries.ITEM
+                                    .getTagOrEmpty(TagKey.create(Registries.ITEM, ResourceLocation.parse(key)))
+                                    .spliterator(),
+                                    false)
+                            .map(Holder::value).collect(Collectors.toList());
                 }
             });
 

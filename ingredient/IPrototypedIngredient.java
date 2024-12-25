@@ -73,10 +73,9 @@ public interface IPrototypedIngredient<T, M> extends Comparable<IPrototypedIngre
         }
 
         String componentName = tag.getString("ingredientComponent");
-        IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName));
-        if (component == null) {
-            throw new IllegalArgumentException("Could not find the ingredient component type " + componentName);
-        }
+        IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName))
+                .orElseThrow(() -> new IllegalArgumentException("Could not find the ingredient component type " + componentName))
+                .value();
 
         IIngredientSerializer serializer = component.getSerializer();
         Object prototype = serializer.deserializeInstance(lookupProvider, tag.get("prototype"));

@@ -129,10 +129,9 @@ public interface IMixedIngredients extends Comparable<IMixedIngredients> {
     public static MixedIngredients deserialize(HolderLookup.Provider lookupProvider, CompoundTag tag) throws IllegalArgumentException {
         Map<IngredientComponent<?, ?>, List<?>> ingredients = Maps.newIdentityHashMap();
         for (String componentName : tag.getAllKeys()) {
-            IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName));
-            if (component == null) {
-                throw new IllegalArgumentException("Could not find the ingredient component type " + componentName);
-            }
+            IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName))
+                    .orElseThrow(() -> new IllegalArgumentException("Could not find the ingredient component type " + componentName))
+                    .value();
             Tag subTag = tag.get(componentName);
             if (!(subTag instanceof ListTag)) {
                 throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid list of instances");

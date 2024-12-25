@@ -5,8 +5,8 @@ import com.google.common.collect.Maps;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.ByteArrayTag;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
@@ -115,10 +115,9 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
 
         CompoundTag inputTag = tag.getCompound("input");
         for (String componentName : inputTag.getAllKeys()) {
-            IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName));
-            if (component == null) {
-                throw new IllegalArgumentException("Could not find the ingredient component type " + componentName);
-            }
+            IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName))
+                    .orElseThrow(() -> new IllegalArgumentException("Could not find the ingredient component type " + componentName))
+                    .value();
             Tag subTag = inputTag.get(componentName);
             if (!(subTag instanceof ListTag)) {
                 throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid list of instances");
@@ -148,10 +147,9 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
         if (tag.contains("inputReusable")) {
             CompoundTag inputReusableTag = tag.getCompound("inputReusable");
             for (String componentName : inputReusableTag.getAllKeys()) {
-                IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName));
-                if (component == null) {
-                    throw new IllegalArgumentException("Could not find the ingredient component type " + componentName);
-                }
+                IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName))
+                        .orElseThrow(() -> new IllegalArgumentException("Could not find the ingredient component type " + componentName))
+                        .value();
                 Tag subTag = inputReusableTag.get(componentName);
                 if (!(subTag instanceof ByteArrayTag instancesReusable)) {
                     throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid list of instance reusable bytes");

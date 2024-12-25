@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import cpw.mods.modlauncher.TransformingClassLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -19,11 +20,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.capabilities.BaseCapability;
-import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.capabilities.EntityCapability;
-import net.neoforged.neoforge.capabilities.ItemCapability;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.capabilities.*;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.registries.NewRegistryEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
@@ -36,11 +33,7 @@ import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponen
 import org.cyclops.commoncapabilities.api.ingredient.storage.IIngredientComponentStorageWrapperHandler;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * A IngredientComponent is a type of component that can be used as ingredients inside recipes.
@@ -66,9 +59,9 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onRegistriesFilled(RegisterEvent event) {
         if (event.getRegistry() == REGISTRY) {
-            ITEMSTACK = (IngredientComponent<ItemStack, Integer>) REGISTRY.get(ResourceLocation.parse("minecraft:itemstack"));
-            FLUIDSTACK = (IngredientComponent<FluidStack, Integer>) REGISTRY.get(ResourceLocation.parse("minecraft:fluidstack"));
-            ENERGY = (IngredientComponent<Long, Boolean>) REGISTRY.get(ResourceLocation.parse("minecraft:energy"));
+            ITEMSTACK = (IngredientComponent<ItemStack, Integer>) REGISTRY.get(ResourceLocation.parse("minecraft:itemstack")).map(Holder.Reference::value).orElse(null);
+            FLUIDSTACK = (IngredientComponent<FluidStack, Integer>) REGISTRY.get(ResourceLocation.parse("minecraft:fluidstack")).map(Holder.Reference::value).orElse(null);
+            ENERGY = (IngredientComponent<Long, Boolean>) REGISTRY.get(ResourceLocation.parse("minecraft:energy")).map(Holder.Reference::value).orElse(null);
         }
     }
 
