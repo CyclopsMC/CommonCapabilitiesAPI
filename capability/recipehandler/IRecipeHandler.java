@@ -2,6 +2,7 @@ package org.cyclops.commoncapabilities.api.capability.recipehandler;
 
 import org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
+import org.cyclops.commoncapabilities.api.ingredient.MixedIngredients;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -56,5 +57,20 @@ public interface IRecipeHandler {
      */
     @Nullable
     public IMixedIngredients simulate(IMixedIngredients input);
+
+    /**
+     * Test if the given recipe can be handled by this handler.
+     *
+     * This method is mainly meant to be indicative.
+     * No actual crafting processes should be crafted because of this,
+     * i.e., calling this method should not have any effects on the state of this recipe handler.
+     *
+     * @param recipe A recipe.
+     * @return The simulated output, or null if no valid recipe for the given input was found.
+     */
+    @Nullable
+    public default IMixedIngredients simulate(IRecipeDefinition recipe) {
+        return this.simulate(MixedIngredients.fromRecipeInput(recipe));
+    }
 
 }
