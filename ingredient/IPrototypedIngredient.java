@@ -2,7 +2,6 @@ package org.cyclops.commoncapabilities.api.ingredient;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -62,9 +61,6 @@ public interface IPrototypedIngredient<T, M> extends Comparable<IPrototypedIngre
      * @throws IllegalArgumentException If the given tag is invalid or does not contain data on the given ingredient.
      */
     public static PrototypedIngredient deserialize(HolderLookup.Provider lookupProvider, CompoundTag tag) throws IllegalArgumentException {
-        if (!tag.contains("ingredientComponent", Tag.TAG_STRING)) {
-            throw new IllegalArgumentException("Could not find a ingredientComponent entry in the given tag");
-        }
         if (!tag.contains("prototype")) {
             throw new IllegalArgumentException("Could not find a prototype entry in the given tag");
         }
@@ -72,7 +68,8 @@ public interface IPrototypedIngredient<T, M> extends Comparable<IPrototypedIngre
             throw new IllegalArgumentException("Could not find a condition entry in the given tag");
         }
 
-        String componentName = tag.getString("ingredientComponent");
+        String componentName = tag.getString("ingredientComponent")
+                .orElseThrow(() -> new IllegalArgumentException("Could not find a ingredientComponent entry in the given tag"));
         IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName))
                 .orElseThrow(() -> new IllegalArgumentException("Could not find the ingredient component type " + componentName))
                 .value();

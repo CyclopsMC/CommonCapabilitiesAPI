@@ -73,16 +73,17 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
         CompoundTag inputTag = new CompoundTag();
         CompoundTag inputReusableTag = new CompoundTag();
         for (IngredientComponent<?, ?> component : recipe.getInputComponents()) {
+            List<IPrototypedIngredientAlternatives> inputs = (List) recipe.getInputs(component);
             ListTag instances = new ListTag();
-            List<Byte> reusableBytes = Lists.newArrayList();
+            byte[] reusableBytes = new byte[inputs.size()];
             int index = 0;
-            for (IPrototypedIngredientAlternatives ingredient : recipe.getInputs(component)) {
+            for (IPrototypedIngredientAlternatives ingredient : inputs) {
                 CompoundTag subTag = new CompoundTag();
                 IPrototypedIngredientAlternatives.ISerializer serializer = ingredient.getSerializer();
                 subTag.put("val", serializer.serialize(lookupProvider, component, ingredient));
                 subTag.putByte("type", serializer.getId());
                 instances.add(subTag);
-                reusableBytes.add((byte) (recipe.isInputReusable(component, index) ? 1 : 0));
+                reusableBytes[index] = (byte) (recipe.isInputReusable(component, index) ? 1 : 0);
                 index++;
             }
             String componentName = IngredientComponent.REGISTRY.getKey(component).toString();
@@ -113,8 +114,8 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
             throw new IllegalArgumentException("A recipe tag did not contain a valid output tag");
         }
 
-        CompoundTag inputTag = tag.getCompound("input");
-        for (String componentName : inputTag.getAllKeys()) {
+        CompoundTag inputTag = tag.getCompoundOrEmpty("input");
+        for (String componentName : inputTag.keySet()) {
             IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName))
                     .orElseThrow(() -> new IllegalArgumentException("Could not find the ingredient component type " + componentName))
                     .value();
@@ -129,7 +130,7 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
                 Tag deserializeTag;
                 if (instanceTag instanceof CompoundTag) {
                     CompoundTag instanceTagCompound = (CompoundTag) instanceTag;
-                    byte type = instanceTagCompound.getByte("type");
+                    byte type = instanceTagCompound.getByteOr("type", (byte) 0);
                     alternativeSerializer = IPrototypedIngredientAlternatives.SERIALIZERS.get(type);
                     if (alternativeSerializer == null) {
                         throw new IllegalArgumentException("Could not find a prototyped ingredient alternative serializer for id " + type);
@@ -145,8 +146,8 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
         }
 
         if (tag.contains("inputReusable")) {
-            CompoundTag inputReusableTag = tag.getCompound("inputReusable");
-            for (String componentName : inputReusableTag.getAllKeys()) {
+            CompoundTag inputReusableTag = tag.getCompoundOrEmpty("inputReusable");
+            for (String componentName : inputReusableTag.keySet()) {
                 IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName))
                         .orElseThrow(() -> new IllegalArgumentException("Could not find the ingredient component type " + componentName))
                         .value();
@@ -162,7 +163,7 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
             }
         }
 
-        IMixedIngredients output = IMixedIngredients.deserialize(lookupProvider, tag.getCompound("output"));
+        IMixedIngredients output = IMixedIngredients.deserialize(lookupProvider, tag.getCompoundOrEmpty("output"));
 
         return new RecipeDefinition(inputs, inputsReusable, output);
     }

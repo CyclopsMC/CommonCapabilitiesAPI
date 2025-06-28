@@ -42,7 +42,7 @@ import java.util.*;
  * @param <M> The matching condition parameter, may be Void. Instances MUST properly implement the equals method.
  * @author rubensworks
  */
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber
 public final class IngredientComponent<T, M> implements Comparable<IngredientComponent<?, ?>> {
 
     public static Registry<IngredientComponent<?, ?>> REGISTRY = null;

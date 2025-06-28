@@ -135,19 +135,14 @@ public class PrototypedIngredientAlternativesItemStackTag implements IPrototyped
         @Override
         public <T, M> PrototypedIngredientAlternativesItemStackTag deserialize(HolderLookup.Provider lookupProvider, IngredientComponent<T, M> ingredientComponent, Tag tag) {
             CompoundTag tagCompound = (CompoundTag) tag;
-            if (!tagCompound.contains("keys")) {
-                throw new IllegalArgumentException("A oredict prototyped alternatives did not contain valid keys");
-            }
-            if (!tagCompound.contains("match")) {
-                throw new IllegalArgumentException("A oredict prototyped alternatives did not contain a valid match");
-            }
-            ListTag keysTag = tagCompound.getList("keys", Tag.TAG_STRING);
+            ListTag keysTag = tagCompound.getList("keys").orElseThrow(() -> new IllegalArgumentException("A oredict prototyped alternatives did not contain valid keys"));
             List<String> keys = Lists.newArrayList();
             for (Tag key : keysTag) {
-                keys.add(key.getAsString());
+                keys.add(key.asString().orElseThrow());
             }
-            int matchCondition = tagCompound.getInt("match");
-            long quantity = tagCompound.getLong("quantity");
+            int matchCondition = tagCompound.getInt("match")
+                    .orElseThrow(() -> new IllegalArgumentException("A oredict prototyped alternatives did not contain a valid match"));
+            long quantity = tagCompound.getLongOr("quantity", 1);
             return new PrototypedIngredientAlternativesItemStackTag(keys, matchCondition, quantity);
         }
     }
