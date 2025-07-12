@@ -2,12 +2,9 @@ package org.cyclops.commoncapabilities.api.capability.recipehandler;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.ByteArrayTag;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 
@@ -64,106 +61,75 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
     /**
      * Deserialize a recipe to NBT.
      *
-     * @param lookupProvider The lookup provider.
+     * @param valueOutput The value output.
      * @param recipe         A recipe.
-     * @return An NBT representation of the given recipe.
      */
-    public static CompoundTag serialize(HolderLookup.Provider lookupProvider, IRecipeDefinition recipe) {
-        CompoundTag tag = new CompoundTag();
-        CompoundTag inputTag = new CompoundTag();
-        CompoundTag inputReusableTag = new CompoundTag();
+    public static void serialize(ValueOutput valueOutput, IRecipeDefinition recipe) {
+        ValueOutput inputTag = valueOutput.child("input");
+        ValueOutput inputReusableTag = valueOutput.child("inputReusable");
         for (IngredientComponent<?, ?> component : recipe.getInputComponents()) {
+            String componentName = IngredientComponent.REGISTRY.getKey(component).toString();
+            ValueOutput.ValueOutputList instances = inputTag.childrenList(componentName);
             List<IPrototypedIngredientAlternatives> inputs = (List) recipe.getInputs(component);
-            ListTag instances = new ListTag();
-            byte[] reusableBytes = new byte[inputs.size()];
+            int[] reusableBytes = new int[inputs.size()];
             int index = 0;
             for (IPrototypedIngredientAlternatives ingredient : inputs) {
-                CompoundTag subTag = new CompoundTag();
+                ValueOutput subTag = instances.addChild();
                 IPrototypedIngredientAlternatives.ISerializer serializer = ingredient.getSerializer();
-                subTag.put("val", serializer.serialize(lookupProvider, component, ingredient));
+                serializer.serialize(subTag.child("val"), component, ingredient);
                 subTag.putByte("type", serializer.getId());
-                instances.add(subTag);
-                reusableBytes[index] = (byte) (recipe.isInputReusable(component, index) ? 1 : 0);
+                reusableBytes[index] = recipe.isInputReusable(component, index) ? 1 : 0;
                 index++;
             }
-            String componentName = IngredientComponent.REGISTRY.getKey(component).toString();
-            inputTag.put(componentName, instances);
-            inputReusableTag.put(componentName, new ByteArrayTag(reusableBytes));
+            inputReusableTag.putIntArray(componentName, reusableBytes);
         }
-        tag.put("input", inputTag);
-        tag.put("inputReusable", inputReusableTag);
-        tag.put("output", IMixedIngredients.serialize(lookupProvider, recipe.getOutput()));
-        return tag;
+        IMixedIngredients.serialize(valueOutput.child("output"), recipe.getOutput());
     }
 
     /**
      * Deserialize a recipe from NBT
      *
-     * @param lookupProvider The lookup provider.
-     * @param tag            An NBT tag.
+     * @param valueInput The value input.
      * @return A new mixed recipe instance.
      * @throws IllegalArgumentException If the given tag is invalid or does not contain data on the given recipe.
      */
-    public static RecipeDefinition deserialize(HolderLookup.Provider lookupProvider, CompoundTag tag) throws IllegalArgumentException {
+    public static RecipeDefinition deserialize(ValueInput valueInput) throws IllegalArgumentException {
         Map<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> inputs = Maps.newIdentityHashMap();
         Map<IngredientComponent<?, ?>, List<Boolean>> inputsReusable = Maps.newIdentityHashMap();
-        if (!tag.contains("input")) {
-            throw new IllegalArgumentException("A recipe tag did not contain a valid input tag");
-        }
-        if (!tag.contains("output")) {
-            throw new IllegalArgumentException("A recipe tag did not contain a valid output tag");
-        }
 
-        CompoundTag inputTag = tag.getCompoundOrEmpty("input");
+        ValueInput inputTag = valueInput.child("input").orElseThrow();
         for (String componentName : inputTag.keySet()) {
             IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName))
                     .orElseThrow(() -> new IllegalArgumentException("Could not find the ingredient component type " + componentName))
                     .value();
-            Tag subTag = inputTag.get(componentName);
-            if (!(subTag instanceof ListTag)) {
-                throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid list of instances");
-            }
-            ListTag instancesTag = (ListTag) subTag;
+            ValueInput.ValueInputList instancesTag = inputTag.childrenList(componentName).orElseThrow();
             List<IPrototypedIngredientAlternatives<?, ?>> instances = Lists.newArrayList();
-            for (Tag instanceTag : instancesTag) {
-                IPrototypedIngredientAlternatives.ISerializer alternativeSerializer;
-                Tag deserializeTag;
-                if (instanceTag instanceof CompoundTag) {
-                    CompoundTag instanceTagCompound = (CompoundTag) instanceTag;
-                    byte type = instanceTagCompound.getByteOr("type", (byte) 0);
-                    alternativeSerializer = IPrototypedIngredientAlternatives.SERIALIZERS.get(type);
-                    if (alternativeSerializer == null) {
-                        throw new IllegalArgumentException("Could not find a prototyped ingredient alternative serializer for id " + type);
-                    }
-                    deserializeTag = ((CompoundTag) instanceTag).get("val");
-                } else {
-                    throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid reference to instances");
+            for (ValueInput instanceTagCompound : instancesTag) {
+                byte type = instanceTagCompound.getByteOr("type", (byte) 0);
+                IPrototypedIngredientAlternatives.ISerializer alternativeSerializer = IPrototypedIngredientAlternatives.SERIALIZERS.get(type);
+                if (alternativeSerializer == null) {
+                    throw new IllegalArgumentException("Could not find a prototyped ingredient alternative serializer for id " + type);
                 }
-                IPrototypedIngredientAlternatives alternatives = alternativeSerializer.deserialize(lookupProvider, component, deserializeTag);
+                IPrototypedIngredientAlternatives alternatives = alternativeSerializer.deserialize(instanceTagCompound.child("val").orElseThrow(), component);
                 instances.add(alternatives);
             }
             inputs.put(component, instances);
         }
 
-        if (tag.contains("inputReusable")) {
-            CompoundTag inputReusableTag = tag.getCompoundOrEmpty("inputReusable");
-            for (String componentName : inputReusableTag.keySet()) {
-                IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName))
-                        .orElseThrow(() -> new IllegalArgumentException("Could not find the ingredient component type " + componentName))
-                        .value();
-                Tag subTag = inputReusableTag.get(componentName);
-                if (!(subTag instanceof ByteArrayTag instancesReusable)) {
-                    throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid list of instance reusable bytes");
-                }
-                List<Boolean> inputReusable = Lists.newArrayList();
-                for (byte b : instancesReusable.getAsByteArray()) {
-                    inputReusable.add(b == (byte)1);
-                }
-                inputsReusable.put(component, inputReusable);
+        ValueInput inputReusableTag = valueInput.child("inputReusable").orElseThrow();
+        for (String componentName : inputReusableTag.keySet()) {
+            IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName))
+                    .orElseThrow(() -> new IllegalArgumentException("Could not find the ingredient component type " + componentName))
+                    .value();
+            int[] subTag = inputReusableTag.getIntArray(componentName).orElseThrow();
+            List<Boolean> inputReusable = Lists.newArrayList();
+            for (int b : subTag) {
+                inputReusable.add(b == 1);
             }
+            inputsReusable.put(component, inputReusable);
         }
 
-        IMixedIngredients output = IMixedIngredients.deserialize(lookupProvider, tag.getCompoundOrEmpty("output"));
+        IMixedIngredients output = IMixedIngredients.deserialize(valueInput.child("output").orElseThrow());
 
         return new RecipeDefinition(inputs, inputsReusable, output);
     }

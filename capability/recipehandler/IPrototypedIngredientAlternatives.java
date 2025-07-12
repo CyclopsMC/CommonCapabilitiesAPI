@@ -2,8 +2,8 @@ package org.cyclops.commoncapabilities.api.capability.recipehandler;
 
 import it.unimi.dsi.fastutil.bytes.Byte2ObjectArrayMap;
 import it.unimi.dsi.fastutil.bytes.Byte2ObjectMap;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.Tag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 
@@ -28,9 +28,9 @@ public interface IPrototypedIngredientAlternatives<T, M> {
 
         public byte getId();
 
-        public <T, M> Tag serialize(HolderLookup.Provider lookupProvider, IngredientComponent<T, M> ingredientComponent, A alternatives);
+        public <T, M> void serialize(ValueOutput valueOutput, IngredientComponent<T, M> ingredientComponent, A alternatives);
 
-        public <T, M> A deserialize(HolderLookup.Provider lookupProvider, IngredientComponent<T, M> ingredientComponent, Tag tag);
+        public <T, M> A deserialize(ValueInput valueInput, IngredientComponent<T, M> ingredientComponent);
 
     }
 

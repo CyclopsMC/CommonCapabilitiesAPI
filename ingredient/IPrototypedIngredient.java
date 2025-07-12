@@ -1,8 +1,9 @@
 package org.cyclops.commoncapabilities.api.ingredient;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 /**
  * An ingredient that is identified by a given instance and can be matched with other instances under a given condition.
@@ -35,48 +36,35 @@ public interface IPrototypedIngredient<T, M> extends Comparable<IPrototypedIngre
      *
      * @param <T>                  The instance type.
      * @param <M>                  The matching condition parameter, may be Void.
-     * @param lookupProvider       The lookup provider.
+     * @param valueOutput          The value output.
      * @param prototypedIngredient Ingredient.
-     * @return An NBT representation of the given ingredient.
      */
-    public static <T, M> CompoundTag serialize(HolderLookup.Provider lookupProvider, IPrototypedIngredient<T, M> prototypedIngredient) {
-        CompoundTag tag = new CompoundTag();
-
+    public static <T, M> void serialize(ValueOutput valueOutput, IPrototypedIngredient<T, M> prototypedIngredient) {
         IngredientComponent<T, M> component = prototypedIngredient.getComponent();
-        tag.putString("ingredientComponent", component.getName().toString());
+        valueOutput.putString("ingredientComponent", component.getName().toString());
 
         IIngredientSerializer<T, M> serializer = component.getSerializer();
-        tag.put("prototype", serializer.serializeInstance(lookupProvider, prototypedIngredient.getPrototype()));
-        tag.put("condition", serializer.serializeCondition(prototypedIngredient.getCondition()));
-
-        return tag;
+        serializer.serializeInstance(valueOutput.child("prototype"), prototypedIngredient.getPrototype());
+        valueOutput.store("condition", ExtraCodecs.NBT, serializer.serializeCondition(prototypedIngredient.getCondition()));
     }
 
     /**
      * Deserialize an ingredient from NBT
      *
-     * @param lookupProvider The lookup provider.
-     * @param tag            An NBT tag.
+     * @param valueInput The value input.
      * @return A new ingredient instance.
      * @throws IllegalArgumentException If the given tag is invalid or does not contain data on the given ingredient.
      */
-    public static PrototypedIngredient deserialize(HolderLookup.Provider lookupProvider, CompoundTag tag) throws IllegalArgumentException {
-        if (!tag.contains("prototype")) {
-            throw new IllegalArgumentException("Could not find a prototype entry in the given tag");
-        }
-        if (!tag.contains("condition")) {
-            throw new IllegalArgumentException("Could not find a condition entry in the given tag");
-        }
-
-        String componentName = tag.getString("ingredientComponent")
+    public static PrototypedIngredient deserialize(ValueInput valueInput) throws IllegalArgumentException {
+        String componentName = valueInput.getString("ingredientComponent")
                 .orElseThrow(() -> new IllegalArgumentException("Could not find a ingredientComponent entry in the given tag"));
         IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName))
                 .orElseThrow(() -> new IllegalArgumentException("Could not find the ingredient component type " + componentName))
                 .value();
 
         IIngredientSerializer serializer = component.getSerializer();
-        Object prototype = serializer.deserializeInstance(lookupProvider, tag.get("prototype"));
-        Object condition = serializer.deserializeCondition(tag.get("condition"));
+        Object prototype = serializer.deserializeInstance(valueInput.child("prototype").orElseThrow());
+        Object condition = serializer.deserializeCondition(valueInput.read("condition", ExtraCodecs.NBT).orElseThrow());
 
         return new PrototypedIngredient(component, prototype, condition);
 }

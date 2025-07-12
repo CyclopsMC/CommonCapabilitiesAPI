@@ -2,11 +2,9 @@ package org.cyclops.commoncapabilities.api.ingredient;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.Iterator;
 import java.util.List;
@@ -101,46 +99,38 @@ public interface IMixedIngredients extends Comparable<IMixedIngredients> {
     /**
      * Deserialize ingredients to NBT.
      *
-     * @param lookupProvider The lookup provider.
-     * @param ingredients    Ingredients.
-     * @return An NBT representation of the given ingredients.
+     * @param valueOutput The value output.
+     * @param ingredients Ingredients.
      */
-    public static CompoundTag serialize(HolderLookup.Provider lookupProvider, IMixedIngredients ingredients) {
-        CompoundTag tag = new CompoundTag();
+    public static void serialize(ValueOutput valueOutput, IMixedIngredients ingredients) {
         for (IngredientComponent<?, ?> component : ingredients.getComponents()) {
-            ListTag instances = new ListTag();
+            ValueOutput.ValueOutputList instances = valueOutput.childrenList(IngredientComponent.REGISTRY.getKey(component).toString());
             IIngredientSerializer serializer = component.getSerializer();
             for (Object instance : ingredients.getInstances(component)) {
-                instances.add(serializer.serializeInstance(lookupProvider, instance));
+                serializer.serializeInstance(instances.addChild(), instance);
             }
-            tag.put(IngredientComponent.REGISTRY.getKey(component).toString(), instances);
         }
-        return tag;
     }
 
     /**
      * Deserialize ingredients from NBT
      *
-     * @param lookupProvider The lookup provider.
-     * @param tag            An NBT tag.
+     * @param valueInput The value input.
      * @return A new mixed ingredients instance.
      * @throws IllegalArgumentException If the given tag is invalid or does not contain data on the given ingredients.
      */
-    public static MixedIngredients deserialize(HolderLookup.Provider lookupProvider, CompoundTag tag) throws IllegalArgumentException {
+    public static MixedIngredients deserialize(ValueInput valueInput) throws IllegalArgumentException {
         Map<IngredientComponent<?, ?>, List<?>> ingredients = Maps.newIdentityHashMap();
-        for (String componentName : tag.keySet()) {
+        for (String componentName : valueInput.keySet()) {
             IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName))
                     .orElseThrow(() -> new IllegalArgumentException("Could not find the ingredient component type " + componentName))
                     .value();
-            Tag subTag = tag.get(componentName);
-            if (!(subTag instanceof ListTag)) {
-                throw new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid list of instances");
-            }
-            ListTag instancesTag = (ListTag) subTag;
+            ValueInput.ValueInputList instancesTag = valueInput.childrenList(componentName)
+                    .orElseThrow(() -> new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid list of instances"));
             IIngredientSerializer serializer = component.getSerializer();
             List instances = Lists.newArrayList();
-            for (Tag instanceTag : instancesTag) {
-                instances.add(serializer.deserializeInstance(lookupProvider, instanceTag));
+            for (ValueInput instanceTag : instancesTag) {
+                instances.add(serializer.deserializeInstance(instanceTag));
             }
             ingredients.put(component, instances);
         }

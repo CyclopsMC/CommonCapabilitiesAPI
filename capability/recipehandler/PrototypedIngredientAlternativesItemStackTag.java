@@ -4,18 +4,16 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.cyclops.commoncapabilities.api.ingredient.IIngredientMatcher;
 import org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
@@ -114,35 +112,29 @@ public class PrototypedIngredientAlternativesItemStackTag implements IPrototyped
     }
 
     public static class Serializer implements IPrototypedIngredientAlternatives.ISerializer<PrototypedIngredientAlternativesItemStackTag> {
+
         @Override
         public byte getId() {
             return 1;
         }
 
         @Override
-        public <T, M> Tag serialize(HolderLookup.Provider lookupProvider, IngredientComponent<T, M> ingredientComponent, PrototypedIngredientAlternativesItemStackTag alternatives) {
-            CompoundTag tag = new CompoundTag();
-            ListTag keys = new ListTag();
+        public <T, M> void serialize(ValueOutput valueOutput, IngredientComponent<T, M> ingredientComponent, PrototypedIngredientAlternativesItemStackTag alternatives) {
+            ValueOutput.TypedOutputList<String> keys = valueOutput.list("keys", Codec.STRING);
             for (String key : alternatives.keys) {
-                keys.add(StringTag.valueOf(key));
+                keys.add(key);
             }
-            tag.put("keys", keys);
-            tag.putInt("match", alternatives.matchCondition);
-            tag.putLong("quantity", alternatives.quantity);
-            return tag;
+            valueOutput.putInt("match", alternatives.matchCondition);
+            valueOutput.putLong("quantity", alternatives.quantity);
         }
 
         @Override
-        public <T, M> PrototypedIngredientAlternativesItemStackTag deserialize(HolderLookup.Provider lookupProvider, IngredientComponent<T, M> ingredientComponent, Tag tag) {
-            CompoundTag tagCompound = (CompoundTag) tag;
-            ListTag keysTag = tagCompound.getList("keys").orElseThrow(() -> new IllegalArgumentException("A oredict prototyped alternatives did not contain valid keys"));
-            List<String> keys = Lists.newArrayList();
-            for (Tag key : keysTag) {
-                keys.add(key.asString().orElseThrow());
-            }
-            int matchCondition = tagCompound.getInt("match")
+        public <T, M> PrototypedIngredientAlternativesItemStackTag deserialize(ValueInput valueInput, IngredientComponent<T, M> ingredientComponent) {
+            ValueInput.TypedInputList<String> keysTag = valueInput.list("keys", Codec.STRING).orElseThrow(() -> new IllegalArgumentException("A oredict prototyped alternatives did not contain valid keys"));
+            List<String> keys = Lists.newArrayList(keysTag);
+            int matchCondition = valueInput.getInt("match")
                     .orElseThrow(() -> new IllegalArgumentException("A oredict prototyped alternatives did not contain a valid match"));
-            long quantity = tagCompound.getLongOr("quantity", 1);
+            long quantity = valueInput.getLongOr("quantity", 1);
             return new PrototypedIngredientAlternativesItemStackTag(keys, matchCondition, quantity);
         }
     }
