@@ -65,11 +65,15 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
      * @param recipe         A recipe.
      */
     public static void serialize(ValueOutput valueOutput, IRecipeDefinition recipe) {
-        ValueOutput inputTag = valueOutput.child("input");
-        ValueOutput inputReusableTag = valueOutput.child("inputReusable");
-        for (IngredientComponent<?, ?> component : recipe.getInputComponents()) {
+        ValueOutput.ValueOutputList inputTag = valueOutput.childrenList("input");
+        for (IngredientComponent<?, ?> component : recipe.getInputComponents().stream().sorted().toList()) {
+            // Component
+            ValueOutput child = inputTag.addChild();
             String componentName = IngredientComponent.REGISTRY.getKey(component).toString();
-            ValueOutput.ValueOutputList instances = inputTag.childrenList(componentName);
+            child.putString("component", componentName);
+
+            // Instances
+            ValueOutput.ValueOutputList instances = child.childrenList("instances");
             List<IPrototypedIngredientAlternatives> inputs = (List) recipe.getInputs(component);
             int[] reusableBytes = new int[inputs.size()];
             int index = 0;
@@ -81,7 +85,9 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
                 reusableBytes[index] = recipe.isInputReusable(component, index) ? 1 : 0;
                 index++;
             }
-            inputReusableTag.putIntArray(componentName, reusableBytes);
+
+            // Reusable
+            child.putIntArray("reusable", reusableBytes);
         }
         IMixedIngredients.serialize(valueOutput.child("output"), recipe.getOutput());
     }
@@ -97,12 +103,15 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
         Map<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> inputs = Maps.newIdentityHashMap();
         Map<IngredientComponent<?, ?>, List<Boolean>> inputsReusable = Maps.newIdentityHashMap();
 
-        ValueInput inputTag = valueInput.child("input").orElseThrow();
-        for (String componentName : inputTag.keySet()) {
+        for (ValueInput child : valueInput.childrenList("input").orElseThrow()) {
+            // Component
+            String componentName = child.getString("component").orElseThrow();
             IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName))
                     .orElseThrow(() -> new IllegalArgumentException("Could not find the ingredient component type " + componentName))
                     .value();
-            ValueInput.ValueInputList instancesTag = inputTag.childrenList(componentName).orElseThrow();
+
+            // Instances
+            ValueInput.ValueInputList instancesTag = child.childrenList("instances").orElseThrow();
             List<IPrototypedIngredientAlternatives<?, ?>> instances = Lists.newArrayList();
             for (ValueInput instanceTagCompound : instancesTag) {
                 byte type = instanceTagCompound.getByteOr("type", (byte) 0);
@@ -114,14 +123,9 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
                 instances.add(alternatives);
             }
             inputs.put(component, instances);
-        }
 
-        ValueInput inputReusableTag = valueInput.child("inputReusable").orElseThrow();
-        for (String componentName : inputReusableTag.keySet()) {
-            IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName))
-                    .orElseThrow(() -> new IllegalArgumentException("Could not find the ingredient component type " + componentName))
-                    .value();
-            int[] subTag = inputReusableTag.getIntArray(componentName).orElseThrow();
+            // Reusable
+            int[] subTag = child.getIntArray("reusable").orElseThrow();
             List<Boolean> inputReusable = Lists.newArrayList();
             for (int b : subTag) {
                 inputReusable.add(b == 1);

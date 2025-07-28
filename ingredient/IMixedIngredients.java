@@ -103,8 +103,11 @@ public interface IMixedIngredients extends Comparable<IMixedIngredients> {
      * @param ingredients Ingredients.
      */
     public static void serialize(ValueOutput valueOutput, IMixedIngredients ingredients) {
-        for (IngredientComponent<?, ?> component : ingredients.getComponents()) {
-            ValueOutput.ValueOutputList instances = valueOutput.childrenList(IngredientComponent.REGISTRY.getKey(component).toString());
+        ValueOutput.ValueOutputList list = valueOutput.childrenList("v");
+        for (IngredientComponent<?, ?> component : ingredients.getComponents().stream().sorted().toList()) {
+            ValueOutput child = list.addChild();
+            child.putString("component", IngredientComponent.REGISTRY.getKey(component).toString());
+            ValueOutput.ValueOutputList instances = child.childrenList("instances");
             IIngredientSerializer serializer = component.getSerializer();
             for (Object instance : ingredients.getInstances(component)) {
                 serializer.serializeInstance(instances.addChild(), instance);
@@ -121,11 +124,12 @@ public interface IMixedIngredients extends Comparable<IMixedIngredients> {
      */
     public static MixedIngredients deserialize(ValueInput valueInput) throws IllegalArgumentException {
         Map<IngredientComponent<?, ?>, List<?>> ingredients = Maps.newIdentityHashMap();
-        for (String componentName : valueInput.keySet()) {
+        for (ValueInput child : valueInput.childrenList("v").orElseThrow()) {
+            String componentName = child.getString("component").orElseThrow();
             IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName))
                     .orElseThrow(() -> new IllegalArgumentException("Could not find the ingredient component type " + componentName))
                     .value();
-            ValueInput.ValueInputList instancesTag = valueInput.childrenList(componentName)
+            ValueInput.ValueInputList instancesTag = child.childrenList("instances")
                     .orElseThrow(() -> new IllegalArgumentException("The ingredient component type " + componentName + " did not contain a valid list of instances"));
             IIngredientSerializer serializer = component.getSerializer();
             List instances = Lists.newArrayList();
