@@ -2,11 +2,7 @@ package org.cyclops.commoncapabilities.api.capability.recipehandler;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients;
-import org.cyclops.commoncapabilities.api.ingredient.IPrototypedIngredient;
-import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
-import org.cyclops.commoncapabilities.api.ingredient.MixedIngredients;
+import org.cyclops.commoncapabilities.api.ingredient.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -70,7 +66,7 @@ public class RecipeDefinition implements IRecipeDefinition {
     public boolean equals(Object obj) {
         if (obj instanceof IRecipeDefinition) {
             IRecipeDefinition that = (IRecipeDefinition) obj;
-            if (Sets.newHashSet(this.getInputComponents()).equals(Sets.newHashSet(that.getInputComponents()))
+            if (MixedIngredientsAdapter.identitySetsEqual(this.getInputComponents(), that.getInputComponents())
                     && this.getOutput().equals(that.getOutput())) {
                 for (IngredientComponent<?, ?> component : getInputComponents()) {
                     List<? extends IPrototypedIngredientAlternatives<?, ?>> thisInputs = this.getInputs(component);
@@ -91,17 +87,8 @@ public class RecipeDefinition implements IRecipeDefinition {
 
     @Override
     public int hashCode() {
-        int inputsHash = 333;
-        for (List<IPrototypedIngredientAlternatives<?, ?>> values : inputs.values()) {
-            inputsHash |= values.hashCode();
-        }
-        for (IngredientComponent<?, ?> component : getInputComponents()) {
-            List<? extends IPrototypedIngredientAlternatives<?, ?>> thisInputs = this.getInputs(component);
-            for (int i = 0; i < thisInputs.size(); i++) {
-                inputsHash |= (i + 1) * Boolean.hashCode(this.isInputReusable(component, i));
-            }
-        }
-        return 578 | inputsHash << 2 | output.hashCode();
+        // Only hash output to keep things quick
+        return 578 | output.hashCode();
     }
 
     @Override
