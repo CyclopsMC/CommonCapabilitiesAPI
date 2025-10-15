@@ -1,10 +1,9 @@
 package org.cyclops.commoncapabilities.api.ingredient;
 
-import com.google.common.collect.Sets;
-
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -13,11 +12,26 @@ import java.util.stream.Collectors;
  */
 public abstract class MixedIngredientsAdapter implements IMixedIngredients {
 
+    public static boolean identitySetsEqual(Set<?> left, Set<?> right) {
+        if (left == right) {
+            return true;
+        }
+        if (left.size() != right.size()) {
+            return false;
+        }
+        for (Object e : left) {
+            if (!right.contains(e)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof IMixedIngredients) {
             IMixedIngredients that = (IMixedIngredients) obj;
-            if (Sets.newHashSet(this.getComponents()).equals(Sets.newHashSet(that.getComponents()))) {
+            if (MixedIngredientsAdapter.identitySetsEqual(this.getComponents(), that.getComponents())) {
                 for (IngredientComponent<?, ?> component : getComponents()) {
                     List<?> thisInstances = this.getInstances(component);
                     List<?> thatInstances = that.getInstances(component);
