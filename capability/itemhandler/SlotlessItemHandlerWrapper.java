@@ -235,10 +235,12 @@ public abstract class SlotlessItemHandlerWrapper implements ISlotlessItemHandler
 
     @Override
     public int getLimit() {
-        int total = 0;
-        for (int i = 0; i < itemHandler.getSlots(); i++) {
-            total += itemHandler.getSlotLimit(i);
+        int slots = itemHandler.getSlots();
+        if (slots > 0) {
+            // As a heuristic, we assume all slots have the same limit as the first slot.
+            // We do this because iterating over a potentially large number of slots could get expensive.
+            return slots * itemHandler.getSlotLimit(0);
         }
-        return total;
+        return 0;
     }
 }
