@@ -2,7 +2,7 @@ package org.cyclops.commoncapabilities.api.ingredient;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import cpw.mods.modlauncher.TransformingClassLoader;
+import net.neoforged.fml.classloading.transformation.TransformingClassLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
