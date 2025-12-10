@@ -5,8 +5,8 @@ import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
-import org.cyclops.commoncapabilities.IngredientComponents;
 import org.cyclops.commoncapabilities.api.capability.resourcehandler.ResourceHandlerIngredientIterator;
+import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 
 import javax.annotation.Nonnull;
 import java.util.Iterator;
@@ -30,7 +30,7 @@ public class DefaultSlotlessItemHandlerWrapper implements ISlotlessItemHandler {
 
     @Override
     public Iterator<ItemStack> getItems() {
-        return new ResourceHandlerIngredientIterator<>(getItemHandler(), IngredientComponents.ITEMSTACK_CONVERTER);
+        return new ResourceHandlerIngredientIterator<>(getItemHandler(), IngredientComponent.ITEMSTACK_CONVERTER);
     }
 
     @Override

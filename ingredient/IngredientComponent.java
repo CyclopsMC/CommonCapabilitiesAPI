@@ -2,7 +2,6 @@ package org.cyclops.commoncapabilities.api.ingredient;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.neoforged.fml.classloading.transformation.TransformingClassLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -19,12 +18,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoader;
+import net.neoforged.fml.classloading.transformation.TransformingClassLoader;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.capabilities.*;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.registries.NewRegistryEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.neoforge.registries.RegistryBuilder;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 import org.cyclops.commoncapabilities.api.ingredient.capability.AttachCapabilitiesEventIngredientComponent;
 import org.cyclops.commoncapabilities.api.ingredient.capability.ICapabilityGetter;
 import org.cyclops.commoncapabilities.api.ingredient.capability.IngredientComponentCapability;
@@ -68,6 +70,9 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
     public static IngredientComponent<ItemStack, Integer> ITEMSTACK = null;
     public static IngredientComponent<FluidStack, Integer> FLUIDSTACK = null;
     public static IngredientComponent<Long, Boolean> ENERGY = null;
+
+    public static final IResourceConverter<ItemResource, ItemStack> ITEMSTACK_CONVERTER = new ResourceConverterItem();
+    public static final IResourceConverter<FluidResource, FluidStack> FLUIDSTACK_CONVERTER = new ResourceConverterFluid();
 
     // This check is needed to make this code run in unit tests
     private static BlockCapability<IIngredientComponentStorageHandler, Direction> CAPABILITY_BLOCK_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? BlockCapability.createSided(ResourceLocation.fromNamespaceAndPath("commoncapabilities", "ingredient_component_storage_handler"), IIngredientComponentStorageHandler.class) : null;
