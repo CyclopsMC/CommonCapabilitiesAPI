@@ -30,6 +30,11 @@ public interface IIngredientMatcher<T, M> extends Comparator<T> {
     public M getExactMatchCondition();
 
     /**
+     * @return The match condition that is used to match instances by quantity based on a prototype.
+     */
+    public M getQuantityMatchCondition();
+
+    /**
      * @return The match condition that is used to match instances exactly based on a prototype,
      *         excluding the quantity.
      */
@@ -85,6 +90,11 @@ public interface IIngredientMatcher<T, M> extends Comparator<T> {
     public T getEmptyInstance();
 
     /**
+     * @return An instance.
+     */
+    public T getNonEmptyInstance();
+
+    /**
      * Check if the given entity matches the empty instance,
      * as provided by {@link #getEmptyInstance()}.
      * @param instance An instance.
@@ -111,6 +121,7 @@ public interface IIngredientMatcher<T, M> extends Comparator<T> {
 
     /**
      * Get the quantity in the given instance.
+     *
      * @param instance An instance.
      * @return The instance quantity.
      */

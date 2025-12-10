@@ -1,31 +1,36 @@
 package org.cyclops.commoncapabilities.api.capability.itemhandler;
 
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import org.cyclops.commoncapabilities.IngredientComponents;
+import org.cyclops.commoncapabilities.api.capability.resourcehandler.ResourceHandlerIngredientIterator;
 
 import javax.annotation.Nonnull;
 import java.util.Iterator;
 
 /**
- * An naive {@link ISlotlessItemHandler} wrapper around an {@link IItemHandler}.
+ * An naive {@link ISlotlessItemHandler} wrapper around an {@link ResourceHandler} for items.
  * This will perform a LIFO item algorithm.
  * @author rubensworks
  */
 public class DefaultSlotlessItemHandlerWrapper implements ISlotlessItemHandler {
 
-    private final IItemHandler itemHandler;
+    private final ResourceHandler<ItemResource> itemHandler;
 
-    public DefaultSlotlessItemHandlerWrapper(IItemHandler itemHandler) {
+    public DefaultSlotlessItemHandlerWrapper(ResourceHandler<ItemResource> itemHandler) {
         this.itemHandler = itemHandler;
     }
 
-    public IItemHandler getItemHandler() {
+    public ResourceHandler<ItemResource> getItemHandler() {
         return itemHandler;
     }
 
     @Override
     public Iterator<ItemStack> getItems() {
-        return new ItemHandlerItemStackIterator(getItemHandler());
+        return new ResourceHandlerIngredientIterator<>(getItemHandler(), IngredientComponents.ITEMSTACK_CONVERTER);
     }
 
     @Override
@@ -35,24 +40,22 @@ public class DefaultSlotlessItemHandlerWrapper implements ISlotlessItemHandler {
 
     @Override
     @Nonnull
-    public ItemStack insertItem(@Nonnull ItemStack stack, boolean simulate) {
-        for (int i = 0; i < getItemHandler().getSlots(); i++) {
-            stack = getItemHandler().insertItem(i, stack, simulate);
-            if (stack.isEmpty()) {
-                return ItemStack.EMPTY;
-            }
-        }
-        return stack;
+    public ItemStack insertItem(@Nonnull ItemStack stack, TransactionContext transaction) {
+        int inserted = getItemHandler().insert(ItemResource.of(stack), stack.getCount(), transaction);
+        return inserted > 0 ? stack.copyWithCount(stack.getCount() - inserted) : stack;
     }
 
     @Override
     @Nonnull
-    public ItemStack extractItem(int amount, boolean simulate) {
-        IItemHandler itemHandler = getItemHandler();
-        for (int i = 0; i < itemHandler.getSlots(); i++) {
-            ItemStack itemStack = itemHandler.extractItem(i, amount, simulate);
-            if (!itemStack.isEmpty()) {
-                return itemStack;
+    public ItemStack extractItem(int amount, TransactionContext transaction) {
+        ResourceHandler<ItemResource> itemHandler = getItemHandler();
+        for (int i = 0; i < itemHandler.size(); i++) {
+            ItemResource resource = itemHandler.getResource(i);
+            if (!resource.isEmpty()) {
+                int extracted = itemHandler.extract(i, resource, amount, transaction);
+                if (extracted > 0) {
+                    return resource.toStack(extracted);
+                }
             }
         }
         return ItemStack.EMPTY;
@@ -60,16 +63,19 @@ public class DefaultSlotlessItemHandlerWrapper implements ISlotlessItemHandler {
 
     @Override
     @Nonnull
-    public ItemStack extractItem(@Nonnull ItemStack matchStack, int matchFlags, boolean simulate) {
-        IItemHandler itemHandler = getItemHandler();
-        for (int i = 0; i < itemHandler.getSlots(); i++) {
+    public ItemStack extractItem(@Nonnull ItemStack matchStack, int matchFlags, TransactionContext transaction) {
+        ResourceHandler<ItemResource> itemHandler = getItemHandler();
+        for (int i = 0; i < itemHandler.size(); i++) {
             int amount = matchStack.getCount();
-            ItemStack tempItemStack;
-            if (simulate || (!(tempItemStack = itemHandler.extractItem(i, amount, true)).isEmpty()
-                    && ItemMatch.areItemStacksEqual(matchStack, tempItemStack, matchFlags))) {
-                ItemStack itemStack = itemHandler.extractItem(i, amount, simulate);
-                if (!itemStack.isEmpty() && ItemMatch.areItemStacksEqual(matchStack, itemStack, matchFlags)) {
-                    return itemStack;
+            try (var tx = Transaction.open(transaction)) {
+                ItemResource resource = itemHandler.getResource(i);
+                if (!resource.isEmpty()) {
+                    int extracted = itemHandler.extract(i, resource, amount, tx);
+                    ItemStack itemStack = resource.toStack(extracted);
+                    if (extracted > 0 && ItemMatch.areItemStacksEqual(matchStack, itemStack, matchFlags)) {
+                        tx.commit();
+                        return itemStack;
+                    }
                 }
             }
         }
@@ -78,10 +84,9 @@ public class DefaultSlotlessItemHandlerWrapper implements ISlotlessItemHandler {
 
     @Override
     public int getLimit() {
-        IItemHandler itemHandler = getItemHandler();
         int total = 0;
-        for (int i = 0; i < itemHandler.getSlots(); i++) {
-            total += itemHandler.getSlotLimit(i);
+        for (int i = 0; i < itemHandler.size(); i++) {
+            total += itemHandler.getCapacityAsInt(i, ItemResource.EMPTY);
         }
         return total;
     }

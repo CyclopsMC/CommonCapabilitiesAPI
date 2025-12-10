@@ -1,5 +1,7 @@
 package org.cyclops.commoncapabilities.api.ingredient.storage;
 
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 
 import javax.annotation.Nonnull;
@@ -69,12 +71,60 @@ public interface IIngredientComponentStorage<T, M> extends Iterable<T> {
      * The ingredient should not be modified in this function!
      *
      * @param ingredient Ingredient to insert.
+     * @param transaction The transaction context.
+     * @return The remaining ingredient that was not inserted (if the entire ingredient is accepted,
+     *         then return {@link org.cyclops.commoncapabilities.api.ingredient.IIngredientMatcher#getEmptyInstance()}).
+     *         May be the same as the input ingredient if unchanged, otherwise a new ingredient.
+     **/
+    public T insert(@Nonnull T ingredient, TransactionContext transaction);
+
+    /**
+     * Inserts an ingredient into the storage and return the remainder.
+     * The ingredient should not be modified in this function!
+     *
+     * @param ingredient Ingredient to insert.
      * @param simulate   If true, the insertion is only simulated.
      * @return The remaining ingredient that was not inserted (if the entire ingredient is accepted,
      *         then return {@link org.cyclops.commoncapabilities.api.ingredient.IIngredientMatcher#getEmptyInstance()}).
      *         May be the same as the input ingredient if unchanged, otherwise a new ingredient.
      **/
-    public T insert(@Nonnull T ingredient, boolean simulate);
+    public default T insert(@Nonnull T ingredient, boolean simulate) {
+        try (var tx = Transaction.openRoot()) {
+            T inserted = insert(ingredient, tx);
+            if (!simulate) {
+                tx.commit();
+            }
+            return inserted;
+        }
+    }
+
+    /**
+     * Extract an ingredient matching the given prototype from the storage.
+     *
+     * Note that only the extracted ingredient must match the prototype under the given condition.
+     * Internally, ingredients can be combined and matched in any way.
+     * For example, an exact match could be produced by combining several ingredients.
+     *
+     * If the primary quantifier (as identified by {@link IngredientComponent#getPrimaryQuantifier()})
+     * IS NOT part of the match condition, then the quantity of the given prototype MUST be interpreted
+     * as the maximum quantity that must be extracted.
+     *
+     * If the primary quantifier (as identified by {@link IngredientComponent#getPrimaryQuantifier()})
+     * IS part of the match condition, then the quantity of the given prototype MUST be interpreted
+     * as the exact quantity that must be extracted.
+     * If the storage has a HIGHER OR EQUAL available quantity,
+     * then the storage MUST allow the given quantity to be extracted.
+     * If the storage on the other hand has a LOWER available quantity,
+     * then extraction is not allowed.
+     *
+     * @param prototype      The ingredient to search for.
+     * @param matchCondition The flags to compare the given prototype
+     *                       by according to {@link IngredientComponent#getMatcher()}.
+     * @param transaction The transaction context.
+     * @return Ingredient extracted from the slot, must be {@link org.cyclops.commoncapabilities.api.ingredient.IIngredientMatcher#getEmptyInstance()},
+     *         if nothing can be extracted
+     */
+    public T extract(@Nonnull T prototype, M matchCondition, TransactionContext transaction);
 
     /**
      * Extract an ingredient matching the given prototype from the storage.
@@ -102,7 +152,25 @@ public interface IIngredientComponentStorage<T, M> extends Iterable<T> {
      * @return Ingredient extracted from the slot, must be {@link org.cyclops.commoncapabilities.api.ingredient.IIngredientMatcher#getEmptyInstance()},
      *         if nothing can be extracted
      */
-    public T extract(@Nonnull T prototype, M matchCondition, boolean simulate);
+    public default T extract(@Nonnull T prototype, M matchCondition, boolean simulate) {
+        try (var tx = Transaction.openRoot()) {
+            T extracted = extract(prototype, matchCondition, tx);
+            if (!simulate) {
+                tx.commit();
+            }
+            return extracted;
+        }
+    }
+
+    /**
+     * Extract any ingredient, but the given maximum amount from the storage.
+     *
+     * @param maxQuantity The maximum amount to extract.
+     * @param transaction The transaction context.
+     * @return Ingredient extracted from the slot, must be {@link org.cyclops.commoncapabilities.api.ingredient.IIngredientMatcher#getEmptyInstance()},
+     *         if nothing can be extracted
+     */
+    public T extract(long maxQuantity, TransactionContext transaction);
 
     /**
      * Extract any ingredient, but the given maximum amount from the storage.
@@ -112,6 +180,14 @@ public interface IIngredientComponentStorage<T, M> extends Iterable<T> {
      * @return Ingredient extracted from the slot, must be {@link org.cyclops.commoncapabilities.api.ingredient.IIngredientMatcher#getEmptyInstance()},
      *         if nothing can be extracted
      */
-    public T extract(long maxQuantity, boolean simulate);
+    public default T extract(long maxQuantity, boolean simulate) {
+        try (var tx = Transaction.openRoot()) {
+            T extracted = extract(maxQuantity, tx);
+            if (!simulate) {
+                tx.commit();
+            }
+            return extracted;
+        }
+    }
 
 }

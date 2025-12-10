@@ -1,7 +1,8 @@
 package org.cyclops.commoncapabilities.api.capability.itemhandler;
 
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -12,13 +13,13 @@ import java.util.NoSuchElementException;
  */
 public class FilteredItemHandlerItemStackIterator implements Iterator<ItemStack> {
 
-    private final IItemHandler itemHandler;
+    private final ResourceHandler<ItemResource> itemHandler;
     private final ItemStack prototype;
     private final int matchFlags;
     private int slot = 0;
     private ItemStack next;
 
-    public FilteredItemHandlerItemStackIterator(IItemHandler itemHandler, ItemStack prototype, int matchFlags) {
+    public FilteredItemHandlerItemStackIterator(ResourceHandler<ItemResource> itemHandler, ItemStack prototype, int matchFlags) {
         this.itemHandler = itemHandler;
         this.prototype = prototype;
         this.matchFlags = matchFlags;
@@ -26,8 +27,8 @@ public class FilteredItemHandlerItemStackIterator implements Iterator<ItemStack>
     }
 
     protected ItemStack findNext() {
-        while(slot < itemHandler.getSlots()) {
-            ItemStack itemStack = itemHandler.getStackInSlot(slot++);
+        while(slot < itemHandler.size()) {
+            ItemStack itemStack = itemHandler.getResource(slot).toStack(itemHandler.getAmountAsInt(slot++));
             if (ItemMatch.areItemStacksEqual(itemStack, prototype, matchFlags)) {
                 return itemStack;
             }

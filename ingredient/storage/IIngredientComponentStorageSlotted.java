@@ -1,5 +1,8 @@
 package org.cyclops.commoncapabilities.api.ingredient.storage;
 
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+
 import javax.annotation.Nonnull;
 
 /**
@@ -51,12 +54,44 @@ public interface IIngredientComponentStorageSlotted<T, M> extends IIngredientCom
      *
      * @param slot       A slot number to insert to.
      * @param ingredient Ingredient to insert.
+     * @param transaction The transaction context.
+     * @return The remaining ingredient that was not inserted (if the entire ingredient is accepted,
+     *         then return {@link org.cyclops.commoncapabilities.api.ingredient.IIngredientMatcher#getEmptyInstance()}).
+     *         May be the same as the input ingredient if unchanged, otherwise a new ingredient.
+     **/
+    public T insert(int slot, @Nonnull T ingredient, TransactionContext transaction);
+
+    /**
+     * Inserts an ingredient into the storage in the given slot and return the remainder.
+     * The ingredient should not be modified in this function!
+     *
+     * @param slot       A slot number to insert to.
+     * @param ingredient Ingredient to insert.
      * @param simulate   If true, the insertion is only simulated.
      * @return The remaining ingredient that was not inserted (if the entire ingredient is accepted,
      *         then return {@link org.cyclops.commoncapabilities.api.ingredient.IIngredientMatcher#getEmptyInstance()}).
      *         May be the same as the input ingredient if unchanged, otherwise a new ingredient.
      **/
-    public T insert(int slot, @Nonnull T ingredient, boolean simulate);
+    public default T insert(int slot, @Nonnull T ingredient, boolean simulate) {
+        try (var tx = Transaction.openRoot()) {
+            T inserted = insert(slot, ingredient, tx);
+            if (!simulate) {
+                tx.commit();
+            }
+            return inserted;
+        }
+    }
+
+    /**
+     * Extract the at most the given quantity from the ingredient from the given slot in the storage.
+     *
+     * @param slot        A slot number to extract from.
+     * @param maxQuantity The maximum amount to extract.
+     * @param transaction The transaction context.
+     * @return Ingredient extracted from the slot, must be {@link org.cyclops.commoncapabilities.api.ingredient.IIngredientMatcher#getEmptyInstance()},
+     *         if nothing can be extracted
+     */
+    public T extract(int slot, long maxQuantity, TransactionContext transaction);
 
     /**
      * Extract the at most the given quantity from the ingredient from the given slot in the storage.
@@ -67,6 +102,14 @@ public interface IIngredientComponentStorageSlotted<T, M> extends IIngredientCom
      * @return Ingredient extracted from the slot, must be {@link org.cyclops.commoncapabilities.api.ingredient.IIngredientMatcher#getEmptyInstance()},
      *         if nothing can be extracted
      */
-    public T extract(int slot, long maxQuantity, boolean simulate);
+    public default T extract(int slot, long maxQuantity, boolean simulate) {
+        try (var tx = Transaction.openRoot()) {
+            T extracted = extract(slot, maxQuantity, tx);
+            if (!simulate) {
+                tx.commit();
+            }
+            return extracted;
+        }
+    }
 
 }

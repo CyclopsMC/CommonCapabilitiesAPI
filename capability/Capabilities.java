@@ -5,6 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.EntityCapability;
 import net.neoforged.neoforge.capabilities.ItemCapability;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
 import org.cyclops.commoncapabilities.api.capability.inventorystate.IInventoryState;
 import org.cyclops.commoncapabilities.api.capability.itemhandler.ISlotlessItemHandler;
 import org.cyclops.commoncapabilities.api.capability.recipehandler.IRecipeHandler;
@@ -19,7 +20,7 @@ public class Capabilities {
 
     public static final class SlotlessItemHandler {
         public static final BlockCapability<ISlotlessItemHandler, Direction> BLOCK = BlockCapability.createSided(ResourceLocation.fromNamespaceAndPath("commoncapabilities", "slotless_item_handler"), ISlotlessItemHandler.class);
-        public static final ItemCapability<ISlotlessItemHandler, Void> ITEM = ItemCapability.createVoid(ResourceLocation.fromNamespaceAndPath("commoncapabilities", "slotless_item_handler"), ISlotlessItemHandler.class);
+        public static final ItemCapability<ISlotlessItemHandler, ItemAccess> ITEM = ItemCapability.create(ResourceLocation.fromNamespaceAndPath("commoncapabilities", "slotless_item_handler"), ISlotlessItemHandler.class, ItemAccess.class);
         public static final EntityCapability<ISlotlessItemHandler, Void> ENTITY = EntityCapability.createVoid(ResourceLocation.fromNamespaceAndPath("commoncapabilities", "slotless_item_handler"), ISlotlessItemHandler.class);
     }
 

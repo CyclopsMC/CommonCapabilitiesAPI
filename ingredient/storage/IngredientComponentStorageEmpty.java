@@ -1,5 +1,6 @@
 package org.cyclops.commoncapabilities.api.ingredient.storage;
 
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 
 import javax.annotation.Nonnull;
@@ -40,18 +41,18 @@ public class IngredientComponentStorageEmpty<T, M> implements IIngredientCompone
 
     @Nonnull
     @Override
-    public T insert(@Nonnull T ingredient, boolean simulate) {
+    public T insert(@Nonnull T ingredient, TransactionContext transaction) {
         return ingredient;
     }
 
     @Nonnull
     @Override
-    public T extract(@Nonnull T prototype, M matchFlags, boolean simulate) {
+    public T extract(@Nonnull T prototype, M matchFlags, TransactionContext transaction) {
         return getComponent().getMatcher().getEmptyInstance();
     }
 
     @Override
-    public T extract(long maxQuantity, boolean simulate) {
+    public T extract(long maxQuantity, TransactionContext transaction) {
         return getComponent().getMatcher().getEmptyInstance();
     }
 }
