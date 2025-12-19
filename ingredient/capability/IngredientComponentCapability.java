@@ -1,6 +1,6 @@
 package org.cyclops.commoncapabilities.api.ingredient.capability;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.capabilities.BaseCapability;
 import net.neoforged.neoforge.capabilities.CapabilityRegistry;
 import net.neoforged.neoforge.capabilities.ICapabilityProvider;
@@ -16,11 +16,11 @@ import java.util.Map;
  * @author rubensworks
  */
 public class IngredientComponentCapability<T, C> extends BaseCapability<T, C> {
-    public static <T, C> IngredientComponentCapability<T, C> create(ResourceLocation name, Class<T> typeClass, Class<C> contextClass) {
+    public static <T, C> IngredientComponentCapability<T, C> create(Identifier name, Class<T> typeClass, Class<C> contextClass) {
         return (IngredientComponentCapability<T, C>) registry.create(name, typeClass, contextClass);
     }
 
-    public static <T> IngredientComponentCapability<T, Void> createVoid(ResourceLocation name, Class<T> typeClass) {
+    public static <T> IngredientComponentCapability<T, Void> createVoid(Identifier name, Class<T> typeClass) {
         return create(name, typeClass, void.class);
     }
 
@@ -33,7 +33,7 @@ public class IngredientComponentCapability<T, C> extends BaseCapability<T, C> {
     // Requires explicitly-typed constructor due to ECJ inference failure.
     private static final CapabilityRegistry<IngredientComponentCapability<?, ?>> registry = new CapabilityRegistry<IngredientComponentCapability<?, ?>>(IngredientComponentCapability::new);
 
-    private IngredientComponentCapability(ResourceLocation name, Class<T> typeClass, Class<C> contextClass) {
+    private IngredientComponentCapability(Identifier name, Class<T> typeClass, Class<C> contextClass) {
         super(name, typeClass, contextClass);
     }
 

@@ -2,7 +2,7 @@ package org.cyclops.commoncapabilities.api.ingredient.capability;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.javafmlmod.FMLModContainer;
@@ -21,7 +21,7 @@ import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
  */
 public class IngredientComponentCapabilityAttacherManager {
 
-    private final Multimap<ResourceLocation, IIngredientComponentCapabilityAttacher<?, ?>> attachers;
+    private final Multimap<Identifier, IIngredientComponentCapabilityAttacher<?, ?>> attachers;
 
     public IngredientComponentCapabilityAttacherManager() {
         this.attachers = MultimapBuilder.hashKeys().arrayListValues().build();

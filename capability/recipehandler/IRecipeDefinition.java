@@ -2,7 +2,7 @@ package org.cyclops.commoncapabilities.api.capability.recipehandler;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients;
@@ -106,7 +106,7 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
         for (ValueInput child : valueInput.childrenList("input").orElseThrow()) {
             // Component
             String componentName = child.getString("component").orElseThrow();
-            IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName))
+            IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(Identifier.parse(componentName))
                     .orElseThrow(() -> new IllegalArgumentException("Could not find the ingredient component type " + componentName))
                     .value();
 

@@ -7,7 +7,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -53,7 +53,7 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
     public static void onRegistriesCreate(NewRegistryEvent event) {
         if (REGISTRY == null) {
             REGISTRY = event.create(new RegistryBuilder<>(
-                    ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath("commoncapabilities", "ingredientcomponents"))
+                    ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath("commoncapabilities", "ingredientcomponents"))
             ));
         }
     }
@@ -61,9 +61,9 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onRegistriesFilled(RegisterEvent event) {
         if (event.getRegistry() == REGISTRY) {
-            ITEMSTACK = (IngredientComponent<ItemStack, Integer>) REGISTRY.get(ResourceLocation.parse("minecraft:itemstack")).map(Holder.Reference::value).orElse(null);
-            FLUIDSTACK = (IngredientComponent<FluidStack, Integer>) REGISTRY.get(ResourceLocation.parse("minecraft:fluidstack")).map(Holder.Reference::value).orElse(null);
-            ENERGY = (IngredientComponent<Long, Boolean>) REGISTRY.get(ResourceLocation.parse("minecraft:energy")).map(Holder.Reference::value).orElse(null);
+            ITEMSTACK = (IngredientComponent<ItemStack, Integer>) REGISTRY.get(Identifier.parse("minecraft:itemstack")).map(Holder.Reference::value).orElse(null);
+            FLUIDSTACK = (IngredientComponent<FluidStack, Integer>) REGISTRY.get(Identifier.parse("minecraft:fluidstack")).map(Holder.Reference::value).orElse(null);
+            ENERGY = (IngredientComponent<Long, Boolean>) REGISTRY.get(Identifier.parse("minecraft:energy")).map(Holder.Reference::value).orElse(null);
         }
     }
 
@@ -75,9 +75,9 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
     public static final IResourceConverter<FluidResource, FluidStack> FLUIDSTACK_CONVERTER = new ResourceConverterFluid();
 
     // This check is needed to make this code run in unit tests
-    private static BlockCapability<IIngredientComponentStorageHandler, Direction> CAPABILITY_BLOCK_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? BlockCapability.createSided(ResourceLocation.fromNamespaceAndPath("commoncapabilities", "ingredient_component_storage_handler"), IIngredientComponentStorageHandler.class) : null;
-    private static EntityCapability<IIngredientComponentStorageHandler, Direction> CAPABILITY_ENTITY_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? EntityCapability.createSided(ResourceLocation.fromNamespaceAndPath("commoncapabilities", "ingredient_component_storage_handler"), IIngredientComponentStorageHandler.class) : null;
-    private static ItemCapability<IIngredientComponentStorageHandler, Void> CAPABILITY_ITEM_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? ItemCapability.createVoid(ResourceLocation.fromNamespaceAndPath("commoncapabilities", "ingredient_component_storage_handler"), IIngredientComponentStorageHandler.class) : null;
+    private static BlockCapability<IIngredientComponentStorageHandler, Direction> CAPABILITY_BLOCK_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? BlockCapability.createSided(Identifier.fromNamespaceAndPath("commoncapabilities", "ingredient_component_storage_handler"), IIngredientComponentStorageHandler.class) : null;
+    private static EntityCapability<IIngredientComponentStorageHandler, Direction> CAPABILITY_ENTITY_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? EntityCapability.createSided(Identifier.fromNamespaceAndPath("commoncapabilities", "ingredient_component_storage_handler"), IIngredientComponentStorageHandler.class) : null;
+    private static ItemCapability<IIngredientComponentStorageHandler, Void> CAPABILITY_ITEM_INGREDIENT_COMPONENT_STORAGE_HANDLER = IngredientComponent.class.getClassLoader() instanceof TransformingClassLoader ? ItemCapability.createVoid(Identifier.fromNamespaceAndPath("commoncapabilities", "ingredient_component_storage_handler"), IIngredientComponentStorageHandler.class) : null;
     private static Map<Class<?>, BaseCapability<IIngredientComponentStorageHandler, ?>> CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLERS = Maps.newIdentityHashMap();
     static {
         CAPABILITY_INGREDIENT_COMPONENT_STORAGE_HANDLERS.put(Block.class, CAPABILITY_BLOCK_INGREDIENT_COMPONENT_STORAGE_HANDLER);
@@ -93,10 +93,10 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
     private final List<BaseCapability<?, ?>> storageWrapperCapabilities;
     private final Map<BaseCapability<?, ?>, IIngredientComponentStorageWrapperHandler<T, M, ?, ?>> storageWrapperHandler;
     private final IngredientComponentCategoryType<T, M, ?> primaryQuantifier;
-    private final ResourceLocation name;
+    private final Identifier name;
     private String translationKey;
 
-    public IngredientComponent(ResourceLocation name, IIngredientMatcher<T, M> matcher,
+    public IngredientComponent(Identifier name, IIngredientMatcher<T, M> matcher,
                                IIngredientSerializer<T, M> serializer,
                                List<IngredientComponentCategoryType<T, M, ?>> categoryTypes) {
         this.name = name;
@@ -127,10 +127,10 @@ public final class IngredientComponent<T, M> implements Comparable<IngredientCom
 
     public IngredientComponent(String name, IIngredientMatcher<T, M> matcher, IIngredientSerializer<T, M> serializer,
                                List<IngredientComponentCategoryType<T, M, ?>> categoryTypes) {
-        this(ResourceLocation.parse(name), matcher, serializer, categoryTypes);
+        this(Identifier.parse(name), matcher, serializer, categoryTypes);
     }
 
-    public ResourceLocation getName() {
+    public Identifier getName() {
         return name;
     }
 

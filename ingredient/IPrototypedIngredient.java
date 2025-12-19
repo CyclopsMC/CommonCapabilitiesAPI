@@ -1,6 +1,6 @@
 package org.cyclops.commoncapabilities.api.ingredient;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -58,7 +58,7 @@ public interface IPrototypedIngredient<T, M> extends Comparable<IPrototypedIngre
     public static PrototypedIngredient deserialize(ValueInput valueInput) throws IllegalArgumentException {
         String componentName = valueInput.getString("ingredientComponent")
                 .orElseThrow(() -> new IllegalArgumentException("Could not find a ingredientComponent entry in the given tag"));
-        IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(ResourceLocation.parse(componentName))
+        IngredientComponent<?, ?> component = IngredientComponent.REGISTRY.get(Identifier.parse(componentName))
                 .orElseThrow(() -> new IllegalArgumentException("Could not find the ingredient component type " + componentName))
                 .value();
 

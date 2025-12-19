@@ -8,7 +8,7 @@ import com.mojang.serialization.Codec;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -45,7 +45,7 @@ public class PrototypedIngredientAlternativesItemStackTag implements IPrototyped
                 public Collection<Item> load(String key) {
                     return StreamSupport.stream(
                             BuiltInRegistries.ITEM
-                                    .getTagOrEmpty(TagKey.create(Registries.ITEM, ResourceLocation.parse(key)))
+                                    .getTagOrEmpty(TagKey.create(Registries.ITEM, Identifier.parse(key)))
                                     .spliterator(),
                                     false)
                             .map(Holder::value).collect(Collectors.toList());

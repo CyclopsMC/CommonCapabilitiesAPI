@@ -1,6 +1,6 @@
 package org.cyclops.commoncapabilities.api.ingredient;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.function.Function;
 
@@ -13,14 +13,14 @@ import java.util.function.Function;
  */
 public class IngredientComponentCategoryType<T, M, C> {
 
-    private final ResourceLocation name;
+    private final Identifier name;
     private final Class<C> categoryType;
     private final boolean referenceEqual;
     private final Function<T, C> classifier;
     private final M matchCondition;
     private final boolean primaryQuantifier;
 
-    public IngredientComponentCategoryType(ResourceLocation name, Class<C> categoryType, boolean referenceEqual,
+    public IngredientComponentCategoryType(Identifier name, Class<C> categoryType, boolean referenceEqual,
                                            Function<T, C> classifier, M matchCondition, boolean primaryQuantifier) {
         this.name = name;
         this.categoryType = categoryType;
@@ -33,7 +33,7 @@ public class IngredientComponentCategoryType<T, M, C> {
     /**
      * @return The name of this category.
      */
-    public ResourceLocation getName() {
+    public Identifier getName() {
         return name;
     }
 
