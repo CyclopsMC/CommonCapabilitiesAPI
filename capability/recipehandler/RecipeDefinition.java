@@ -2,8 +2,13 @@ package org.cyclops.commoncapabilities.api.capability.recipehandler;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.Recipe;
 import org.cyclops.commoncapabilities.api.ingredient.*;
+import org.cyclops.cyclopscore.helper.IModHelpers;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +24,14 @@ public class RecipeDefinition implements IRecipeDefinition {
     private final Map<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> inputs;
     private final Map<IngredientComponent<?, ?>, List<Boolean>> inputsReusable;
     private final IMixedIngredients output;
+    @Nullable
+    private final ResourceLocation recipeId;
+
+    public RecipeDefinition(Map<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> inputs,
+                            IMixedIngredients output,
+                            @Nullable ResourceLocation recipeId) {
+        this(inputs, Maps.newIdentityHashMap(), output, recipeId);
+    }
 
     public RecipeDefinition(Map<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> inputs,
                             IMixedIngredients output) {
@@ -28,9 +41,17 @@ public class RecipeDefinition implements IRecipeDefinition {
     public RecipeDefinition(Map<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> inputs,
                             Map<IngredientComponent<?, ?>, List<Boolean>> inputsReusable,
                             IMixedIngredients output) {
+        this(inputs, inputsReusable, output, null);
+    }
+
+    public RecipeDefinition(Map<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> inputs,
+                            Map<IngredientComponent<?, ?>, List<Boolean>> inputsReusable,
+                            IMixedIngredients output,
+                            @Nullable ResourceLocation recipeId) {
         this.inputs = inputs;
         this.inputsReusable = inputsReusable;
         this.output = output;
+        this.recipeId = recipeId;
 
         // Ensure that the lists are non-empty
         for (Map.Entry<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> entry : this.inputs.entrySet()) {
@@ -39,6 +60,13 @@ public class RecipeDefinition implements IRecipeDefinition {
                         entry.getKey().getName()));
             }
         }
+    }
+
+    public static RecipeDefinition fromRecipeId(HolderLookup.Provider lookupProvider, ResourceLocation recipeId) {
+        Recipe<?> recipe = IModHelpers.get().getCraftingHelpers().getRecipeManager().byKey(recipeId)
+                .orElseThrow(() -> new IllegalArgumentException("Could not find recipe with id: " + recipeId))
+                .value();
+        return RecipeHandlerHelpers.recipeToRecipeDefinition(recipeId, recipe, lookupProvider);
     }
 
     @Override
@@ -62,10 +90,19 @@ public class RecipeDefinition implements IRecipeDefinition {
         return output;
     }
 
+    @Nullable
+    @Override
+    public ResourceLocation getRecipeId() {
+        return recipeId;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof IRecipeDefinition) {
             IRecipeDefinition that = (IRecipeDefinition) obj;
+            if (that.getRecipeId() != null && this.getRecipeId() != null) {
+                return this.getRecipeId().equals(that.getRecipeId());
+            }
             if (MixedIngredientsAdapter.identitySetsEqual(this.getInputComponents(), that.getInputComponents())
                     && this.getOutput().equals(that.getOutput())) {
                 for (IngredientComponent<?, ?> component : getInputComponents()) {
@@ -93,7 +130,7 @@ public class RecipeDefinition implements IRecipeDefinition {
 
     @Override
     public String toString() {
-        return "[RecipeDefinition input: " + inputs.toString() + "; inputsReusable: " + inputsReusable.toString() + "; output: " + output.toString() + "]";
+        return "[RecipeDefinition id: " + (recipeId != null ? recipeId : "/") + " input: " + inputs.toString() + "; inputsReusable: " + inputsReusable.toString() + "; output: " + output.toString() + "]";
     }
 
     /**
@@ -109,9 +146,26 @@ public class RecipeDefinition implements IRecipeDefinition {
     public static <T, R, M> RecipeDefinition ofAlternatives(IngredientComponent<T, M> component,
                                                            List<IPrototypedIngredientAlternatives<T, M>> alternatives,
                                                            IMixedIngredients output) {
+        return ofAlternatives(component, alternatives, output, null);
+    }
+
+    /**
+     * Create a new recipe definition for a single component type input and a list of alternatives.
+     * @param component A component type.
+     * @param alternatives The alternatives for the given component type.
+     * @param output The recipe output.
+     * @param recipeId The recipe id.
+     * @param <T> The instance type.
+     * @param <R> The recipe target type, may be Void.
+     * @param <M> The matching condition parameter, may be Void.
+     * @return A new recipe definition.
+     */
+    public static <T, R, M> RecipeDefinition ofAlternatives(IngredientComponent<T, M> component,
+                                                            List<IPrototypedIngredientAlternatives<T, M>> alternatives,
+                                                            IMixedIngredients output, @Nullable ResourceLocation recipeId) {
         Map<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> inputs = Maps.newIdentityHashMap();
         inputs.put(component, (List) alternatives);
-        return new RecipeDefinition(inputs, output);
+        return new RecipeDefinition(inputs, output, recipeId);
     }
 
     /**
@@ -130,6 +184,26 @@ public class RecipeDefinition implements IRecipeDefinition {
         return ofAlternatives(component, ingredients.stream()
                 .map(PrototypedIngredientAlternativesList::new)
                 .collect(Collectors.toList()), output);
+    }
+
+    /**
+     * Create a new recipe definition for a single component type input and a list of instances.
+     * @param component A component type.
+     * @param ingredients The ingredients for the given component type.
+     * @param output The recipe output.
+     * @param recipeId The recipe id.
+     * @param <T> The instance type.
+     * @param <R> The recipe target type, may be Void.
+     * @param <M> The matching condition parameter, may be Void.
+     * @return A new recipe definition.
+     */
+    public static <T, R, M> RecipeDefinition ofIngredients(IngredientComponent<T, M> component,
+                                                           List<List<IPrototypedIngredient<T, M>>> ingredients,
+                                                           IMixedIngredients output,
+                                                           @Nullable ResourceLocation recipeId) {
+        return ofAlternatives(component, ingredients.stream()
+                .map(PrototypedIngredientAlternativesList::new)
+                .collect(Collectors.toList()), output, recipeId);
     }
 
     /**

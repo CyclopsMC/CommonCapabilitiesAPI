@@ -5,12 +5,13 @@ import com.google.common.collect.Maps;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.ByteArrayTag;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +63,13 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
     public IMixedIngredients getOutput();
 
     /**
+     * @return The id of the recipe that this recipe definition represents.
+     * Can be null if it does not correspond to a built-in recipe.
+     */
+    @Nullable
+    public ResourceLocation getRecipeId();
+
+    /**
      * Deserialize a recipe to NBT.
      *
      * @param lookupProvider The lookup provider.
@@ -69,6 +77,12 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
      * @return An NBT representation of the given recipe.
      */
     public static CompoundTag serialize(HolderLookup.Provider lookupProvider, IRecipeDefinition recipe) {
+        if (recipe.getRecipeId() != null) {
+            CompoundTag tag = new CompoundTag();
+            tag.putString("recipeId", recipe.getRecipeId().toString());
+            return tag;
+        }
+
         CompoundTag tag = new CompoundTag();
         CompoundTag inputTag = new CompoundTag();
         CompoundTag inputReusableTag = new CompoundTag();
@@ -104,6 +118,11 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
      * @throws IllegalArgumentException If the given tag is invalid or does not contain data on the given recipe.
      */
     public static RecipeDefinition deserialize(HolderLookup.Provider lookupProvider, CompoundTag tag) throws IllegalArgumentException {
+        if (tag.contains("recipeId", Tag.TAG_STRING)) {
+            ResourceLocation recipeId = ResourceLocation.parse(tag.getString("recipeId"));
+            return RecipeDefinition.fromRecipeId(lookupProvider, recipeId);
+        }
+
         Map<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> inputs = Maps.newIdentityHashMap();
         Map<IngredientComponent<?, ?>, List<Boolean>> inputsReusable = Maps.newIdentityHashMap();
         if (!tag.contains("input")) {
