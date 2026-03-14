@@ -2,14 +2,20 @@ package org.cyclops.commoncapabilities.api.capability.recipehandler;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.cyclops.commoncapabilities.api.ingredient.IMixedIngredients;
 import org.cyclops.commoncapabilities.api.ingredient.IngredientComponent;
+import org.cyclops.cyclopscore.helper.IModHelpers;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -59,12 +65,24 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
     public IMixedIngredients getOutput();
 
     /**
+     * @return The id of the recipe that this recipe definition represents.
+     * Can be null if it does not correspond to a built-in recipe.
+     */
+    @Nullable
+    public ResourceKey<Recipe<?>> getRecipeId();
+
+    /**
      * Deserialize a recipe to NBT.
      *
      * @param valueOutput The value output.
      * @param recipe         A recipe.
      */
     public static void serialize(ValueOutput valueOutput, IRecipeDefinition recipe) {
+        if (recipe.getRecipeId() != null) {
+            valueOutput.putString("recipeId", recipe.getRecipeId().identifier().toString());
+            return;
+        }
+
         ValueOutput.ValueOutputList inputTag = valueOutput.childrenList("input");
         for (IngredientComponent<?, ?> component : recipe.getInputComponents().stream().sorted().toList()) {
             // Component
@@ -100,6 +118,11 @@ public interface IRecipeDefinition extends Comparable<IRecipeDefinition> {
      * @throws IllegalArgumentException If the given tag is invalid or does not contain data on the given recipe.
      */
     public static RecipeDefinition deserialize(ValueInput valueInput) throws IllegalArgumentException {
+        Optional<String> recipeId = valueInput.getString("recipeId");
+        if (recipeId.isPresent()) {
+            return RecipeDefinition.fromRecipeId(IModHelpers.get().getWorldHelpers().getActiveLevel(), ResourceKey.create(Registries.RECIPE, Identifier.parse(recipeId.get())));
+        }
+
         Map<IngredientComponent<?, ?>, List<IPrototypedIngredientAlternatives<?, ?>>> inputs = Maps.newIdentityHashMap();
         Map<IngredientComponent<?, ?>, List<Boolean>> inputsReusable = Maps.newIdentityHashMap();
 
