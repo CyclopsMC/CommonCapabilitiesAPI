@@ -13,6 +13,7 @@ import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.ShapedCraftingRecipeDisplay;
 import net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
 import org.cyclops.commoncapabilities.IngredientComponents;
@@ -51,10 +52,37 @@ public class RecipeHandlerHelpers {
             return new PrototypedIngredientAlternativesItemStackTag(Lists.newArrayList(tag.location().toString()), ItemMatch.ITEM, count);
         } else if (display instanceof SlotDisplay.Empty) {
             return new PrototypedIngredientAlternativesList<>(Lists.newArrayList(new PrototypedIngredient<>(IngredientComponent.ITEMSTACK, ItemStack.EMPTY, ItemMatch.ITEM)));
-        } else if (display instanceof SlotDisplay.ItemStackSlotDisplay(ItemStack stack)) {
+        } else if (display instanceof SlotDisplay.ItemStackSlotDisplay(net.minecraft.world.item.ItemStackTemplate stackTemplate)) {
+            ItemStack stack = stackTemplate.create();
             return new PrototypedIngredientAlternativesList<>(Lists.newArrayList(new PrototypedIngredient<>(IngredientComponent.ITEMSTACK, stack, ItemMatch.ITEM | ItemMatch.DATA)));
         } else {
             PrototypedIngredientAlternativesList<ItemStack, Integer> prototypes = new PrototypedIngredientAlternativesList<>(display.resolveForStacks(ContextMap.EMPTY).stream()
+                    .map(item -> new PrototypedIngredient<>(IngredientComponent.ITEMSTACK, overrideStackCount(item, count), ItemMatch.ITEM))
+                    .collect(Collectors.toList()));
+            if (prototypes.getAlternatives().isEmpty()) {
+                prototypes = new PrototypedIngredientAlternativesList<>(Lists.newArrayList(new PrototypedIngredient<>(IngredientComponent.ITEMSTACK, ItemStack.EMPTY, ItemMatch.ITEM)));
+            }
+            return prototypes;
+        }
+    }
+
+    /**
+     * A heuristical method for converting a display slot to a list of prototyped ingredients.
+     * @param display A display slot.
+     * @param count Override for the prototype counts.
+     * @param contextMap The context map for resolving displays (e.g. from SlotDisplayContext.fromLevel).
+     * @return A list of prototyped ingredients.
+     */
+    private static IPrototypedIngredientAlternatives<ItemStack, Integer> getPrototypesFromDisplay(SlotDisplay display, int count, ContextMap contextMap) {
+        if (display instanceof SlotDisplay.TagSlotDisplay(net.minecraft.tags.TagKey<net.minecraft.world.item.Item> tag)) {
+            return new PrototypedIngredientAlternativesItemStackTag(Lists.newArrayList(tag.location().toString()), ItemMatch.ITEM, count);
+        } else if (display instanceof SlotDisplay.Empty) {
+            return new PrototypedIngredientAlternativesList<>(Lists.newArrayList(new PrototypedIngredient<>(IngredientComponent.ITEMSTACK, ItemStack.EMPTY, ItemMatch.ITEM)));
+        } else if (display instanceof SlotDisplay.ItemStackSlotDisplay(net.minecraft.world.item.ItemStackTemplate stackTemplate)) {
+            ItemStack stack = stackTemplate.create();
+            return new PrototypedIngredientAlternativesList<>(Lists.newArrayList(new PrototypedIngredient<>(IngredientComponent.ITEMSTACK, stack, ItemMatch.ITEM | ItemMatch.DATA)));
+        } else {
+            PrototypedIngredientAlternativesList<ItemStack, Integer> prototypes = new PrototypedIngredientAlternativesList<>(display.resolveForStacks(contextMap).stream()
                     .map(item -> new PrototypedIngredient<>(IngredientComponent.ITEMSTACK, overrideStackCount(item, count), ItemMatch.ITEM))
                     .collect(Collectors.toList()));
             if (prototypes.getAlternatives().isEmpty()) {
@@ -96,6 +124,31 @@ public class RecipeHandlerHelpers {
         }
     }
 
+    /**
+     * A heuristical method for converting an ingredient to a list of prototyped ingredients.
+     * @param ingredient An ingredient.
+     * @param display An optional display slot.
+     * @param count Override for the prototype counts.
+     * @param contextMap The context map for resolving displays.
+     * @return A list of prototyped ingredients.
+     */
+    private static IPrototypedIngredientAlternatives<ItemStack, Integer> getPrototypesFromIngredient(Ingredient ingredient, @Nullable SlotDisplay display, int count, ContextMap contextMap) {
+        if (display != null) {
+            return getPrototypesFromDisplay(display, count, contextMap);
+        } else if (ingredient.isCustom()) {
+            return new PrototypedIngredientAlternativesList<>(Lists.newArrayList(new PrototypedIngredient<>(IngredientComponent.ITEMSTACK,
+                    overrideStackCount(new ItemStack(ingredient.getCustomIngredient().items().findFirst().get().value()), count), ItemMatch.ITEM | ItemMatch.DATA)));
+        } else {
+            PrototypedIngredientAlternativesList<ItemStack, Integer> prototypes = new PrototypedIngredientAlternativesList<>(ingredient.getValues().stream()
+                    .map(item -> new PrototypedIngredient<>(IngredientComponent.ITEMSTACK, overrideStackCount(new ItemStack(item), count), ItemMatch.ITEM))
+                    .collect(Collectors.toList()));
+            if (prototypes.getAlternatives().isEmpty()) {
+                prototypes = new PrototypedIngredientAlternativesList<>(Lists.newArrayList(new PrototypedIngredient<>(IngredientComponent.ITEMSTACK, ItemStack.EMPTY, ItemMatch.ITEM)));
+            }
+            return prototypes;
+        }
+    }
+
     protected static ItemStack overrideStackCount(ItemStack stack, int count) {
         if (count > 1) {
             stack = stack.copy();
@@ -122,6 +175,7 @@ public class RecipeHandlerHelpers {
             return null;
         }
         RecipeDisplay recipeDisplay = recipe.display().get(0);
+        ContextMap contextMap = SlotDisplayContext.fromLevel(level);
 
         if (recipe instanceof ShapedRecipe) {
             int width = 3;
@@ -134,14 +188,14 @@ public class RecipeHandlerHelpers {
             }
             ShapedCraftingRecipeDisplay recipeDisplayShaped = (ShapedCraftingRecipeDisplay) recipeDisplay;
             PlaceRecipeHelper.placeRecipe(width, height, recipeDisplayShaped.width(), recipeDisplayShaped.height(), recipeDisplayShaped.ingredients(), (display, destinationSlot, x, y) -> {
-                inputIngredients.set(destinationSlot, getPrototypesFromDisplay(display));
+                inputIngredients.set(destinationSlot, getPrototypesFromDisplay(display, 1, contextMap));
             });
         } else {
             // Shapeless
             inputIngredients = Lists.newArrayListWithCapacity(inputSize);
             List<SlotDisplay> displayIngredients = recipeDisplay instanceof ShapelessCraftingRecipeDisplay recipeDisplayShapeless ? recipeDisplayShapeless.ingredients() : null;
             for (int i = 0; i < ingredients.size(); i++) {
-                inputIngredients.add(i, getPrototypesFromIngredient(ingredients.get(i), displayIngredients != null ? displayIngredients.get(i) : null));
+                inputIngredients.add(i, getPrototypesFromIngredient(ingredients.get(i), displayIngredients != null && i < displayIngredients.size() ? displayIngredients.get(i) : null, 1, contextMap));
             }
         }
         return RecipeDefinition.ofAlternatives(IngredientComponent.ITEMSTACK, inputIngredients,
