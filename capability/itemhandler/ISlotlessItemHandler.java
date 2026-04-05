@@ -150,6 +150,6 @@ public interface ISlotlessItemHandler {
      *
      * @return The maximum item count allowed in the handler.
      */
-    int getLimit(); // TODO: migrate to long in next major
+    long getLimit();
 
 }

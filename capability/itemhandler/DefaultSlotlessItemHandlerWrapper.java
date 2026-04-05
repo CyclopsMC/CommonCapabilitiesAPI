@@ -83,7 +83,7 @@ public class DefaultSlotlessItemHandlerWrapper implements ISlotlessItemHandler {
     }
 
     @Override
-    public int getLimit() {
+    public long getLimit() {
         int total = 0;
         for (int i = 0; i < itemHandler.size(); i++) {
             total += itemHandler.getCapacityAsInt(i, ItemResource.EMPTY);
