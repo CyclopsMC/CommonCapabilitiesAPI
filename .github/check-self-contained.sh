@@ -44,8 +44,17 @@ top_level_class() {
     echo ""
 }
 
-# Collect every org.cyclops.* reference, both imports and inline fully-qualified usages
-references="$(grep -rhoE 'org\.cyclops\.[A-Za-z0-9_.]+' --include='*.java' "${API_DIR}" \
+# Collect every org.cyclops.* reference, both imports and inline fully-qualified usages.
+# Only this repo's own tracked sources are scanned, so a CyclopsCore checkout that happens to
+# sit inside the working directory is not picked up.
+sources="$(git -C "${API_DIR}" ls-files '*.java')"
+if [[ -z "${sources}" ]]; then
+    echo "error: no java sources found in ${API_DIR}" >&2
+    exit 1
+fi
+references="$(echo "${sources}" \
+    | sed -E "s|^|${API_DIR}/|" \
+    | xargs grep -hoE 'org\.cyclops\.[A-Za-z0-9_.]+' \
     | sed -E 's/\.$//' \
     | sort -u)"
 
