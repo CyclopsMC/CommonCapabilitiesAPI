@@ -1,9 +1,11 @@
 package org.cyclops.commoncapabilities.api.capability.recipehandler;
 
 import com.google.common.collect.Lists;
+import net.minecraft.core.HolderSet;
 import net.minecraft.recipebook.PlaceRecipeHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.context.ContextMap;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
@@ -43,8 +45,8 @@ public class RecipeHandlerHelpers {
      * @return A list of prototyped ingredients.
      */
     public static IPrototypedIngredientAlternatives<ItemStack, Integer> getPrototypesFromDisplay(SlotDisplay display, int count) {
-        if (display instanceof SlotDisplay.TagSlotDisplay(net.minecraft.tags.TagKey<net.minecraft.world.item.Item> tag)) {
-            return new PrototypedIngredientAlternativesItemStackTag(Lists.newArrayList(tag.location().toString()), ItemMatch.ITEM, count);
+        if (display instanceof SlotDisplay.TagSlotDisplay(HolderSet<Item> tag) && tag.unwrapKey().isPresent()) {
+            return new PrototypedIngredientAlternativesItemStackTag(Lists.newArrayList(tag.unwrapKey().get().location().toString()), ItemMatch.ITEM, count);
         } else if (display instanceof SlotDisplay.Empty) {
             return new PrototypedIngredientAlternativesList<>(Lists.newArrayList(new PrototypedIngredient<>(IngredientComponent.ITEMSTACK, ItemStack.EMPTY, ItemMatch.ITEM)));
         } else if (display instanceof SlotDisplay.ItemStackSlotDisplay(net.minecraft.world.item.ItemStackTemplate stackTemplate)) {
@@ -69,8 +71,8 @@ public class RecipeHandlerHelpers {
      * @return A list of prototyped ingredients.
      */
     private static IPrototypedIngredientAlternatives<ItemStack, Integer> getPrototypesFromDisplay(SlotDisplay display, int count, ContextMap contextMap) {
-        if (display instanceof SlotDisplay.TagSlotDisplay(net.minecraft.tags.TagKey<net.minecraft.world.item.Item> tag)) {
-            return new PrototypedIngredientAlternativesItemStackTag(Lists.newArrayList(tag.location().toString()), ItemMatch.ITEM, count);
+        if (display instanceof SlotDisplay.TagSlotDisplay(HolderSet<Item> tag) && tag.unwrapKey().isPresent()) {
+            return new PrototypedIngredientAlternativesItemStackTag(Lists.newArrayList(tag.unwrapKey().get().location().toString()), ItemMatch.ITEM, count);
         } else if (display instanceof SlotDisplay.Empty) {
             return new PrototypedIngredientAlternativesList<>(Lists.newArrayList(new PrototypedIngredient<>(IngredientComponent.ITEMSTACK, ItemStack.EMPTY, ItemMatch.ITEM)));
         } else if (display instanceof SlotDisplay.ItemStackSlotDisplay(net.minecraft.world.item.ItemStackTemplate stackTemplate)) {
