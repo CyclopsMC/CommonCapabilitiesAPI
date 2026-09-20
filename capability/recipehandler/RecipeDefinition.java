@@ -4,15 +4,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import org.cyclops.commoncapabilities.api.ingredient.*;
 import org.cyclops.cyclopscore.helper.IModHelpers;
+import org.cyclops.cyclopscore.helper.IModHelpersNeoForge;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -63,7 +62,13 @@ public class RecipeDefinition implements IRecipeDefinition {
     }
 
     public static RecipeDefinition fromRecipeId(Level level, ResourceKey<Recipe<?>> recipeId) {
-        Recipe<?> recipe = IModHelpers.get().getCraftingHelpers().getRecipeManager().byKey(recipeId)
+        Optional<RecipeHolder<?>> recipeHolder;
+        if (IModHelpers.get().getMinecraftHelpers().isClientSide()) {
+            recipeHolder = Optional.ofNullable(IModHelpersNeoForge.get().getMinecraftClientHelpers().getRecipes().byKey(recipeId));
+        } else {
+            recipeHolder = IModHelpers.get().getCraftingHelpers().getRecipeManager().byKey(recipeId);
+        }
+        Recipe<?> recipe = recipeHolder
                 .orElseThrow(() -> new IllegalArgumentException("Could not find recipe with id: " + recipeId))
                 .value();
         return RecipeHandlerHelpers.recipeToRecipeDefinition(recipeId, recipe, level);
