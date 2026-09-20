@@ -2,7 +2,7 @@ package org.cyclops.commoncapabilities.api.capability.itemhandler;
 
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.world.item.ItemStack;
-import org.cyclops.commoncapabilities.ingredient.DataComparator;
+import org.cyclops.commoncapabilities.api.ingredient.IDataComparator;
 
 /**
  * Item matching flags to be used in {@link ISlotlessItemHandler}.
@@ -34,7 +34,7 @@ public final class ItemMatch {
     /**
      * A comparator for data components. (This is set in GeneralConfig)
      */
-    public static DataComparator DATA_COMPARATOR;
+    public static IDataComparator DATA_COMPARATOR;
 
     public static boolean areItemStacksEqual(ItemStack a, ItemStack b, int matchFlags) {
         if (matchFlags == ANY) {
