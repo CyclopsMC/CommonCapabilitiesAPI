@@ -8,7 +8,6 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import org.cyclops.commoncapabilities.api.ingredient.*;
 import org.cyclops.cyclopscore.helper.IModHelpers;
-import org.cyclops.cyclopscore.helper.IModHelpersNeoForge;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -64,7 +63,7 @@ public class RecipeDefinition implements IRecipeDefinition {
     public static RecipeDefinition fromRecipeId(Level level, ResourceKey<Recipe<?>> recipeId) {
         Optional<RecipeHolder<?>> recipeHolder;
         if (IModHelpers.get().getMinecraftHelpers().isClientSide()) {
-            recipeHolder = Optional.ofNullable(IModHelpersNeoForge.get().getMinecraftClientHelpers().getRecipes().byKey(recipeId));
+            recipeHolder = Optional.ofNullable(IModHelpers.get().getMinecraftClientHelpers().getRecipes().byKey(recipeId));
         } else {
             recipeHolder = IModHelpers.get().getCraftingHelpers().getRecipeManager().byKey(recipeId);
         }

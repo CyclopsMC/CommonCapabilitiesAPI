@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  self-contained:
+    name: Check self-containment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout API
+        uses: actions/checkout@v4
+
+      - name: Checkout CyclopsCore
+        uses: actions/checkout@v4
+        with:
+          repository: CyclopsMC/CyclopsCore
+          # The branch that consumes this API branch as a submodule
+          ref: master-26
+          path: cyclopscore
+
+      - name: Check
+        run: .github/check-self-contained.sh cyclopscore
